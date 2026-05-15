@@ -46,4 +46,18 @@ Add marketing pages under `src/pages/`. Add docs under `src/content/docs/docs/` 
 
 ## Deploy
 
-Target: Cloudflare Pages or Vercel. Static output, no server runtime required.
+Target: **Cloudflare Pages**, Git-connected to this repo, auto-deploy on push to `main`.
+
+Build settings:
+
+- **Framework preset**: `Astro`
+- **Build command**: `pnpm build` (set `PNPM_VERSION=10` env var) — or fall back to `npm run build`
+- **Build output directory**: `dist`
+- **Root directory**: `/`
+- **Node version**: pinned by `.nvmrc` (22)
+
+Custom domain: `ikenga.dev` (apex). The Cloudflare zone is already onboarded; attach via Pages → Custom domains → Set up a custom domain → `ikenga.dev`.
+
+### Note on `@ikenga/tokens`
+
+The dep is declared as `^0.1.0` (a real npm version, not `workspace:*`) so Cloudflare's standalone clone can resolve it from the registry. Locally inside the meta-repo, pnpm's `link-workspace-packages` (default `true`) still overrides with the workspace copy — both worlds work without changing imports.
