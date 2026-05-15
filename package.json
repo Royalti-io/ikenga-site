@@ -1,0 +1,35 @@
+{
+  "name": "ikenga-site",
+  "version": "0.0.1",
+  "private": true,
+  "description": "Marketing site and documentation for Ikenga — your personal seat of strength for AI-augmented work.",
+  "type": "module",
+  "scripts": {
+    "dev": "astro dev",
+    "start": "astro dev",
+    "build": "astro build",
+    "preview": "astro preview",
+    "astro": "astro",
+    "check": "astro check",
+    "typecheck": "astro check"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^4.0.0",
+    "@astrojs/react": "^4.0.0",
+    "@astrojs/sitemap": "^3.2.0",
+    "@astrojs/starlight": "^0.34.0",
+    "@astrojs/starlight-tailwind": "^4.0.0",
+    "@ikenga/tokens": "workspace:*",
+    "@tailwindcss/vite": "^4.0.0",
+    "astro": "^5.0.0",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "sharp": "^0.33.5",
+    "tailwindcss": "^4.0.0"
+  },
+  "devDependencies": {
+    "@types/react": "^19.0.0",
+    "@types/react-dom": "^19.0.0",
+    "typescript": "^5.4.0"
+  }
+}

@@ -1,0 +1,13 @@
+---
+title: Engines
+description: Pluggable AI adapters. The default ships as a pkg so it updates independently of the shell.
+---
+
+> Placeholder. Full engine authoring guide lands once the Engine interface is locked.
+
+An engine is a pkg that implements the `Engine` interface from `@ikenga/contract`. The shell is engine-optional: it boots and runs the kernel without one, and any number of engines can be installed side by side.
+
+Available adapters:
+
+- **`engine-claude-code`** — wraps the user's local `claude` binary via an ACP server. Default.
+- **`engine-noop`** — reference adapter that returns canned responses. Useful for tests and demos.

@@ -1,0 +1,16 @@
+/* Tailwind v4 + Starlight v4 layer order */
+@layer base, starlight, theme, components, utilities;
+
+@import '@astrojs/starlight-tailwind';
+@import 'tailwindcss/theme.css' layer(theme);
+@import 'tailwindcss/utilities.css' layer(utilities);
+
+/* Ikenga design tokens — shared with the shell and every UI pkg. */
+@import '@ikenga/tokens/tokens.css';
+
+/* Re-map Starlight accents onto the Ikenga ember/kola palette. */
+:root {
+	--sl-color-accent-low: hsl(14, 70%, 18%);
+	--sl-color-accent: hsl(14, 78%, 52%);
+	--sl-color-accent-high: hsl(14, 80%, 78%);
+}

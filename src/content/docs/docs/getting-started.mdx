@@ -1,0 +1,46 @@
+---
+title: Install
+description: Download and run the Ikenga shell.
+---
+
+> **Pre-release.** Builds are tagged but not yet publicly released. The commands below will be live the moment the first GitHub release is published. Track progress at [github.com/royalti-io/ikenga/releases](https://github.com/royalti-io/ikenga/releases).
+
+## One-command install (macOS · Linux)
+
+```sh
+curl -fsSL https://ikenga.dev/install.sh | sh
+```
+
+The script detects your OS and architecture, downloads the right artifact from the latest GitHub release, and installs it:
+
+- **macOS** (x86_64) — mounts the signed `.dmg` and copies `Ikenga.app` into `/Applications`. Clears the Gatekeeper quarantine flag on the copy.
+- **Linux** (x86_64) — downloads the AppImage to `~/.local/bin/ikenga` and makes it executable. If you'd rather a `.deb` (system-wide, `apt`-managed), the script prints the exact command.
+
+### Apple Silicon and Linux arm64
+
+Not yet supported. The current build matrix is x86_64-only. The installer exits cleanly with a pointer to the issue tracker rather than installing the wrong artifact.
+
+## Windows
+
+```powershell
+winget install Ikenga.Shell
+```
+
+Or download the `.exe` installer directly from the [latest release](https://github.com/royalti-io/ikenga/releases/latest).
+
+## Environment overrides
+
+The install script honours three environment variables:
+
+| Variable | Default | Purpose |
+| --- | --- | --- |
+| `IKENGA_VERSION` | `latest` | Pin a specific release tag (e.g. `v0.0.4`). |
+| `IKENGA_INSTALL_DIR` | `~/.local/bin` | Linux portable install location. |
+| `IKENGA_REPO` | `royalti-io/ikenga` | Source repository. |
+
+Example: pin a specific version and install to a different directory:
+
+```sh
+curl -fsSL https://ikenga.dev/install.sh | \
+  IKENGA_VERSION=v0.0.4 IKENGA_INSTALL_DIR=$HOME/opt/bin sh
+```

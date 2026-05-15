@@ -1,0 +1,138 @@
+---
+import '../styles/global.css';
+---
+
+<!doctype html>
+<html lang="en" data-mode="dark">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>Ikenga — coming soon</title>
+		<meta
+			name="description"
+			content="Your personal seat of strength for AI-augmented work. Coming soon."
+		/>
+	</head>
+	<body>
+		<main>
+			<div class="mark" aria-hidden="true">I</div>
+			<h1>Ikenga</h1>
+			<p class="tagline">
+				Your personal seat of strength for AI-augmented work.
+			</p>
+
+			<p class="welcome">Welcome to your Obi.</p>
+			<p class="gloss">
+				<em>Obi</em> — the meeting house; the home of your workspace.
+			</p>
+
+			<p class="status">Coming soon</p>
+
+			<p class="links">
+				<a href="/docs/">Read the docs →</a>
+			</p>
+		</main>
+
+		<footer>
+			<p>
+				Lore drawn from the <em>Ikenga</em> tradition of the Igbo people
+				and from Chinua Achebe's <em>Things Fall Apart</em>. See
+				<a href="/docs/">About → Lore</a> for full credits.
+			</p>
+		</footer>
+
+		<style>
+			html,
+			body {
+				height: 100%;
+			}
+			body {
+				margin: 0;
+				font-family: var(--font-sans);
+				background: var(--bg-base);
+				color: hsl(220, 10%, 92%);
+				display: grid;
+				grid-template-rows: 1fr auto;
+				padding: var(--space-8);
+			}
+			main {
+				max-width: 32rem;
+				text-align: center;
+				margin: auto;
+			}
+			.mark {
+				display: inline-grid;
+				place-items: center;
+				width: 64px;
+				height: 64px;
+				margin: 0 auto var(--space-6);
+				border-radius: var(--radius-lg);
+				background: var(--ember);
+				color: var(--bg-base);
+				font-family: var(--font-display);
+				font-weight: 700;
+				font-size: 32px;
+				line-height: 1;
+			}
+			h1 {
+				font-family: var(--font-display);
+				font-size: 40px;
+				margin: 0 0 var(--space-3);
+				letter-spacing: -0.02em;
+			}
+			.tagline {
+				font-size: 16px;
+				margin: 0 0 var(--space-8);
+				opacity: 0.75;
+				line-height: 1.5;
+			}
+			.welcome {
+				font-family: var(--font-display);
+				font-size: var(--text-h3);
+				margin: 0 0 var(--space-2);
+				color: var(--kola-amber-soft);
+			}
+			.gloss {
+				font-size: var(--text-caption);
+				opacity: 0.6;
+				margin: 0 0 var(--space-6);
+				line-height: 1.5;
+			}
+			.status {
+				display: inline-block;
+				padding: 4px 10px;
+				border-radius: var(--radius-pill);
+				background: hsla(42, 78%, 50%, 0.12);
+				color: var(--kola-amber);
+				font-size: var(--text-caption);
+				letter-spacing: 0.04em;
+				text-transform: uppercase;
+				margin: 0 0 var(--space-6);
+			}
+			.links a {
+				color: var(--ember-soft);
+				text-decoration: none;
+				border-bottom: 1px solid currentColor;
+			}
+			.links a:hover {
+				color: var(--ember);
+			}
+			footer {
+				text-align: center;
+				font-size: var(--text-caption);
+				opacity: 0.45;
+				line-height: 1.5;
+				max-width: 36rem;
+				margin: 0 auto;
+				padding-top: var(--space-8);
+			}
+			footer a {
+				color: inherit;
+				text-decoration: underline;
+				text-underline-offset: 2px;
+			}
+		</style>
+	</body>
+</html>

@@ -1,0 +1,18 @@
+---
+title: Pkgs
+description: Manifest-driven extensions that contribute UI, sidecars, MCP servers, skills, and cron to the Ikenga shell.
+---
+
+> Placeholder. Full pkg authoring guide lands once the manifest schema is locked.
+
+Each pkg is a self-contained directory: a `manifest.json` plus whatever it contributes — an iframe mini-app, sidecar binaries, MCP servers, Claude Code skills, cron entries.
+
+The shell discovers pkgs at boot, validates each manifest against the Zod schema in `@ikenga/contract`, and registers contributed blocks with the matching kernel registry.
+
+Topics that will live here:
+
+- The manifest schema
+- Capabilities and scopes
+- AppBridge handshake (host context, message protocol)
+- Lifecycle (install, update, remove)
+- Publishing to the registry
