@@ -20,6 +20,17 @@ export default defineConfig({
 				},
 			],
 			customCss: ['./src/styles/global.css'],
+			head: [
+				{
+					tag: 'script',
+					attrs: {
+						defer: true,
+						src: 'https://static.cloudflareinsights.com/beacon.min.js',
+						'data-cf-beacon':
+							'{"token": "3fdcdf8ab9ba4ca68bd46410d1527108"}',
+					},
+				},
+			],
 			sidebar: [
 				{
 					label: 'Start here',
