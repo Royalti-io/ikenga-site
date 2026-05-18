@@ -12,6 +12,11 @@
 # Environment overrides:
 #   IKENGA_VERSION       Pin a release tag (default: latest published).
 #   IKENGA_INSTALL_DIR   Linux portable install dir (default: $HOME/.local/bin).
+#                        Ignored when IKENGA_FORMAT=deb (system install).
+#   IKENGA_FORMAT        Linux installer format: appimage (default) or deb.
+#                        deb requires dpkg + apt-get; sudo prompts are not
+#                        auto-run under `curl … | sh`, so the script prints
+#                        the apt-get command for you to paste with sudo.
 #   IKENGA_REPO          Source repo (default: royalti-io/ikenga).
 #   IKENGA_SILENT        Windows: set to 1 to run the NSIS installer with /S
 #                        (no UI, system-default install dir). Default: 0.
@@ -24,6 +29,7 @@ set -eu
 
 REPO="${IKENGA_REPO:-royalti-io/ikenga}"
 VERSION="${IKENGA_VERSION:-latest}"
+FORMAT="${IKENGA_FORMAT:-appimage}"
 
 # ─── colour helpers ────────────────────────────────────────────────────────
 if [ -t 1 ] && command -v tput >/dev/null 2>&1 && [ "$(tput colors 2>/dev/null || echo 0)" -ge 8 ]; then
@@ -138,37 +144,70 @@ if [ "$os" = "darwin" ]; then
 fi
 
 if [ "$os" = "linux" ]; then
-	asset="Ikenga_${ver}_amd64.AppImage"
-	url="https://github.com/$REPO/releases/download/$tag/$asset"
+	case "$FORMAT" in
+		appimage)
+			asset="Ikenga_${ver}_amd64.AppImage"
+			url="https://github.com/$REPO/releases/download/$tag/$asset"
 
-	dir="${IKENGA_INSTALL_DIR:-$HOME/.local/bin}"
-	bin="$dir/ikenga"
+			dir="${IKENGA_INSTALL_DIR:-$HOME/.local/bin}"
+			bin="$dir/ikenga"
 
-	echo "→ Downloading $asset"
-	mkdir -p "$dir"
-	download "$url" "$bin"
-	chmod +x "$bin"
+			echo "→ Downloading $asset"
+			mkdir -p "$dir"
+			download "$url" "$bin"
+			chmod +x "$bin"
 
-	echo
-	say "Ikenga is installed at $bin"
-
-	case ":${PATH:-}:" in
-		*":$dir:"*) echo "Launch with: ikenga" ;;
-		*)
-			hint "Note: $dir is not on your PATH."
-			hint "Add it (bash/zsh):"
-			hint "  echo 'export PATH=\"$dir:\$PATH\"' >> ~/.profile"
 			echo
-			echo "Or launch directly: $bin"
+			say "Ikenga is installed at $bin"
+
+			case ":${PATH:-}:" in
+				*":$dir:"*) echo "Launch with: ikenga" ;;
+				*)
+					hint "Note: $dir is not on your PATH."
+					hint "Add it (bash/zsh):"
+					hint "  echo 'export PATH=\"$dir:\$PATH\"' >> ~/.profile"
+					echo
+					echo "Or launch directly: $bin"
+					;;
+			esac
+
+			if command -v dpkg >/dev/null 2>&1; then
+				echo
+				hint "Prefer a system-wide .deb install? Re-run with IKENGA_FORMAT=deb:"
+				hint "  curl -fsSL https://ikenga.dev/install.sh | IKENGA_FORMAT=deb sh"
+			fi
+			;;
+
+		deb)
+			if ! command -v dpkg >/dev/null 2>&1; then
+				fail "IKENGA_FORMAT=deb requires dpkg, which isn't installed. Try IKENGA_FORMAT=appimage."
+			fi
+
+			asset="Ikenga_${ver}_amd64.deb"
+			url="https://github.com/$REPO/releases/download/$tag/$asset"
+			out="$tmp/$asset"
+
+			echo "→ Downloading $asset"
+			download "$url" "$out"
+
+			echo
+			say "Downloaded $asset → $out"
+			echo "To install, run with sudo (curl|sh can't prompt for a password):"
+			echo
+			if command -v apt-get >/dev/null 2>&1; then
+				echo "  sudo apt-get install -y $out"
+			else
+				echo "  sudo dpkg -i $out"
+				hint "  (dpkg won't auto-resolve deps; if it complains, install them via your distro's package manager.)"
+			fi
+			echo
+			hint "After install: launch from your app menu, or run \`ikenga\` from a terminal."
+			;;
+
+		*)
+			fail "Unknown IKENGA_FORMAT: $FORMAT (expected appimage or deb)"
 			;;
 	esac
-
-	if command -v dpkg >/dev/null 2>&1; then
-		echo
-		hint "Prefer a system-wide .deb install? Run:"
-		hint "  curl -fSL -o /tmp/ikenga.deb https://github.com/$REPO/releases/download/$tag/Ikenga_${ver}_amd64.deb"
-		hint "  sudo apt-get install -y /tmp/ikenga.deb"
-	fi
 fi
 
 if [ "$os" = "windows" ]; then
