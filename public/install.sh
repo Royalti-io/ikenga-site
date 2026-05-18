@@ -185,7 +185,10 @@ if [ "$os" = "linux" ]; then
 
 			asset="Ikenga_${ver}_amd64.deb"
 			url="https://github.com/$REPO/releases/download/$tag/$asset"
-			out="$tmp/$asset"
+			# Download to /tmp (not $tmp) so the file outlives this script's
+			# exit trap — the user needs to run `sudo apt-get install` after
+			# the script returns, and $tmp gets wiped on EXIT.
+			out="/tmp/$asset"
 
 			echo "→ Downloading $asset"
 			download "$url" "$out"
