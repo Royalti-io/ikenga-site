@@ -1,16 +1,20 @@
 #!/usr/bin/env sh
-# install.sh — Ikenga installer (macOS + Linux, x86_64).
+# install.sh — Ikenga installer (macOS + Linux + Windows-under-bash, x86_64).
 #
-# Usage:
+# Usage (macOS / Linux):
 #   curl -fsSL https://ikenga.dev/install.sh | sh
+#
+# Usage (Windows under Git Bash / MSYS / Cygwin):
+#   curl -fsSL https://ikenga.dev/install.sh | sh
+# Or use winget:
+#   winget install Ikenga.Shell
 #
 # Environment overrides:
 #   IKENGA_VERSION       Pin a release tag (default: latest published).
 #   IKENGA_INSTALL_DIR   Linux portable install dir (default: $HOME/.local/bin).
 #   IKENGA_REPO          Source repo (default: royalti-io/ikenga).
-#
-# Windows is not handled here — use winget:
-#   winget install Ikenga.Shell
+#   IKENGA_SILENT        Windows: set to 1 to run the NSIS installer with /S
+#                        (no UI, system-default install dir). Default: 0.
 #
 # This script is meant to be safe under `curl … | sh` (non-interactive, no
 # `read`, no surprise sudo). It prints clear messages and exits non-zero on
@@ -41,15 +45,7 @@ uname_m="$(uname -m)"
 case "$uname_s" in
 	Darwin) os=darwin ;;
 	Linux)  os=linux ;;
-	MINGW*|MSYS*|CYGWIN*|Windows_NT)
-		say "Ikenga on Windows"
-		echo "Install with winget:"
-		echo "  winget install Ikenga.Shell"
-		echo
-		echo "Or download the installer directly:"
-		echo "  https://github.com/$REPO/releases/latest"
-		exit 0
-		;;
+	MINGW*|MSYS*|CYGWIN*|Windows_NT) os=windows ;;
 	*) fail "Unsupported OS: $uname_s" ;;
 esac
 
@@ -173,4 +169,60 @@ if [ "$os" = "linux" ]; then
 		hint "  curl -fSL -o /tmp/ikenga.deb https://github.com/$REPO/releases/download/$tag/Ikenga_${ver}_amd64.deb"
 		hint "  sudo apt-get install -y /tmp/ikenga.deb"
 	fi
+fi
+
+if [ "$os" = "windows" ]; then
+	asset="Ikenga_${ver}_x64-setup.exe"
+	url="https://github.com/$REPO/releases/download/$tag/$asset"
+
+	# Prefer a Windows-visible Downloads dir so users can find / re-run the
+	# installer later. Fall back to a /tmp path if USERPROFILE isn't set.
+	if [ -n "${USERPROFILE:-}" ]; then
+		# Translate Windows path → MSYS-style if needed.
+		win_home="$USERPROFILE"
+		case "$win_home" in
+			/c/*|/[A-Za-z]/*) ;; # already MSYS-style
+			*) win_home="$(cygpath -u "$win_home" 2>/dev/null || echo "$win_home")" ;;
+		esac
+		downloads="$win_home/Downloads"
+		mkdir -p "$downloads" 2>/dev/null || downloads="$tmp"
+	else
+		downloads="$tmp"
+	fi
+
+	out="$downloads/$asset"
+	echo "→ Downloading $asset → $out"
+	download "$url" "$out"
+
+	# Run the NSIS installer. Silent mode (/S) installs to the system default
+	# location with no UI; interactive mode (default) shows the standard
+	# Windows installer wizard.
+	silent_flag=""
+	[ "${IKENGA_SILENT:-0}" = "1" ] && silent_flag="//S"  # double-slash so MSYS doesn't path-translate
+
+	echo "→ Launching installer"
+	# `start "" path` returns immediately; the installer runs detached. Wrap
+	# in `cmd //c` so we work under Git Bash / MSYS where `start` isn't a
+	# native command.
+	if command -v cmd >/dev/null 2>&1; then
+		win_out="$(cygpath -w "$out" 2>/dev/null || echo "$out")"
+		cmd //c start "" "$win_out" $silent_flag || \
+			fail "Installer launch failed. Run it manually: $out"
+	else
+		# Last-resort: just point at the file.
+		warn "cmd.exe not found; cannot auto-launch."
+		warn "Run the installer manually: $out"
+		exit 1
+	fi
+
+	echo
+	say "Ikenga installer running."
+	if [ "${IKENGA_SILENT:-0}" = "1" ]; then
+		echo "Silent install: launches once the installer completes."
+		echo "Default location: C:\\Users\\<you>\\AppData\\Local\\Programs\\Ikenga\\"
+	else
+		echo "Follow the installer wizard, then launch Ikenga from the Start menu."
+	fi
+	echo
+	hint "Installer saved at: $out (re-run anytime)"
 fi
