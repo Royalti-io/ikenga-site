@@ -1,9 +1,14 @@
 ---
 title: Install
-description: Download and run the Ikenga shell.
+description: Download, verify, and run the Ikenga shell — macOS, Linux, Windows.
 ---
 
-> **Pre-release.** Builds are tagged but not yet publicly released. The commands below will be live the moment the first GitHub release is published. Track progress at [github.com/royalti-io/ikenga/releases](https://github.com/royalti-io/ikenga/releases).
+import { Aside } from '@astrojs/starlight/components';
+
+<Aside type="caution" title="Pre-release">
+Builds are tagged but not yet publicly released. The commands on this page go live the moment the first GitHub Release is published. Track progress at [github.com/Royalti-io/ikenga/releases](https://github.com/Royalti-io/ikenga/releases).
+{/* GATED: install one-liner not live until WP-13 */}
+</Aside>
 
 ## One-command install (macOS · Linux)
 
@@ -11,14 +16,35 @@ description: Download and run the Ikenga shell.
 curl -fsSL https://ikenga.dev/install.sh | sh
 ```
 
-The script detects your OS and architecture, downloads the right artifact from the latest GitHub release, and installs it:
+The script detects your OS and architecture, downloads the matching artifact from the latest GitHub Release, and installs it:
 
-- **macOS** (x86_64) — mounts the signed `.dmg` and copies `Ikenga.app` into `/Applications`. Clears the Gatekeeper quarantine flag on the copy.
-- **Linux** (x86_64) — downloads the AppImage to `~/.local/bin/ikenga` and makes it executable. If you'd rather a `.deb` (system-wide, `apt`-managed), the script prints the exact command.
+- **macOS** — mounts the signed `.dmg` and copies `Ikenga.app` into `/Applications`, clearing the Gatekeeper quarantine flag on the copy.
+- **Linux** — downloads the AppImage to `~/.local/bin/ikenga` and makes it executable. If you'd rather have a system-wide, `apt`-managed install, the script prints the exact `.deb` command.
 
-### Apple Silicon and Linux arm64
+### macOS — Apple Silicon and Intel
 
-Not yet supported. The current build matrix is x86_64-only. The installer exits cleanly with a pointer to the issue tracker rather than installing the wrong artifact.
+{/* VERIFY: confirm the published macOS build targets before launch — shell/CLAUDE.md documents an aarch64-apple-darwin build path (bunx tauri build --target aarch64-apple-darwin), but the existing getting-started stub claims the current matrix is x86_64-only. Reconcile which is true at WP-13 and state it plainly here. */}
+
+The installer picks the right artifact for your chip. On Apple Silicon (arm64) it installs the native build where one exists; otherwise it points you at the issue tracker rather than installing the wrong binary.
+
+### Linux — arm64
+
+{/* VERIFY: confirm whether linux arm64 is in the launch build matrix. The prior stub says x86_64-only; do not promise arm64 Linux until the Release proves it. */}
+
+## Download and inspect (the no-`curl | sh` path)
+
+If you'd rather not pipe a script straight into your shell, you don't have to.
+
+1. Open the [latest release](https://github.com/Royalti-io/ikenga/releases/latest) and download the artifact for your platform directly — `.dmg` (macOS), `.AppImage` or `.deb` (Linux), `.exe` (Windows).
+2. To read the installer before running it:
+
+   ```sh
+   curl -fsSL https://ikenga.dev/install.sh -o install.sh
+   less install.sh        # read it
+   sh install.sh          # then run it
+   ```
+
+3. Verify the download against the checksums published on the release page before you run anything. {/* VERIFY: confirm checksums (and any signature) are published per-release at WP-13, and link the exact verification command. */}
 
 ## Windows
 
@@ -26,7 +52,7 @@ Not yet supported. The current build matrix is x86_64-only. The installer exits 
 winget install Ikenga.Shell
 ```
 
-Or download the `.exe` installer directly from the [latest release](https://github.com/royalti-io/ikenga/releases/latest).
+Or download the `.exe` installer directly from the [latest release](https://github.com/Royalti-io/ikenga/releases/latest). {/* VERIFY: confirm the winget package id and that a Windows artifact ships at launch. */}
 
 ## Environment overrides
 
@@ -36,11 +62,25 @@ The install script honours three environment variables:
 | --- | --- | --- |
 | `IKENGA_VERSION` | `latest` | Pin a specific release tag (e.g. `v0.0.4`). |
 | `IKENGA_INSTALL_DIR` | `~/.local/bin` | Linux portable install location. |
-| `IKENGA_REPO` | `royalti-io/ikenga` | Source repository. |
+| `IKENGA_REPO` | `Royalti-io/ikenga` | Source repository. |
 
-Example: pin a specific version and install to a different directory:
+Example — pin a version and install to a different directory:
 
 ```sh
 curl -fsSL https://ikenga.dev/install.sh | \
   IKENGA_VERSION=v0.0.4 IKENGA_INSTALL_DIR=$HOME/opt/bin sh
 ```
+
+## First launch
+
+Open Ikenga. The first run is **consecration** — the short ritual that brings a new workspace to life. You'll:
+
+1. **Set up your engine (your Chi).** Ikenga is engine-optional — the shell boots and runs without one — but you'll want at least one to chat. Claude Code is fully wired; Codex and Gemini are pluggable adapters. Each engine needs its CLI on your `$PATH` and its own auth (for example, `claude login` for Claude Code). The onboarding wizard tells you exactly which key or command each engine wants. {/* VERIFY: confirm the exact onboarding step copy/order at launch. */}
+2. **Land in your Obi** — the home view, with the split panes (terminal · chat · file viewer) side by side.
+3. **Commission a project** when you're ready to start real work.
+
+From here:
+
+- Add capabilities with the **`ikenga` CLI** — `ikenga list`, `ikenga add <pkg>`. See **[Pkgs →](/docs/pkgs)**.
+- Build your own pkg — start with the **[Build your first pkg](/docs/build-a-pkg)** tutorial.
+- Drive a running shell from the terminal with the **`iyke` CLI** and **[mcp-iyke](/docs/mcp-iyke)**.

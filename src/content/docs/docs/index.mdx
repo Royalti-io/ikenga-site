@@ -1,32 +1,47 @@
 ---
 title: What is Ikenga?
-description: Your personal seat of strength for AI-augmented work.
+description: An open-source, local-first desktop AI workspace for people who live in a coding agent every day.
 ---
 
-> Documentation is under active construction. This page is a placeholder while the site is scaffolded.
+Ikenga is an **open-source, local-first desktop AI workspace** for people who run their day through a coding agent. It is one window where you talk to an agent, browse and read files, and run and watch workflows — split panes, side by side, all of it aware of itself.
 
-**Ikenga** is your personal AI-augmented workspace — a seat of strength brought to life through consecration, addressed daily, holding what your right hand has earned.
+The point isn't a single chat box. It's a **composable workforce that lives inside the workspace**: agents, skills, slash commands, scheduled jobs, and a persistent memory layer — named, inspectable parts you can read as files. The 18 months we spent running a real company on this system is the proof it works, not a feature you have to care about.
 
-It's a desktop shell that hosts independently installable mini-apps (**pkgs**), driven by a pluggable AI engine (your **Chi**), and controllable from the terminal via the **Iyke** CLI. The shell itself is industry-neutral; verticals enter through pkgs and through scaffolding presets.
+Underneath the chrome, everything is a **package** (a "pkg"): mini-apps, tool servers, engine adapters — each one independently installable and updatable. The engine that drives the workspace is swappable too. Claude Code is fully wired today; Codex and Gemini are pluggable adapters.
 
-A short glossary you'll meet again across these docs:
+Ikenga is built on **Tauri 2** and licensed **Apache-2.0**. The source lives at [github.com/Royalti-io](https://github.com/Royalti-io).
 
-- **Ikenga** — the workspace itself. A personal seat of strength.
-- **Obi** — the home of your workspace; the shell that holds your panes.
-- **Chi** — the AI engine that drives your workspace. One Chi at a time (Claude Code, Codex, Gemini, …).
-- **Iyke** — the runtime CLI that lets any terminal or MCP client drive a running Obi.
-- **Consecration** — the first-run ritual that brings a new Ikenga to life.
+## A short glossary
 
-This documentation covers:
+Ikenga borrows its vocabulary from the Igbo tradition. You don't need to learn it to use the product — the plain-English value comes first, and the lore is a light layer underneath. But you'll meet these terms across the docs:
 
-- **Pkgs** — the manifest-driven extension system that powers every mini-app.
-- **Engines** — pluggable Chi adapters; the default ships as a pkg so it updates independently of the shell.
-- **mcp-iyke** — the MCP server that exposes a running Obi as tools so any model can drive it.
+| Term | What it means |
+| --- | --- |
+| **Ikenga** | The workspace itself — "a personal seat of strength." |
+| **Obi** | The home view and shell chrome — the window that holds your panes. |
+| **Chi** | The engine adapter that drives your workspace (Claude Code / Codex / Gemini). One Chi at a time per chat thread. |
+| **Iyke** | The runtime-controller CLI that drives a *running* shell from the terminal or an MCP client. |
+| **pkg** | A package — the manifest-driven unit of everything beyond the window chrome. |
+| **Commission** | Create a project. |
+| **Retire** | Uninstall or archive. |
+| **Share kola** | Grant permissions consent. |
 
-Next: [Install →](/docs/getting-started)
+There are **two CLIs**, and they do different jobs:
+
+- **`ikenga`** — the disk-side **package manager** (`add`, `update`, `list`, `dev`).
+- **`iyke`** — the runtime **controller** that drives a shell that's already running.
+
+They share no code. You can install either one on its own.
+
+## Where to go next
+
+- **[Install →](/docs/getting-started)** — download and run the shell.
+- **[Pkgs →](/docs/pkgs)** — the manifest-driven extension system: archetypes, capabilities, the AppBridge handshake, lifecycle.
+- **[Engines →](/docs/engines)** — the `Engine` interface and the Chi adapter model; Claude Code, noop, and pluggable Codex/Gemini.
+- **[mcp-iyke →](/docs/mcp-iyke)** — the MCP server that exposes a running shell as tools so any model can drive it.
 
 ---
 
 <small>
-The Ikenga tradition is drawn from the Igbo people of southeastern Nigeria. Literary anchor: Chinua Achebe's *Things Fall Apart*. Source deck: `Ikenga.pptx`. Full credits: forthcoming on the About / Lore page.
+The Ikenga tradition is drawn from the Igbo people of southeastern Nigeria. Full credits live on the About / Lore page.
 </small>
