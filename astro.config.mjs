@@ -37,6 +37,7 @@ export default defineConfig({
 					items: [
 						{ label: 'What is Ikenga?', slug: 'docs' },
 						{ label: 'Install', slug: 'docs/getting-started' },
+						{ label: 'Build your first pkg', slug: 'docs/build-a-pkg' },
 					],
 				},
 				{

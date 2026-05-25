@@ -36,10 +36,88 @@ import '../styles/global.css';
 
 			<p class="status">Coming soon</p>
 
+			<form class="subscribe" id="subscribe-form" novalidate>
+				<label class="subscribe-label" for="subscribe-email">
+					Get the <em>ozi</em> — dispatches when Ikenga ships:
+					releases, new packages, and notes from the build.
+				</label>
+				<div class="subscribe-row">
+					<input
+						id="subscribe-email"
+						name="email"
+						type="email"
+						inputmode="email"
+						autocomplete="email"
+						placeholder="you@example.com"
+						required
+					/>
+					<button type="submit" id="subscribe-btn">Subscribe</button>
+				</div>
+				<!-- honeypot: hidden from humans, catches bots -->
+				<input
+					class="subscribe-hp"
+					type="text"
+					name="company"
+					tabindex="-1"
+					autocomplete="off"
+					aria-hidden="true"
+				/>
+				<p class="subscribe-consent">
+					Double opt-in — we email you once to confirm. No spam, unsubscribe anytime.
+				</p>
+				<p class="subscribe-msg" id="subscribe-msg" role="status" aria-live="polite"></p>
+			</form>
+
 			<p class="links">
 				<a href="/docs/">Read the docs →</a>
 			</p>
 		</main>
+
+		<script>
+			const form = document.getElementById('subscribe-form') as HTMLFormElement | null;
+			const emailEl = document.getElementById('subscribe-email') as HTMLInputElement | null;
+			const btn = document.getElementById('subscribe-btn') as HTMLButtonElement | null;
+			const msg = document.getElementById('subscribe-msg');
+
+			form?.addEventListener('submit', async (e) => {
+				e.preventDefault();
+				if (!emailEl || !btn || !msg) return;
+				const email = emailEl.value.trim();
+				const company = (form.elements.namedItem('company') as HTMLInputElement)?.value ?? '';
+				if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
+					msg.textContent = 'Enter a valid email address.';
+					msg.dataset.state = 'error';
+					return;
+				}
+				btn.disabled = true;
+				const original = btn.textContent;
+				btn.textContent = 'Subscribing…';
+				msg.textContent = '';
+				delete msg.dataset.state;
+				try {
+					const res = await fetch('/api/subscribe', {
+						method: 'POST',
+						headers: { 'content-type': 'application/json' },
+						body: JSON.stringify({ email, company }),
+					});
+					const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
+					if (res.ok && data.ok) {
+						form.reset();
+						msg.textContent = 'Almost there — check your inbox to confirm.';
+						msg.dataset.state = 'ok';
+					} else {
+						msg.textContent = data.error ?? 'Could not subscribe right now. Please try again.';
+						msg.dataset.state = 'error';
+					}
+				} catch {
+					msg.textContent = 'Network error. Please try again.';
+					msg.dataset.state = 'error';
+				} finally {
+					btn.disabled = false;
+					btn.textContent = original;
+				}
+			});
+		</script>
 
 		<footer>
 			<p>
@@ -124,6 +202,88 @@ import '../styles/global.css';
 			}
 			.links a:hover {
 				color: var(--ember);
+			}
+			.subscribe {
+				max-width: 26rem;
+				margin: 0 auto var(--space-6);
+				text-align: left;
+			}
+			.subscribe-label {
+				display: block;
+				font-size: var(--text-caption);
+				opacity: 0.7;
+				line-height: 1.5;
+				margin: 0 0 var(--space-3);
+				text-align: center;
+			}
+			.subscribe-label em {
+				color: var(--kola-amber-soft);
+				font-style: italic;
+			}
+			.subscribe-row {
+				display: flex;
+				gap: var(--space-2);
+			}
+			.subscribe-row input {
+				flex: 1;
+				min-width: 0;
+				padding: 10px 12px;
+				border-radius: var(--radius-md);
+				border: 1px solid var(--border, hsl(220, 10%, 30%));
+				background: var(--bg-surface, hsl(220, 14%, 12%));
+				color: inherit;
+				font: inherit;
+				font-size: 15px;
+			}
+			.subscribe-row input:focus-visible {
+				outline: 2px solid var(--ember);
+				outline-offset: 1px;
+				border-color: var(--ember);
+			}
+			.subscribe-row button {
+				padding: 10px 16px;
+				border-radius: var(--radius-md);
+				border: 0;
+				background: var(--ember);
+				color: var(--bg-base);
+				font: inherit;
+				font-weight: 600;
+				cursor: pointer;
+				white-space: nowrap;
+			}
+			.subscribe-row button:hover {
+				background: var(--kola-amber, var(--ember));
+			}
+			.subscribe-row button:disabled {
+				opacity: 0.6;
+				cursor: default;
+			}
+			.subscribe-hp {
+				position: absolute;
+				left: -9999px;
+				width: 1px;
+				height: 1px;
+				opacity: 0;
+			}
+			.subscribe-consent {
+				font-size: var(--text-caption);
+				opacity: 0.5;
+				line-height: 1.5;
+				margin: var(--space-3) 0 0;
+				text-align: center;
+			}
+			.subscribe-msg {
+				font-size: var(--text-caption);
+				line-height: 1.5;
+				margin: var(--space-2) 0 0;
+				text-align: center;
+				min-height: 1.2em;
+			}
+			.subscribe-msg[data-state='ok'] {
+				color: var(--kola-amber);
+			}
+			.subscribe-msg[data-state='error'] {
+				color: hsl(0, 70%, 70%);
 			}
 			footer {
 				text-align: center;

@@ -25,3 +25,6 @@ pnpm-debug.log*
 
 # pagefind output (regenerated each build)
 src/pagefind/
+
+# Cloudflare Pages local secrets
+.dev.vars
