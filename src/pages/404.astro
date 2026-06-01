@@ -1,0 +1,104 @@
+---
+import '../styles/global.css';
+
+const GITHUB = 'https://github.com/Royalti-io/ikenga';
+---
+
+<!doctype html>
+<html lang="en" data-theme="A" data-mode="dark">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="robots" content="noindex" />
+		<title>Not found — Ikenga</title>
+	</head>
+	<body>
+		<main>
+			<p class="eyebrow">404</p>
+			<h1>This path isn't on the map.</h1>
+			<p class="sub">
+				The page you're after has moved or never existed. Head back home, or
+				find your way through the docs.
+			</p>
+			<div class="cta-row">
+				<a class="btn btn-primary" href="/">Back home</a>
+				<a class="btn btn-ghost" href="/docs/">Read the docs</a>
+				<a class="btn btn-ghost" href={GITHUB} rel="noopener">GitHub</a>
+			</div>
+		</main>
+
+		<style>
+			:root {
+				--fg: hsl(36, 24%, 92%);
+				--fg-muted: hsl(36, 12%, 68%);
+			}
+			html,
+			body {
+				height: 100%;
+				margin: 0;
+			}
+			body {
+				background: var(--bg-base);
+				color: var(--fg);
+				font-family: var(--font-sans);
+				display: grid;
+				place-items: center;
+				padding: var(--space-8);
+			}
+			main {
+				max-width: 34rem;
+				text-align: center;
+			}
+			.eyebrow {
+				font-family: var(--font-mono);
+				letter-spacing: 0.3em;
+				font-size: 13px;
+				color: var(--achievement);
+				margin: 0 0 var(--space-4);
+			}
+			h1 {
+				font-family: var(--font-display);
+				font-weight: 600;
+				font-size: clamp(2rem, 5vw, 3rem);
+				line-height: 1.1;
+				letter-spacing: -0.02em;
+				margin: 0 0 var(--space-4);
+			}
+			.sub {
+				color: var(--fg-muted);
+				line-height: 1.6;
+				margin: 0 0 var(--space-7);
+			}
+			.cta-row {
+				display: flex;
+				gap: var(--space-3);
+				justify-content: center;
+				flex-wrap: wrap;
+			}
+			.btn {
+				display: inline-flex;
+				align-items: center;
+				padding: 11px 20px;
+				border-radius: var(--radius-md, 8px);
+				font-weight: 600;
+				font-size: 15px;
+				text-decoration: none;
+				border: 1px solid transparent;
+			}
+			.btn-primary {
+				background: var(--achievement);
+				color: var(--bg-base);
+			}
+			.btn-ghost {
+				background: transparent;
+				color: var(--fg);
+				border-color: var(--border, hsl(36, 14%, 28%));
+			}
+			.btn-ghost:hover {
+				border-color: var(--achievement);
+				color: var(--achievement);
+			}
+		</style>
+	</body>
+</html>
