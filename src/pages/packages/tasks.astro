@@ -1,0 +1,210 @@
+---
+// /packages/tasks — flagship page for @ikenga/pkg-tasks.
+// Draft source: plans/launch/drafts/pkg-page-tasks.md
+// All [SCREENSHOT: …] beats render as copy-only (no matching images in /assets/).
+import Layout from '../../layouts/Layout.astro';
+import FeaturePage from '../../components/FeaturePage.astro';
+---
+
+<Layout
+	title="Tasks — local-first task manager for Ikenga"
+	description="A local-first task manager that lives in your workspace and keeps your data on your machine. List, Agenda, Triage, Sweeper, and Done views over local SQLite — no cloud account required."
+	canonical="https://ikenga.dev/packages/tasks/"
+>
+	<FeaturePage
+		eyebrow="@ikenga/pkg-tasks · com.ikenga.tasks · Apache-2.0"
+		title="A task manager that stays where work happens."
+		lede="Local-first. No account. No round-trip to a server. Your task data lives in the same local SQLite database the rest of Ikenga uses — on your machine, always one click away."
+		problem="Every project turns into a scattered heap of tasks — some in a GitHub board, some in a note, some in a chat thread you'll never scroll back to. Switching contexts to check them means leaving the place where work actually happens. Tasks is a mini-app that installs into the Ikenga shell and stays there. Status changes write immediately to the local database. No save button."
+		install="ikenga add @ikenga/pkg-tasks"
+		worksWith="Requires the Ikenga shell. Once installed, Tasks appears in the sidebar under the ops section. View selection persists between sessions."
+		docsHref="/docs/"
+		catalogHref="/packages/"
+	>
+		<!-- Beat 1: List view — copy-only (no matching screenshot asset) -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">The List view — see everything at once</h2>
+				<p class="sk-body">
+					Tasks groups your work automatically: <strong>Overdue</strong>, <strong>Today</strong>,
+					<strong>This week</strong>, <strong>Later</strong>, and <strong>Auto-closed</strong>.
+					A filter bar lets you narrow by search text, status, owner, or category.
+				</p>
+				<p class="sk-body">
+					Click any row to open a detail pane alongside: status, progress %, tags, source chips,
+					subtasks, and the blocking task. Status changes write immediately to the local
+					database — no save button, no round-trip to a server.
+				</p>
+			</div>
+		</section>
+
+		<!-- Beat 2: Agenda view — copy-only -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">The Agenda view — today as a time-rail</h2>
+				<p class="sk-body">
+					Agenda projects the current list onto an hourly rail for today. A live "now" line
+					moves with the clock. Overdue tasks from prior days pull forward into a bucket at
+					the top so nothing falls out of sight.
+				</p>
+			</div>
+		</section>
+
+		<!-- Beat 3: Triage view — copy-only -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">The Triage view — backlog health at a glance</h2>
+				<p class="sk-body">
+					Triage surfaces four health counts — <strong>Overdue</strong>,
+					<strong>Stale (&gt;7 days)</strong>, <strong>Unassigned</strong>, and
+					<strong>Blocked</strong> — with sample rows for each bucket and an overall backlog
+					health grade. Use it at the start of a session to decide what to touch before
+					diving in.
+				</p>
+			</div>
+		</section>
+
+		<!-- Beat 4: Sweeper view — copy-only -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">The Sweeper view — the auto-close review queue</h2>
+				<p class="sk-body">
+					Sweeper shows the tasks the system has marked as candidates for auto-close —
+					work whose side-effect has likely been observed (reply sent, post published,
+					etc.) but that hasn't been formally closed yet. Reviewing here takes seconds
+					and keeps your list honest.
+				</p>
+			</div>
+		</section>
+
+		<!-- Beat 5: Done view — copy-only -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">The Done view — closed task record</h2>
+				<p class="sk-body">
+					Done is a plain log of everything that has been closed. A record on your
+					machine that doesn't disappear.
+				</p>
+			</div>
+		</section>
+
+		<!-- Creating a task -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">Creating a task</h2>
+				<p class="sk-body">
+					New tasks are dispatched as a message into your active Claude Code session —
+					Claude creates the task on its privileged write path. The "New task" button is
+					intentionally disabled when Tasks runs in standalone preview (no agent session
+					to dispatch to). The agent is the write path so the record stays consistent.
+				</p>
+			</div>
+		</section>
+
+		<!-- Fork it -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">Fork it in one step</h2>
+				<p class="sk-body">
+					Tasks is a no-build pkg — the source you read is the source that runs.
+					Copy and change it:
+				</p>
+				<pre class="sk-code">git clone https://github.com/Royalti-io/ikenga-pkgs &amp;&amp; cp -r ikenga-pkgs/packages/apps/tasks ~/my-tasks
+# edit ~/my-tasks/manifest.json (change the id), adjust dist/features/* as needed
+ikenga add ~/my-tasks</pre>
+				<p class="sk-body">
+					No <code>tsc</code>, no Vite, no bundler. Edits to files in
+					<code>dist/</code> take effect on next reload.
+				</p>
+			</div>
+		</section>
+
+		<!-- Works with / requires table -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">Works with / requires</h2>
+				<table class="tk-table">
+					<tbody>
+						<tr>
+							<th>Requires</th>
+							<td>Ikenga shell (any v0.1.x+)</td>
+						</tr>
+						<tr>
+							<th>Data store</th>
+							<td>Local SQLite (<code>ikenga.local</code> — the shell's shared database)</td>
+						</tr>
+						<tr>
+							<th>Tables used</th>
+							<td><code>tasks</code></td>
+						</tr>
+						<tr>
+							<th>Network</th>
+							<td>
+								<code>https://esm.sh</code> only (React, TanStack Query, htm loaded at
+								runtime) — no outbound calls to any backend
+							</td>
+						</tr>
+						<tr>
+							<th>Works with</th>
+							<td>Claude Code (agent write path); any session active in the shell</td>
+						</tr>
+						<tr>
+							<th>Does not require</th>
+							<td>A cloud account, a Supabase project, or any external service</td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
+		</section>
+
+		<!-- See also -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">See also</h2>
+				<ul class="sk-list">
+					<li><a href="/packages/">Package catalog</a> — all published Ikenga packages</li>
+					<li><a href="/docs/tutorial/build-a-pkg">Build a pkg</a> — author your own in the same no-build pattern</li>
+					<li><a href="/packages/mcp-iyke">mcp-iyke</a> — let Claude Code drive the shell that Tasks runs in</li>
+				</ul>
+			</div>
+		</section>
+	</FeaturePage>
+</Layout>
+
+<style>
+	.tk-table {
+		border-collapse: collapse;
+		width: 100%;
+		max-width: var(--site-measure-body, 65ch);
+		font-size: 0.9375rem;
+		color: var(--site-muted);
+	}
+	.tk-table th,
+	.tk-table td {
+		text-align: left;
+		padding: var(--space-3) var(--space-4);
+		border-bottom: 1px solid var(--site-border-soft);
+		vertical-align: top;
+	}
+	.tk-table th {
+		white-space: nowrap;
+		font-weight: 600;
+		color: var(--site-fg);
+		width: 10rem;
+	}
+	.tk-table code {
+		font-family: var(--site-font-mono);
+		font-size: 0.875em;
+		color: var(--site-accent);
+		background: var(--site-accent-soft);
+		padding: 1px 5px;
+		border-radius: var(--radius-sm, 4px);
+	}
+	.sk-list a {
+		color: var(--site-accent);
+		text-decoration: none;
+	}
+	.sk-list a:hover {
+		text-decoration: underline;
+	}
+</style>

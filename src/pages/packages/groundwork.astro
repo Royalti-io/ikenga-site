@@ -1,0 +1,264 @@
+---
+// /packages/groundwork — flagship page for @ikenga/skill-groundwork.
+// Copy source: plans/launch/drafts/pkg-page-groundwork.md (approved).
+// No shell required — installs via npx skills add, works in any Claude Code project.
+import Layout from '../../layouts/Layout.astro';
+import FeaturePage from '../../components/FeaturePage.astro';
+import Button from '../../components/Button.astro';
+import InstallBlock from '../../components/InstallBlock.astro';
+
+const title = 'Groundwork — research → design → plan → act, as a Claude Code skill';
+const description =
+	'Groundwork scaffolds and maintains a reusable research → design → plan → orchestrate → act folder for any non-trivial work — features, campaigns, org changes. Published on npm. No Ikenga shell required.';
+---
+
+<Layout
+	title={title}
+	description={description}
+	canonical="https://ikenga.dev/packages/groundwork/"
+>
+	<FeaturePage
+		eyebrow="@ikenga/skill-groundwork · v0.3.0 · Apache-2.0"
+		title="research → design → plan → <em>act.</em>"
+		lede="A Claude Code skill that scaffolds and maintains a structured folder for any non-trivial work — features, campaigns, org changes. Plain files, a standalone plan board, and a multi-agent kickoff handoff."
+		problem="Fully published on npm and installable with a single npx command. No Ikenga shell required. Try it today in any project where you already use Claude Code."
+		install="npx skills add royalti-io/groundwork"
+		worksWith="Works in any Claude Code project — no shell install required. Node ≥ 18 to run npx skills add. The Ikenga shell is optional: it adds a live in-shell board view, but the skill, the folder, the board, and the multi-agent kickoff all work without it."
+		docsHref="https://github.com/Royalti-io/ikenga-pkgs"
+		catalogHref="/packages/"
+	>
+
+		<!-- Beat 1: The problem it removes — copy-only (no matching screenshot) -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">The problem it removes</h2>
+				<p class="sk-body">
+					Non-trivial work is where ad-hoc Claude Code sessions break down. You ask for a plan,
+					you get a long prose answer. You start building. Three sessions later, the plan has
+					drifted — the research isn't recorded, the decisions aren't threaded, the next agent
+					starts from scratch. You're back to hand-maintaining a tangle of notes, half-finished
+					outlines, and stale task lists across dotfiles and documents that don't know about
+					each other.
+				</p>
+				<p class="sk-body">
+					Groundwork removes that by giving the folder a <strong>stateful spine</strong>: stable
+					IDs thread from the plan through the tracking doc through the orchestration handoff.
+					Re-runs augment instead of overwrite. Every action knows what already exists. A
+					multi-agent kickoff falls out the back end when you're ready.
+				</p>
+			</div>
+		</section>
+
+		<!-- Beat 2: Scaffold once, maintain forever — copy-only -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">Scaffold once, maintain forever</h2>
+				<p class="sk-body">
+					Run <code>groundwork init</code> and answer a short interview: goal, profile, where
+					the folder lives. Groundwork drops a domain-agnostic spine:
+				</p>
+				<pre class="gw-spine sk-body"><code>plans/my-feature/
+├── .groundwork.json        ← identity + state anchor
+├── 00-README.md
+├── 01-plan.md
+├── 02-research-external.md
+├── 03-research-internal.md
+├── 04-discussion.md        ← rounds, newest-first
+├── 05-tracking.md          ← work packages + gates
+├── 09-orchestration.md     ← generated kickoff handoff
+└── artifact/
+    └── board.html          ← standalone plan board, opens in any browser</code></pre>
+				<p class="sk-body">
+					Every doc uses <strong>generated-region fences</strong> — Claude writes only inside
+					them; your hand-authored prose is never touched.
+				</p>
+			</div>
+		</section>
+
+		<!-- Beat 3: Three profiles — copy-only -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">Three profiles, one spine</h2>
+				<p class="sk-body">
+					A <strong>profile</strong> swaps vocabulary and optional blocks without changing the
+					spine shape. Pick the one that fits:
+				</p>
+				<div class="gw-profiles">
+					<div class="gw-profile">
+						<p class="gw-profile__name sk-eyebrow">software</p>
+						<p class="sk-body gw-profile__line">Features, code work, PRs — work unit: work package</p>
+					</div>
+					<div class="gw-profile">
+						<p class="gw-profile__name sk-eyebrow">general</p>
+						<p class="sk-body gw-profile__line">Campaigns, org changes, research — work unit: workstream / deliverable</p>
+					</div>
+					<div class="gw-profile">
+						<p class="gw-profile__name sk-eyebrow">content</p>
+						<p class="sk-body gw-profile__line">Editorial series, campaigns with key art — work unit: piece / asset</p>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Beat 4: Actions that augment — copy-only -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">Actions that augment, not overwrite</h2>
+				<p class="sk-body">
+					Each action is a focused step you call when you need it:
+				</p>
+				<ul class="sk-list">
+					<li>
+						<strong>research</strong> — spawns a researcher agent that fills
+						<code>02</code>/<code>03</code> in-place; hash-diffed so re-runs only write
+						what changed.
+					</li>
+					<li>
+						<strong>review</strong> — reviewer agent appends a new Round to
+						<code>04-discussion.md</code> and re-syncs work packages by ID.
+					</li>
+					<li>
+						<strong>design</strong> — produces comparable design options in
+						<code>designs/*.html</code>; locks one as canonical. Active for
+						<code>software</code> and <code>content</code> profiles; skipped for
+						<code>general</code>.
+					</li>
+					<li>
+						<strong>orchestrate</strong> — generates <code>09-orchestration.md</code> from
+						<code>05-tracking.md</code>; <code>--emit-workflow</code> writes a runnable
+						workflow fan-out.
+					</li>
+					<li>
+						<strong>status</strong> — read-only freshness and coverage report; safe to run
+						anytime.
+					</li>
+				</ul>
+			</div>
+		</section>
+
+		<!-- Beat 5: The plan board — copy-only -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">The plan board</h2>
+				<p class="sk-body">
+					Every groundwork folder gets an <code>artifact/board.html</code> — a standalone HTML
+					file that opens in any browser with no server. In the Ikenga shell, the board renders
+					live inside the workspace; outside the shell, open it with
+					<code>open artifact/board.html</code>. Either way it shows the same data: phases,
+					waves, work packages, gates, and current status derived from
+					<code>05-tracking.md</code>.
+				</p>
+			</div>
+		</section>
+
+		<!-- Install section (second, expanded install with both options) -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">Install</h2>
+				<p class="sk-body">
+					Groundwork is on npm. One command adds it to any Claude Code project:
+				</p>
+				<InstallBlock cmd="npx skills add royalti-io/groundwork">
+					<p class="sk-install__note">
+						Project install — committed with the repo. Use <code>-g</code> for a global
+						install available across all your projects.
+					</p>
+				</InstallBlock>
+				<p class="sk-body" style="margin-top: var(--space-5);">
+					<code>npx skills add</code> resolves <code>skills/groundwork/SKILL.md</code> and
+					links it into <code>~/.claude/skills/</code>. No shell install required. No account.
+					Just a Claude Code environment and Node ≥ 18.
+				</p>
+				<p class="sk-body">
+					The Ikenga shell is not a prerequisite. Groundwork works fully in any terminal where
+					you run Claude Code. The shell adds a live-board view — but the skill, the folder,
+					the board, and the multi-agent kickoff all work without it.
+				</p>
+			</div>
+		</section>
+
+		<!-- Works with / requires -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">Works with</h2>
+				<ul class="sk-list">
+					<li>
+						<strong>Claude Code</strong> (any version that supports skills) in your terminal —
+						groundwork is a Claude Code skill.
+					</li>
+					<li>
+						<strong>Node ≥ 18</strong> to run <code>npx skills add</code>.
+					</li>
+					<li>
+						<strong>The Ikenga shell</strong> is optional — adds a live in-shell board view
+						and (planned) click-to-start sessions. Try the skill first; add the shell later.
+					</li>
+				</ul>
+			</div>
+		</section>
+
+		<!-- See also -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">See also</h2>
+				<div class="gw-links">
+					<Button href="/packages/" variant="ghost">All packages</Button>
+					<Button
+						href="https://github.com/Royalti-io/ikenga-pkgs"
+						variant="ghost"
+						rel="noopener noreferrer"
+					>GitHub: royalti-io/ikenga-pkgs</Button>
+				</div>
+			</div>
+		</section>
+
+	</FeaturePage>
+</Layout>
+
+<style>
+	.gw-spine {
+		background: var(--site-surface);
+		border: 1px solid var(--site-border);
+		border-radius: var(--radius-md, 6px);
+		padding: var(--space-5) var(--space-6);
+		overflow-x: auto;
+		font-family: var(--site-font-mono);
+		font-size: 0.875rem;
+		line-height: 1.6;
+		color: var(--site-fg);
+		margin: 0 0 var(--space-5);
+	}
+	.gw-spine code {
+		font-family: inherit;
+		font-size: inherit;
+		color: inherit;
+		background: none;
+		padding: 0;
+	}
+
+	.gw-profiles {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(16rem, 1fr));
+		gap: var(--space-4);
+		margin: 0 0 var(--space-5);
+	}
+	.gw-profile {
+		background: var(--site-surface);
+		border: 1px solid var(--site-border);
+		border-radius: var(--radius-md, 6px);
+		padding: var(--space-5);
+	}
+	.gw-profile__name {
+		margin-bottom: var(--space-2);
+	}
+	.gw-profile__line {
+		margin: 0;
+		font-size: 0.9375rem;
+	}
+
+	.gw-links {
+		display: flex;
+		gap: var(--space-3);
+		flex-wrap: wrap;
+	}
+</style>

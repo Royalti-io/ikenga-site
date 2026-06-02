@@ -1,0 +1,462 @@
+---
+// /packages/artifacts — flagship page for the Artifacts workflow
+// Draft source: plans/launch/drafts/pkg-page-artifacts.md
+// Two-act story: author a self-contained HTML artifact (standalone skill,
+// no shell required), then review it inside the Ikenga shell.
+import Layout from '../../layouts/Layout.astro';
+import FeaturePage from '../../components/FeaturePage.astro';
+import Beat from '../../components/Beat.astro';
+import Button from '../../components/Button.astro';
+import InstallBlock from '../../components/InstallBlock.astro';
+
+const title = 'Artifacts — build a live interactive HTML file, then review it like a designer';
+const description =
+	'Author self-contained interactive HTML artifacts from any Claude Code session. Open them in a browser, share them as single files, or light them up with live data inside the Ikenga shell — where you can grid-review, compare variants, pin feedback, and promote the winner.';
+---
+
+<Layout
+	title={title}
+	description={description}
+	canonical="https://ikenga.dev/packages/artifacts/"
+>
+	<FeaturePage
+		eyebrow="ikenga-artifact-builder · Apache-2.0"
+		title="Build a live interactive HTML file, then review it like a designer."
+		lede="Author a self-contained artifact from any Claude Code session. Render it in any browser with no build step. Open it inside the shell to grid-review variants, pin feedback, compare, and promote."
+		problem="Most tools do one half of this loop. You can ask Claude to generate a dashboard and get an HTML file. Or you have a design-review tool where you annotate screenshots. Rarely both, in the same workspace. The Artifacts workflow covers the full cycle: author with a standalone skill that works anywhere, then review inside the shell — thumbnail grid, side-by-side compare, pinned feedback routed to your agent, and one-click promote."
+		install="npx skills add royalti-io/ikenga-artifact-builder"
+		worksWith="No Ikenga shell required for authoring. Works with Claude Code, Codex, Cursor, and any agent that reads a .claude/skills/ directory. The shell unlocks the review half: grid, compare, pin, and promote."
+		catalogHref="/packages/"
+		docsHref="/docs/"
+	>
+
+		<!-- ── WHAT IT REMOVES ─────────────────────────────────────────────── -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">The problem it removes</h2>
+				<p class="sk-body">
+					Claude generates useful HTML outputs — dashboards, summaries,
+					comparisons, mockups — but they disappear into a folder you forget to
+					open, or land as a wall of code you paste into a browser. There is no
+					connection between the agent that built the thing and the place where
+					you decide whether it's right.
+				</p>
+				<p class="sk-body">
+					The skill closes the authoring gap: every output it produces has
+					structured mock data, a fallback for offline use, and the right shape
+					to light up with live data inside the shell. The Artifact Studio closes
+					the review gap: instead of opening files one by one and losing track of
+					which version you liked, you get a grid view, a compare view, inline
+					pinned feedback routed directly to your agent, and a version strip that
+					makes branching and promoting trivial.
+				</p>
+			</div>
+		</section>
+
+		<!-- ── ACT ONE: BUILD ─────────────────────────────────────────────── -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<p class="sk-eyebrow">Act one</p>
+				<h2 class="sk-h2">Build</h2>
+			</div>
+		</section>
+
+		<!-- Beat 1 — Install -->
+		<section class="sk-section">
+			<div class="sk-wrap sk-beat">
+				<div class="sk-beat__copy">
+					<h2 class="sk-h2">1. Install the skill</h2>
+					<p class="sk-body">
+						<code>ikenga-artifact-builder</code> is a Claude Code skill. Install
+						it globally so it's available in every project, or scoped to a
+						single repo to commit it alongside your team's setup.
+					</p>
+					<ul class="sk-list">
+						<li>
+							<strong>Global</strong> — available across all projects:
+							<br /><code class="af-cmd">npx skills add royalti-io/ikenga-artifact-builder -g</code>
+						</li>
+						<li>
+							<strong>Project</strong> — committed with your repo, shared with your team:
+							<br /><code class="af-cmd">npx skills add royalti-io/ikenga-artifact-builder</code>
+						</li>
+						<li>
+							<strong>Targeted</strong> — if you have several agents configured:
+							<br /><code class="af-cmd">npx skills add royalti-io/ikenga-artifact-builder -g -a claude-code</code>
+						</li>
+					</ul>
+					<p class="sk-body">
+						No Ikenga shell required. The skill works with Claude Code, Codex,
+						Cursor, and any agent that reads a <code>.claude/skills/</code> directory.
+					</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- Beat 2 — Ask Claude to build an artifact (no image available) -->
+		<section class="sk-section">
+			<div class="sk-wrap sk-beat">
+				<div class="sk-beat__copy">
+					<h2 class="sk-h2">2. Ask Claude to build an artifact</h2>
+					<p class="sk-body">
+						In any Claude Code session, ask for a dashboard, view, summary,
+						comparison, mockup, or prototype. The skill takes over automatically.
+					</p>
+					<p class="sk-body">
+						From a terminal session it runs a short <strong>discover path</strong>:
+						five focused questions — what are you building, which archetype fits
+						(dashboard, one-pager, slides, social card, site, scrollytelling),
+						where the file should live, which sub-skills are available, do you
+						want to riff on past work. On confirmation, it builds.
+					</p>
+					<p class="sk-body">
+						Inside the Ikenga shell, the <strong>wizard fast-path</strong> skips
+						the discovery entirely. Open the artifact-creation wizard
+						(<kbd>⌘⇧N</kbd>), pick an archetype and folder, and the agent starts
+						building immediately with the project and path already resolved.
+					</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- Beat 3 — What comes out (image: capability-graph.png is closest available; but draft has no matching screenshot — render copy-only per rules) -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">3. What comes out</h2>
+				<p class="sk-body">
+					Every artifact is a single self-contained HTML file.
+				</p>
+				<ul class="sk-list">
+					<li>
+						<strong>Renders anywhere with no build step</strong> — open it with
+						<code>file://</code>, paste it into the claude.ai artifact viewer,
+						or share it as a standalone file.
+					</li>
+					<li>
+						<strong>Realistic mock data embedded</strong> as a
+						<code>&lt;script type="application/json"&gt;</code> block, so it works
+						offline and in review even when live sources are unavailable.
+					</li>
+					<li>
+						<strong>Live data when opened inside the shell</strong> — the bridge
+						connects declared data sources (Supabase, local SQLite, HTTP, MCP)
+						and refreshes on your chosen interval.
+					</li>
+					<li>
+						<strong>Reacts to the shell's theme</strong> — light/dark toggle and
+						the palette apply via the injected token bridge; outside the shell it
+						follows the OS color scheme.
+					</li>
+				</ul>
+				<p class="sk-body">
+					The skill ships three worked reference artifacts:
+					<code>hello-world.html</code> (~150 lines, minimal),
+					<code>cfo-daily.html</code> (~330 lines, four data sources, KPI tiles,
+					AR aging table, FX rates), and <code>ceo-overview.html</code> (~470
+					lines, six sources, cross-artifact links). All open directly in a
+					browser without a server.
+				</p>
+			</div>
+		</section>
+
+		<!-- ── ACT TWO: REVIEW ───────────────────────────────────────────────── -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<p class="sk-eyebrow">Act two</p>
+				<h2 class="sk-h2">Review</h2>
+				<p class="sk-body">
+					The review half requires the Ikenga desktop shell. Once installed,
+					the Artifact Studio is built in — no additional packages needed.
+				</p>
+			</div>
+		</section>
+
+		<!-- Beat 4 — Grid view (image available: ngwa-cockpit.png closest, but draft has no matching exact screenshot — copy-only per rules) -->
+		<section class="sk-section">
+			<div class="sk-wrap sk-beat">
+				<div class="sk-beat__copy">
+					<h2 class="sk-h2">4. Open a folder as a grid</h2>
+					<p class="sk-body">
+						Open any folder of <code>.html</code> artifacts as the Artifact
+						Studio grid: from the sidebar, use <strong>Browse folder</strong>
+						to pick the directory, or navigate to <code>/artifacts/home</code>
+						and click into an archetype group. The grid renders a live thumbnail
+						for each artifact using the same renderer the full view uses — a
+						scaled-down iframe, not a screenshot.
+					</p>
+					<p class="sk-body">
+						Artifacts that share a naming family (<code>report.html</code>,
+						<code>report-v2.html</code>, <code>report-v3.html</code>) stack
+						under a single cell. Click <strong>+ var</strong> to expand the
+						stack in place and see all variants alongside their parent.
+					</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- Beat 5 — Loupe (copy-only, no matching image) -->
+		<section class="sk-section">
+			<div class="sk-wrap sk-beat sk-beat--reverse">
+				<div class="sk-beat__copy">
+					<h2 class="sk-h2">5. Inspect one at loupe density</h2>
+					<p class="sk-body">
+						Double-click any thumbnail to open it at <strong>loupe density</strong>
+						— a full-size preview with a right rail offering four tabs: Chat,
+						Code, DOM, and Manifest. The Code tab shows the raw source with a
+						live save path; the DOM tab shows the accessibility tree of the
+						rendered iframe; the Manifest tab is an inline JSON editor for the
+						artifact's <code>ikenga-manifest</code> block.
+					</p>
+					<p class="sk-body">
+						At the bottom, a <strong>version strip</strong> lists every member
+						of the artifact's naming family — canonical first (marked ◉),
+						variants after. Click any entry to switch to it; right-click a
+						variant to jump straight to compare.
+					</p>
+					<p class="sk-body">
+						A <strong>+ new button</strong> at the end of the version strip
+						copies the current artifact to the next free variant name and opens
+						it in the editor so you can brief the agent on what to change —
+						without losing the previous version.
+					</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- Beat 6 — Pin feedback (copy-only, no matching image) -->
+		<section class="sk-section">
+			<div class="sk-wrap sk-beat">
+				<div class="sk-beat__copy">
+					<h2 class="sk-h2">6. Pin feedback at the element</h2>
+					<p class="sk-body">
+						Switch to <strong>comment mode</strong> (the pin icon in the loupe
+						chrome, or the floating comment button the bridge injects into every
+						artifact). The cursor becomes a crosshair. Click any element — a
+						chart bar, a table row, a headline — to attach a numbered pin dot
+						at that position. Type the feedback and send.
+					</p>
+					<p class="sk-body">
+						Pinned feedback routes to your active Claude session so the agent
+						reads the full payload — selector, screenshot, text, artifact path
+						— without you describing it. If no session is connected, it stays
+						in the side-pane review queue.
+					</p>
+					<p class="sk-body">
+						Back in the grid view, pin dots overlay every thumbnail at the
+						positions you set. Open or in-progress pins show in red or amber;
+						resolved pins fade. Click a dot to re-dispatch to the agent;
+						<kbd>⌥</kbd>-click to override the routing sink for that one
+						dispatch.
+					</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- Beat 7 — Compare (image: oba-store.png is available but not semantically matching — copy-only) -->
+		<section class="sk-section">
+			<div class="sk-wrap sk-beat sk-beat--reverse">
+				<div class="sk-beat__copy">
+					<h2 class="sk-h2">7. Compare variants side by side</h2>
+					<p class="sk-body">
+						From the version strip, right-click any variant to open it in
+						<strong>compare density</strong> next to the current artifact. Both
+						iframes render at full height with a resizable split; the right rail
+						carries a Chat thread shared by both sides.
+					</p>
+					<p class="sk-body">
+						Use <strong>swap</strong> to flip sides. When you've decided which
+						variant wins, click <strong>Promote</strong> on that side: the shell
+						performs an atomic rename on disk, making the chosen variant the
+						canonical file and the former canonical a numbered sibling. The view
+						updates immediately.
+					</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- Beat 8 — Promote to folder (copy-only) -->
+		<section class="sk-section">
+			<div class="sk-wrap sk-beat">
+				<div class="sk-beat__copy">
+					<h2 class="sk-h2">8. Promote to folder</h2>
+					<p class="sk-body">
+						When a single-file artifact grows complex — extracted CSS, separate
+						JSX, large data files — use <strong>Promote to folder</strong> from
+						the loupe's action menu. The dialog lets you choose what to split:
+						CSS into <code>assets/styles.css</code>, JSX into
+						<code>assets/app.jsx</code>, mock data into
+						<code>assets/mock.json</code>. The resulting folder structure is a
+						fully working artifact under the same schema; the split files are
+						wired back in as references so nothing breaks.
+					</p>
+				</div>
+			</div>
+		</section>
+
+		<!-- ── INSTALL ──────────────────────────────────────────────────────── -->
+		<section class="sk-section" id="install">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">Install</h2>
+
+				<h3 class="af-h3">The skill — authoring, no shell required</h3>
+				<InstallBlock cmd="npx skills add royalti-io/ikenga-artifact-builder -g">
+					<p class="sk-body">
+						Global install — available across all projects. Omit <code>-g</code>
+						for a project-scoped install committed with your repo. Works with
+						Claude Code, Codex, Cursor, and any agent that loads a
+						<code>.claude/skills/</code> directory.
+					</p>
+				</InstallBlock>
+
+				<h3 class="af-h3">The shell — review half</h3>
+				<p class="sk-body">
+					The Artifact Studio (grid, loupe, compare, pin, and promote) is built
+					into the Ikenga desktop shell. Install the shell to unlock the review
+					half.
+				</p>
+				<Button href="/#install" variant="ghost">Install the shell</Button>
+			</div>
+		</section>
+
+		<!-- ── WORKS WITH ────────────────────────────────────────────────────── -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">Works with / requires</h2>
+				<table class="af-table">
+					<thead>
+						<tr>
+							<th>Capability</th>
+							<th>Requires</th>
+						</tr>
+					</thead>
+					<tbody>
+						<tr>
+							<td>Author artifacts (standalone)</td>
+							<td>Claude Code + <code>ikenga-artifact-builder</code> skill</td>
+						</tr>
+						<tr>
+							<td>Live data</td>
+							<td>Ikenga desktop shell + bridge, declared data sources in the artifact manifest</td>
+						</tr>
+						<tr>
+							<td>Artifact Studio (grid, loupe, compare, pin, promote)</td>
+							<td>Ikenga desktop shell</td>
+						</tr>
+						<tr>
+							<td>Pin routing to your agent</td>
+							<td>Active Claude session connected via the mcp-iyke bridge</td>
+						</tr>
+						<tr>
+							<td>Cross-artifact links and MCP sources</td>
+							<td>Ikenga shell + declared MCP server in the artifact manifest</td>
+						</tr>
+					</tbody>
+				</table>
+				<p class="sk-body af-license">
+					Apache-2.0. <a href="https://github.com/Royalti-io/ikenga-artifact-builder/blob/main/LICENSE" rel="noopener noreferrer">Read it.</a>
+				</p>
+			</div>
+		</section>
+
+	</FeaturePage>
+</Layout>
+
+<style>
+	/* ── beat layout for copy-only beats (no image) ───────────────────────── */
+	.sk-beat {
+		display: grid;
+		gap: var(--space-8);
+	}
+	@media (min-width: 56rem) {
+		.sk-beat {
+			grid-template-columns: 1fr 1fr;
+			align-items: start;
+		}
+		.sk-beat--reverse > .sk-beat__copy {
+			order: 2;
+		}
+	}
+
+	/* ── section sub-headings ─────────────────────────────────────────────── */
+	.af-h3 {
+		font-family: var(--site-font-display);
+		font-weight: 600;
+		font-size: 1.125rem;
+		margin: var(--space-7) 0 var(--space-3);
+	}
+
+	/* ── inline code in lists ─────────────────────────────────────────────── */
+	.af-cmd {
+		font-family: var(--site-font-mono);
+		font-size: 0.84rem;
+		color: var(--site-fg);
+		background: var(--site-surface);
+		border: 1px solid var(--site-border);
+		border-radius: var(--radius-sm, 4px);
+		padding: 2px 8px;
+		display: inline-block;
+		margin-top: var(--space-1);
+	}
+
+	/* ── works-with table ─────────────────────────────────────────────────── */
+	.af-table {
+		width: 100%;
+		border-collapse: collapse;
+		font-size: 0.9375rem;
+		color: var(--site-muted);
+		margin-bottom: var(--space-6);
+	}
+	.af-table thead th {
+		text-align: left;
+		font-family: var(--site-font-mono);
+		font-size: 0.75rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--site-faint);
+		padding: 0 var(--space-4) var(--space-3) 0;
+		border-bottom: 1px solid var(--site-border);
+	}
+	.af-table tbody td {
+		padding: var(--space-3) var(--space-4) var(--space-3) 0;
+		border-bottom: 1px solid var(--site-border-soft);
+		vertical-align: top;
+	}
+	.af-table tbody td:first-child {
+		color: var(--site-fg);
+		font-weight: 500;
+		min-width: 14rem;
+	}
+	.af-table code {
+		font-family: var(--site-font-mono);
+		font-size: 0.875em;
+		color: var(--site-accent);
+		background: var(--site-accent-soft);
+		padding: 1px 5px;
+		border-radius: var(--radius-sm, 4px);
+	}
+
+	/* ── license line ─────────────────────────────────────────────────────── */
+	.af-license {
+		color: var(--site-faint);
+		font-size: 0.875rem;
+		margin-bottom: 0;
+	}
+	.af-license a {
+		color: var(--site-accent);
+		text-decoration: none;
+	}
+	.af-license a:hover {
+		text-decoration: underline;
+	}
+
+	/* ── kbd chip ─────────────────────────────────────────────────────────── */
+	kbd {
+		font-family: var(--site-font-mono);
+		font-size: 0.8em;
+		background: var(--site-surface);
+		border: 1px solid var(--site-border-strong);
+		border-radius: var(--radius-sm, 4px);
+		padding: 1px 5px;
+		color: var(--site-fg);
+	}
+</style>

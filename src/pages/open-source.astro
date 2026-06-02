@@ -1,0 +1,114 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Button from '../components/Button.astro';
+---
+
+<Layout
+	title="Why we open-sourced all of it — Ikenga"
+	description="Not parts — the whole thing, under Apache-2.0. The reasoning behind open-sourcing the Ikenga workspace, why local-first is the default, and how we sustain it."
+	canonical="https://ikenga.dev/open-source"
+>
+
+	<!-- Hero -->
+	<section class="sk-hero sk-section--flush">
+		<div class="sk-wrap">
+			<p class="sk-eyebrow">Open source</p>
+			<h1 class="sk-display">Why we <em>open-sourced</em> all of it</h1>
+			<p class="sk-lede">
+				Not parts — the whole thing, under Apache-2.0. Here's the reasoning, in short. The long
+				version is in the manifesto and the build-in-public essay, linked below.
+			</p>
+			<p class="sk-body">
+				Platform and all packages are Apache-2.0.
+			</p>
+		</div>
+	</section>
+
+	<!-- Section: The host is the business -->
+	<section class="sk-section">
+		<div class="sk-wrap">
+			<h2 class="sk-h2">The host is the business</h2>
+			<p class="sk-body">
+				Vercel didn't invent the JavaScript runtime. They built a clean, opinionated host for it,
+				and sold the hosting. Workspace AI sits at the same inflection point. We open-source the
+				workspace and make our money running it — hosted plans, custom builds, enterprise support.
+				We make our money running it, not hiding it.
+			</p>
+			<p class="sk-body">
+				<span class="sk-aside">From <em>The Ikenga Platform Manifesto</em> — the full argument is in the founder's writing.</span>
+			</p>
+		</div>
+	</section>
+
+	<!-- Section: Why local-first -->
+	<section class="sk-section">
+		<div class="sk-wrap">
+			<h2 class="sk-h2">Why local-first</h2>
+			<p class="sk-body">
+				Your config and your agents' data run on your machine. That means they don't pass through
+				someone else's server to be useful, and you can read every line of the code that touches
+				them. Local-first isn't a privacy slogan here — it's the default, and the source is
+				Apache-2.0 so you can verify it.
+			</p>
+		</div>
+	</section>
+
+	<!-- Section: Built and run, not a side project -->
+	<section class="sk-section">
+		<div class="sk-wrap">
+			<h2 class="sk-h2">Built and run, not a side project</h2>
+			<p class="sk-body">
+				We didn't open-source a demo. We built this workspace to run our own company, used it for
+				18 months, and shipped the generic half as Ikenga. The cockpit and package manager you see
+				are the ones we actually run on. Open-sourcing it means you get the real thing, and we keep
+				building it in the open.
+			</p>
+			<p class="sk-body">
+				<span class="sk-aside">From <em>Running a company on AI agents — the useful number isn't 100%</em>.</span>
+			</p>
+		</div>
+	</section>
+
+	<!-- Foot CTA -->
+	<section class="sk-section">
+		<div class="sk-wrap sk-obi">
+			<h2 class="sk-h2">See for yourself</h2>
+			<div class="sk-obi__cta">
+				<Button
+					href="https://github.com/Royalti-io/ikenga"
+					variant="primary"
+					rel="noopener noreferrer"
+				>
+					Star the repo on GitHub
+				</Button>
+				<Button
+					href="https://github.com/Royalti-io/ikenga/blob/main/LICENSE"
+					variant="ghost"
+					rel="noopener noreferrer"
+				>
+					Read the license (Apache-2.0)
+				</Button>
+			</div>
+			<p class="sk-body" style="margin-top: var(--space-5);">
+				Ready to install? <a class="sk-link" href="/#install">Get Ikenga on your machine.</a>
+			</p>
+		</div>
+	</section>
+
+</Layout>
+
+<style>
+	.sk-link {
+		color: var(--site-accent);
+		text-decoration: none;
+		transition: color 0.15s ease;
+	}
+	.sk-link:hover {
+		text-decoration: underline;
+	}
+	.sk-link:focus-visible {
+		outline: 2px solid var(--site-accent);
+		outline-offset: 2px;
+		border-radius: 3px;
+	}
+</style>

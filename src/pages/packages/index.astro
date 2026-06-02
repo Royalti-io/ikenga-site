@@ -1,0 +1,229 @@
+---
+// /packages — the catalog. Featured strip (editorial) + generated index
+// (live build-time fetch from the published registry) + roadmap.
+// Spec: plans/launch/drafts/pkg-catalog.md. DS pattern: catalog-grid.
+import Layout from '../../layouts/Layout.astro';
+import Button from '../../components/Button.astro';
+import Card from '../../components/Card.astro';
+
+const REGISTRY_URL = 'https://royalti-io.github.io/ikenga-registry/index.json';
+
+// Fallback mirrors the current public registry so the build never hard-fails
+// or ships an empty catalog if the fetch is unavailable at build time.
+const FALLBACK = {
+	updatedAt: '2026-06-01T03:31:10.278Z',
+	pkgs: [
+		{ name: '@ikenga/mcp-browser', latest: '0.2.0', kind: 'skill', description: 'An MCP server that lets agents drive native child webviews in the shell — open, snapshot, click, and fill pages that block iframes.' },
+		{ name: '@ikenga/mcp-iyke', latest: '0.2.0', kind: 'skill', description: 'An MCP server that exposes the running shell to any MCP client — drive panes, navigate, and inspect state from Claude or Cursor.' },
+		{ name: '@ikenga/pkg-engine-claude-code', latest: '0.2.0', kind: 'engine', description: 'The default engine adapter — wraps the claude CLI so your Claude Code setup runs natively inside Ikenga.' },
+		{ name: '@ikenga/pkg-engine-codex', latest: '0.2.0', kind: 'engine', description: 'A Codex CLI adapter — plugs the OpenAI codex CLI into the same engine slot.' },
+		{ name: '@ikenga/pkg-engine-gemini', latest: '0.2.0', kind: 'engine', description: "A Gemini CLI adapter — run the same installed setup through Google's Gemini CLI." },
+		{ name: '@ikenga/pkg-suite', latest: '0.3.0', kind: 'embedded', description: 'A business suite — Sales, Outbound, and Email views in one no-build iframe pkg, over Supabase.' },
+		{ name: '@ikenga/pkg-tasks', latest: '0.4.0', kind: 'embedded', description: 'A local-first task manager with list, agenda, and triage views over your local tasks data.' },
+	],
+};
+
+let registry = FALLBACK;
+try {
+	const res = await fetch(REGISTRY_URL);
+	if (res.ok) registry = await res.json();
+} catch {
+	/* offline at build — use the bundled fallback above */
+}
+
+// Belt-and-suspenders: honor the registry's own `visibility` flag (the
+// source-of-truth mechanism), plus a guard for known stubs/fixtures in case a
+// pre-flag index is served.
+const HIDDEN = new Set([
+	'@ikenga/pkg-engine-cursor-agent',
+	'@ikenga/pkg-engine-noop',
+	'@ikenga/pkg-hello',
+]);
+const visible = (registry.pkgs || []).filter(
+	(p) => p.visibility !== 'hidden' && !HIDDEN.has(p.name)
+);
+
+const label = (name) => name.replace(/^@ikenga\//, '');
+const oneLine = (d) => {
+	const s = (d || '').split(/(?<=\.)\s/)[0].trim();
+	return s.length > 140 ? s.slice(0, 137).trimEnd() + '…' : s;
+};
+
+const CATEGORIES = [
+	{ key: 'Apps', blurb: 'iframe mini-apps that run inside the shell', match: (p) => p.kind === 'embedded' },
+	{ key: 'MCP servers', blurb: 'tool servers any MCP client can drive', match: (p) => p.kind === 'skill' && p.name.includes('mcp-') },
+	{ key: 'Engines', blurb: 'pluggable reasoning adapters', match: (p) => p.kind === 'engine' },
+	{ key: 'Skills', blurb: 'Claude Code skill packages', match: (p) => p.kind === 'skill' && !p.name.includes('mcp-') },
+];
+const grouped = CATEGORIES.map((c) => ({
+	...c,
+	rows: visible.filter(c.match).sort((a, b) => a.name.localeCompare(b.name)),
+})).filter((c) => c.rows.length);
+
+const FEATURED = [
+	{ name: 'Tasks', line: 'A local-first task manager that lives inside your workspace — lists, triage, and agenda in one pane.', href: '/packages/tasks', cta: 'Learn more' },
+	{ name: 'mcp-iyke', line: 'Give any MCP client — Claude, Cursor, or your own tool — live control over the running shell.', href: '/packages/mcp-iyke', cta: 'Learn more' },
+	{ name: 'Groundwork', line: 'A research → plan → act workflow scaffold — fully published, installs with npx, no shell required.', href: '/packages/groundwork', cta: 'No shell required', install: 'npx skills add royalti-io/groundwork' },
+	{ name: 'Artifacts', line: 'Author self-contained interactive HTML artifacts that render standalone — and light up with live data in the shell.', href: '/packages/artifacts', cta: 'No shell required', install: 'npx skills add royalti-io/ikenga-artifact-builder' },
+	{ name: 'Engines', line: 'Claude Code is the default. Gemini and Codex are pluggable adapters — same setup, different engine.', href: '/packages/engines', cta: 'Learn more' },
+];
+
+const updated = new Date(registry.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+const title = 'Packages for Ikenga — install and update like apps';
+const desc = "Browse what's published for your Claude Code setup — mini-apps, MCP tool servers, engine adapters, and skills. The catalog is generated live from the registry; only what's actually published appears here.";
+---
+
+<Layout title={title} description={desc} canonical="https://ikenga.dev/packages/">
+	<section class="sk-hero">
+		<div class="sk-wrap">
+			<p class="sk-eyebrow">Packages</p>
+			<h1 class="sk-display">Install and update like <em>apps.</em></h1>
+			<p class="sk-lede">
+				Everything that extends your Claude Code setup — mini-apps, MCP tool
+				servers, skill bundles, engine adapters — is a package.
+			</p>
+			<p class="sk-body">
+				Browse what's published, install with one command, and update
+				automatically. The catalog is generated live from the registry — only
+				what's actually published appears here.
+			</p>
+		</div>
+	</section>
+
+	<!-- Featured strip (editorial — spans both install channels) -->
+	<section class="sk-section">
+		<div class="sk-wrap">
+			<h2 class="sk-h2">Featured</h2>
+			<div class="sk-grid">
+				{FEATURED.map((f) => (
+					<Card title={f.name} href={f.href} tag={f.install ? 'no shell' : 'flagship'}>
+						{f.line}
+						{f.install && <><br /><code class="pk-cmd">{f.install}</code></>}
+					</Card>
+				))}
+			</div>
+		</div>
+	</section>
+
+	<!-- Generated index -->
+	<section class="sk-section">
+		<div class="sk-wrap">
+			<h2 class="sk-h2">All packages</h2>
+			<p class="sk-body pk-meta">
+				Generated from the registry · Last updated {updated} · install commands
+				require the <a href="/#install">Ikenga shell</a>.
+			</p>
+			{grouped.map((cat) => (
+				<div class="pk-cat">
+					<h3 class="pk-cat__head">{cat.key} <span class="pk-cat__blurb">— {cat.blurb}</span></h3>
+					<ul class="pk-rows">
+						{cat.rows.map((p) => (
+							<li class="pk-row">
+								<div class="pk-row__top">
+									<code class="pk-row__id">{label(p.name)}</code>
+									<span class="pk-row__ver">v{p.latest}</span>
+								</div>
+								<p class="pk-row__desc">{oneLine(p.description)}</p>
+								<code class="pk-cmd">ikenga add {p.name}</code>
+							</li>
+						))}
+					</ul>
+				</div>
+			))}
+		</div>
+	</section>
+
+	<!-- Roadmap -->
+	<section class="sk-section">
+		<div class="sk-wrap">
+			<h2 class="sk-h2">Coming soon</h2>
+			<div class="sk-grid">
+				<div class="sk-card pk-soon">
+					<span class="sk-card__tag">Coming soon</span>
+					<h3 class="sk-card__title">Studio</h3>
+					<p class="sk-card__body">An in-shell Remotion-powered video/media workspace for reviewing and exporting creative work.</p>
+				</div>
+			</div>
+		</div>
+	</section>
+
+	<section class="sk-section">
+		<div class="sk-wrap">
+			<Button href="/docs/" variant="ghost">Read the docs</Button>
+		</div>
+	</section>
+</Layout>
+
+<style>
+	.pk-meta {
+		color: var(--site-faint);
+		font-size: 0.875rem;
+	}
+	.pk-meta a {
+		color: var(--site-accent);
+	}
+	.pk-cat {
+		margin-top: var(--space-8);
+	}
+	.pk-cat__head {
+		font-family: var(--site-font-display);
+		font-size: 1.125rem;
+		font-weight: 600;
+		margin: 0 0 var(--space-4);
+		padding-bottom: var(--space-2);
+		border-bottom: 1px solid var(--site-border-soft);
+	}
+	.pk-cat__blurb {
+		color: var(--site-muted);
+		font-weight: 400;
+		font-size: 0.9375rem;
+	}
+	.pk-rows {
+		list-style: none;
+		padding: 0;
+		margin: 0;
+		display: grid;
+		gap: var(--space-3);
+	}
+	.pk-row {
+		border: 1px solid var(--site-border);
+		border-radius: var(--radius-lg, 10px);
+		background: var(--site-surface);
+		padding: var(--space-4) var(--space-5);
+	}
+	.pk-row__top {
+		display: flex;
+		align-items: baseline;
+		gap: var(--space-3);
+	}
+	.pk-row__id {
+		font-family: var(--site-font-mono);
+		font-size: 0.9375rem;
+		color: var(--site-fg);
+	}
+	.pk-row__ver {
+		font-family: var(--site-font-mono);
+		font-size: 0.75rem;
+		color: var(--site-accent);
+	}
+	.pk-row__desc {
+		color: var(--site-muted);
+		font-size: 0.9375rem;
+		margin: var(--space-2) 0 var(--space-3);
+		max-width: var(--site-measure-body);
+	}
+	.pk-cmd {
+		display: inline-block;
+		font-family: var(--site-font-mono);
+		font-size: 0.8125rem;
+		color: var(--site-fg);
+		background: var(--site-bg);
+		border: 1px solid var(--site-border-strong);
+		border-radius: var(--radius-sm, 4px);
+		padding: var(--space-1) var(--space-3);
+		margin-top: var(--space-2);
+	}
+	.pk-soon {
+		opacity: 0.72;
+	}
+</style>

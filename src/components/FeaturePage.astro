@@ -32,7 +32,7 @@ const {
 	<section class="sk-hero">
 		<div class="sk-wrap">
 			<p class="sk-eyebrow">{eyebrow}</p>
-			<h1 class="sk-display">{title}</h1>
+			<h1 class="sk-display" set:html={title}></h1>
 			<p class="sk-lede">{lede}</p>
 			<p class="sk-body">{problem}</p>
 			{install && (

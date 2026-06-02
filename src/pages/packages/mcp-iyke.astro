@@ -1,0 +1,327 @@
+---
+// /packages/mcp-iyke — flagship feature page for @ikenga/mcp-iyke (the Iyke MCP server).
+// Copy source: plans/launch/drafts/pkg-page-mcp-iyke.md (approved, WP-30).
+// All five [SCREENSHOT: …] beats have no matching asset — rendered as copy-only sections.
+import Layout from '../../layouts/Layout.astro';
+import FeaturePage from '../../components/FeaturePage.astro';
+import Button from '../../components/Button.astro';
+import InstallBlock from '../../components/InstallBlock.astro';
+---
+
+<Layout
+  title="Iyke MCP — let your agent drive the running workspace | Ikenga"
+  description="@ikenga/mcp-iyke exposes the running Ikenga shell as MCP tools — navigate panes, read state, inspect logs, and interact with the UI from Claude Code or any MCP client."
+  canonical="https://ikenga.dev/packages/mcp-iyke"
+>
+  <FeaturePage
+    eyebrow="@ikenga/mcp-iyke · Apache-2.0"
+    title="Let the agent you already use drive your workspace."
+    lede="Any MCP client — Claude Code, Cursor, or your own tool — can navigate panes, read workspace state, inspect logs, and interact with the UI. The agent and the workspace share a wire."
+    problem="You ask Claude Code to set something up, it completes the task, and you switch to the desktop app to check the result. Then you switch back. Then back again. Two windows, two contexts, a constant seam. @ikenga/mcp-iyke closes that seam."
+    worksWith="Requires the Ikenga shell to be running. The tools report a structured error immediately if the app is closed — they never hang."
+    docsHref="/docs/iyke-bridge"
+    catalogHref="/packages"
+  >
+
+    <!-- Beat 1: The agent reads what's on screen -->
+    <section class="sk-section">
+      <div class="sk-wrap">
+        <h2 class="sk-h2">The agent reads what's on screen</h2>
+        <p class="sk-body">
+          <code>iyke_state</code> returns the current sidebar mode, the focused pane's route, and the
+          full pane tree. <code>iyke_dom</code> returns an accessibility-tree snapshot of the focused
+          pane — the same structure Playwright uses to identify elements.
+          <code>iyke_screenshot</code> returns a PNG of the window or a specific pane.
+        </p>
+        <p class="sk-body">
+          The agent can see where you are and what's in front of you — without you describing it.
+        </p>
+      </div>
+    </section>
+
+    <!-- Beat 2: The agent navigates -->
+    <section class="sk-section">
+      <div class="sk-wrap">
+        <h2 class="sk-h2">The agent navigates</h2>
+        <p class="sk-body">
+          <code>iyke_go</code> navigates the focused pane to any route. <code>iyke_split</code> opens
+          a second (or third) pane, horizontally or vertically. <code>iyke_focus</code> switches
+          which pane is active by id or by 1-based index. <code>iyke_mode</code> switches the sidebar
+          activity mode. <code>iyke_open</code> opens a new tab — a route, a chat, an artifact, a
+          mini-app.
+        </p>
+      </div>
+    </section>
+
+    <!-- Beat 3: The agent interacts with UI elements -->
+    <section class="sk-section">
+      <div class="sk-wrap">
+        <h2 class="sk-h2">The agent interacts with UI elements</h2>
+        <p class="sk-body">
+          <code>iyke_click</code>, <code>iyke_type</code>, and <code>iyke_key</code> let the agent
+          interact with elements the same way a user would. <code>iyke_wait</code> blocks until a
+          condition is met: text appears, a selector resolves, a ref goes away.
+        </p>
+        <p class="sk-body">
+          This is useful for driving pkgs that don't have their own API surface — the agent can work
+          with the visual UI directly.
+        </p>
+      </div>
+    </section>
+
+    <!-- Beat 4: The agent inspects the runtime -->
+    <section class="sk-section">
+      <div class="sk-wrap">
+        <h2 class="sk-h2">The agent inspects the runtime</h2>
+        <p class="sk-body">
+          <code>iyke_logs</code> returns the last 500 console and error log entries from the running
+          webview. <code>iyke_network</code> returns the last 100 fetch/XHR entries with status and
+          duration. <code>iyke_query_cache</code> dumps the TanStack Query cache for the focused pane.
+        </p>
+        <p class="sk-body">
+          When the agent is debugging a pkg, it can read the evidence without you opening DevTools.
+        </p>
+      </div>
+    </section>
+
+    <!-- Beat 5: The agent talks to iframe pkgs -->
+    <section class="sk-section">
+      <div class="sk-wrap">
+        <h2 class="sk-h2">The agent talks to iframe pkgs</h2>
+        <p class="sk-body">
+          <code>iyke_iframe_state</code> reads the latest state published by an iframe pkg (like
+          Tasks). <code>iyke_iframe_send</code> fires a postMessage into a pkg pane. Pkgs that expose
+          structured state become legible to the agent without a custom API.
+        </p>
+      </div>
+    </section>
+
+    <!-- Full tool list -->
+    <section class="sk-section">
+      <div class="sk-wrap">
+        <h2 class="sk-h2">Full tool list</h2>
+
+        <h3 class="mp-table-head">Layout &amp; navigation</h3>
+        <table class="mp-table">
+          <thead>
+            <tr><th>Tool</th><th>What it does</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>iyke_state</code></td><td>Current sidebar mode + focused pane route + full pane tree</td></tr>
+            <tr><td><code>iyke_go</code></td><td>Navigate the focused pane to a route path</td></tr>
+            <tr><td><code>iyke_mode</code></td><td>Switch sidebar activity mode</td></tr>
+            <tr><td><code>iyke_open</code></td><td>Open a new tab (route, terminal, chat, artifact, mini-app)</td></tr>
+            <tr><td><code>iyke_split</code></td><td>Split a pane horizontally or vertically</td></tr>
+            <tr><td><code>iyke_focus</code></td><td>Focus a pane by id or 1-based DFS leaf index</td></tr>
+            <tr><td><code>iyke_close</code></td><td>Close a pane (focused pane if <code>pane_id</code> omitted)</td></tr>
+          </tbody>
+        </table>
+
+        <h3 class="mp-table-head">Runtime inspection &amp; interaction</h3>
+        <table class="mp-table">
+          <thead>
+            <tr><th>Tool</th><th>What it does</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>iyke_dom</code></td><td>Accessibility-tree snapshot of the focused pane</td></tr>
+            <tr><td><code>iyke_logs</code></td><td>Last 500 console + error log entries from the webview</td></tr>
+            <tr><td><code>iyke_network</code></td><td>Last 100 fetch/XHR network entries with status + duration</td></tr>
+            <tr><td><code>iyke_screenshot</code></td><td>PNG of the window or a specific pane</td></tr>
+            <tr><td><code>iyke_wait</code></td><td>Wait until a predicate is satisfied (text / selector / ref / gone)</td></tr>
+            <tr><td><code>iyke_click</code></td><td>Click an element by ref, selector, or text</td></tr>
+            <tr><td><code>iyke_type</code></td><td>Type into an input, textarea, or contenteditable</td></tr>
+            <tr><td><code>iyke_key</code></td><td>Dispatch a keyboard combo (e.g. <code>Ctrl+S</code>, <code>Meta+K</code>)</td></tr>
+            <tr><td><code>iyke_query_cache</code></td><td>Dump TanStack Query cache for the focused pane</td></tr>
+            <tr><td><code>iyke_devtools</code></td><td>Open Chrome DevTools (debug builds only)</td></tr>
+          </tbody>
+        </table>
+
+        <h3 class="mp-table-head">Iframe pkg state</h3>
+        <table class="mp-table">
+          <thead>
+            <tr><th>Tool</th><th>What it does</th></tr>
+          </thead>
+          <tbody>
+            <tr><td><code>iyke_iframe_state</code></td><td>Read the latest published state from an iframe pane</td></tr>
+            <tr><td><code>iyke_iframe_send</code></td><td>Fire a postMessage to an iframe pane</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- Install -->
+    <section class="sk-section">
+      <div class="sk-wrap">
+        <h2 class="sk-h2">Install</h2>
+
+        <h3 class="mp-install-head">Via Claude Code (recommended)</h3>
+        <p class="sk-body">
+          Install once, and every Claude Code session on your machine has the <code>iyke_*</code>
+          tools available. The shell doesn't need to be running for the install itself — the tools
+          report a structured error until the app is open.
+        </p>
+        <InstallBlock cmd="npm install -g @ikenga/mcp-iyke">
+          <p class="sk-install__note">Then register with Claude Code:</p>
+        </InstallBlock>
+        <pre class="mp-pre"><code>claude mcp add iyke -s user -- iyke-mcp</code></pre>
+
+        <h3 class="mp-install-head">Via npx (no global install)</h3>
+        <InstallBlock cmd="claude mcp add iyke -s user -- npx -y @ikenga/mcp-iyke" />
+
+        <h3 class="mp-install-head">As an Ikenga package</h3>
+        <p class="sk-body">
+          When installed as a pkg, the shell manages the MCP server's lifecycle — it starts when
+          the shell starts and registers itself with whatever engine (Claude Code, Gemini, Codex)
+          is active.
+        </p>
+        <InstallBlock cmd="ikenga add com.ikenga.mcp-iyke">
+          <p class="sk-install__note">Requires the Ikenga shell. <a href="/#install">Get Ikenga &rarr;</a></p>
+        </InstallBlock>
+      </div>
+    </section>
+
+    <!-- Trust boundary -->
+    <section class="sk-section">
+      <div class="sk-wrap">
+        <h2 class="sk-h2">Trust boundary</h2>
+        <p class="sk-body">
+          <code>@ikenga/mcp-iyke</code> reads <code>control.json</code> from your app-local-data
+          directory — macOS: <code>~/Library/Application Support/app.ikenga/control.json</code>;
+          Linux: <code>$XDG_DATA_HOME/app.ikenga/control.json</code>;
+          Windows: <code>%APPDATA%/app.ikenga/control.json</code>.
+        </p>
+        <p class="sk-body">
+          The file contains the localhost port, the bearer token, and the owning PID. The MCP server
+          talks only to <code>127.0.0.1</code> on that port, with that token. No outbound network
+          calls, no telemetry.
+        </p>
+        <p class="sk-body">
+          If the Ikenga app isn't running, every tool call returns a structured error immediately —
+          it does not hang. Stale <code>control.json</code> files (left behind by a force-quit) are
+          auto-deleted once they are at least 5 minutes old. Younger stale files are reported rather
+          than silently overwritten, to avoid clobbering an app that is still starting up.
+        </p>
+      </div>
+    </section>
+
+    <!-- Works with -->
+    <section class="sk-section">
+      <div class="sk-wrap">
+        <h2 class="sk-h2">Works with</h2>
+        <table class="mp-table mp-table--compact">
+          <tbody>
+            <tr><th>Requires</th><td>Ikenga shell running (any version exposing the v1 control bridge)</td></tr>
+            <tr><th>MCP clients</th><td>Claude Code (<code>claude mcp add</code>), Cursor, any MCP-compatible client</td></tr>
+            <tr><th>Node.js</th><td>≥ 20</td></tr>
+            <tr><th>Bun</th><td>Runs without compilation (<code>bun src/index.ts</code>)</td></tr>
+            <tr><th>Network</th><td>Loopback only — <code>127.0.0.1</code> on the port from <code>control.json</code></td></tr>
+            <tr><th>Published on</th><td><a href="https://www.npmjs.com/package/@ikenga/mcp-iyke" rel="noopener noreferrer">npm — @ikenga/mcp-iyke</a></td></tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+
+    <!-- License + source -->
+    <section class="sk-section">
+      <div class="sk-wrap">
+        <p class="sk-body">
+          Apache-2.0.
+          <a href="https://github.com/Royalti-io/ikenga-pkgs/blob/main/LICENSE" rel="noopener noreferrer">Read the license</a>
+          ·
+          <a href="https://github.com/Royalti-io/ikenga-pkgs/tree/main/packages/mcp/iyke" rel="noopener noreferrer">Source on GitHub</a>
+        </p>
+      </div>
+    </section>
+
+  </FeaturePage>
+</Layout>
+
+<style>
+  /* ── Tool reference tables ─────────────────────────────────────────────── */
+  .mp-table-head {
+    font-family: var(--site-font-display);
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--site-fg);
+    margin: var(--space-7) 0 var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--site-border-soft);
+  }
+  .mp-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.9375rem;
+    margin-bottom: var(--space-6);
+  }
+  .mp-table thead th {
+    text-align: left;
+    font-family: var(--site-font-mono);
+    font-size: 0.75rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    color: var(--site-muted);
+    padding: var(--space-2) var(--space-3) var(--space-2) 0;
+    border-bottom: 1px solid var(--site-border);
+  }
+  .mp-table tbody td,
+  .mp-table tbody th {
+    padding: var(--space-3) var(--space-3) var(--space-3) 0;
+    border-bottom: 1px solid var(--site-border-soft);
+    vertical-align: top;
+    color: var(--site-muted);
+  }
+  .mp-table tbody th {
+    font-weight: 500;
+    color: var(--site-fg);
+    white-space: nowrap;
+    min-width: 9rem;
+  }
+  .mp-table td:first-child,
+  .mp-table th:first-child {
+    white-space: nowrap;
+  }
+  .mp-table code {
+    font-family: var(--site-font-mono);
+    color: var(--site-accent);
+    background: var(--site-accent-soft);
+    padding: 1px 6px;
+    border-radius: var(--radius-sm, 4px);
+    font-size: 0.875em;
+  }
+  .mp-table a {
+    color: var(--site-accent);
+    text-decoration: underline;
+    text-underline-offset: 2px;
+  }
+  .mp-table--compact tbody th {
+    min-width: 8rem;
+  }
+
+  /* ── Install section ───────────────────────────────────────────────────── */
+  .mp-install-head {
+    font-family: var(--site-font-display);
+    font-size: 1.0625rem;
+    font-weight: 600;
+    color: var(--site-fg);
+    margin: var(--space-7) 0 var(--space-3);
+  }
+  .mp-pre {
+    background: var(--site-surface);
+    border: 1px solid var(--site-border);
+    border-radius: var(--radius-md, 6px);
+    padding: var(--space-3) var(--space-5);
+    overflow-x: auto;
+    margin: var(--space-3) 0 var(--space-6);
+  }
+  .mp-pre code {
+    font-family: var(--site-font-mono);
+    font-size: 0.875rem;
+    color: var(--site-fg);
+  }
+
+  /* ── Install note links ────────────────────────────────────────────────── */
+  :global(.sk-install__note a) {
+    color: var(--site-accent);
+  }
+</style>

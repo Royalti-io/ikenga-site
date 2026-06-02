@@ -1,0 +1,114 @@
+---
+import Layout from '../layouts/Layout.astro';
+import Beat from '../components/Beat.astro';
+import Button from '../components/Button.astro';
+---
+
+<Layout
+	title="How Ikenga works — cockpit and package manager for Claude Code"
+	description="Your Claude Code setup is powerful, but it lives in scattered dotfiles. Ikenga is the cockpit and package manager that gives it a home — one screen, on your machine."
+	canonical="https://ikenga.dev/how-it-works"
+>
+
+	<!-- Hero -->
+	<section class="sk-hero sk-section--flush">
+		<div class="sk-wrap">
+			<p class="sk-eyebrow">How it works</p>
+			<h1 class="sk-display">How <em>Ikenga</em> works</h1>
+			<p class="sk-lede">
+				Your Claude Code setup is powerful, but it lives in scattered dotfiles: agents in
+				<code>~/.claude/agents/</code>, skills in <code>~/.claude/skills/</code>, MCP servers in a
+				JSON config you hand-edit every time. Ikenga is the cockpit and package manager that gives
+				it a home — one screen, on your machine.
+			</p>
+		</div>
+	</section>
+
+	<!-- Section: One screen for your whole Claude setup (Beat with ngwa-cockpit image) -->
+	<Beat
+		heading="One screen for your whole Claude setup"
+		img="/assets/shell/ngwa-cockpit.png"
+		alt="The Ikenga cockpit showing agents, skills, commands, hooks, and MCP servers across projects"
+		caption="The cockpit — all your Claude config visible at once"
+		eager={true}
+	>
+		<p class="sk-body">
+			The cockpit is a visual surface that shows every agent, skill, command, hook, and MCP server
+			across all your projects and scopes. Enable or disable any of them without opening a file. See
+			what's installed, what's active, and where each piece lives — across every project at once,
+			without switching terminals or editors.
+		</p>
+	</Beat>
+
+	<!-- Section: A package manager, not a dotfile editor (Beat with oba-store image, reversed) -->
+	<Beat
+		heading="A package manager, not a dotfile editor"
+		img="/assets/shell/oba-store.png"
+		alt="The Ikenga package manager showing installed packages with provenance and update controls"
+		caption="The package manager — install, update, and remove with full provenance"
+		reverse={true}
+	>
+		<p class="sk-body">
+			The package manager installs and updates agents, skills, commands, and pkgs from git or npx —
+			with provenance, dependent-aware safe-uninstall, and an auto-update option. A catalog lets you
+			discover what the community has built. You manage your Claude config the same way you manage
+			your dependencies: with a tool that knows what's installed, where it came from, and how to
+			remove it cleanly.
+		</p>
+	</Beat>
+
+	<!-- Section: The engine is swappable (copy-only — no matching image) -->
+	<section class="sk-section">
+		<div class="sk-wrap">
+			<h2 class="sk-h2">The engine is swappable</h2>
+			<p class="sk-body">
+				The reasoning core — your Chi — is a pluggable adapter. Claude Code is fully wired today;
+				Codex and Gemini are pluggable adapters. Switch the engine without rebuilding your workspace,
+				because the engine ships as a package, separate from the shell.
+			</p>
+		</div>
+	</section>
+
+	<!-- Section: Everything is a package (copy-only) -->
+	<section class="sk-section">
+		<div class="sk-wrap">
+			<h2 class="sk-h2">Everything is a package</h2>
+			<p class="sk-body">
+				Beyond the cockpit and package manager, everything in the workspace extends via independently
+				installable packages: mini-apps, tool servers (including MCP bridges), engine adapters, and
+				bundled command-line tools. Packages install, update, and retire when you're done with them.
+				Two small command-line tools sit underneath: <code>ikenga</code> manages packages on disk,
+				and <code>iyke</code> drives a running workspace.
+			</p>
+		</div>
+	</section>
+
+	<!-- Section: Local-first by default (copy-only) -->
+	<section class="sk-section">
+		<div class="sk-wrap">
+			<h2 class="sk-h2">Local-first by default</h2>
+			<p class="sk-body">
+				Ikenga runs on your machine. Your config, your files, and your agents' data stay where you
+				put them — in local SQLite and files, not a cloud service. There's no account to create and
+				nothing to upload to use it. When you want hosting or a managed setup, that's a choice you
+				make — not a default you have to opt out of.
+			</p>
+		</div>
+	</section>
+
+	<!-- Foot CTA -->
+	<section class="sk-section">
+		<div class="sk-wrap sk-obi">
+			<h2 class="sk-h2">See it for yourself</h2>
+			<div class="sk-obi__cta">
+				<Button href="/docs/getting-started" variant="primary">
+					Read the getting-started guide
+				</Button>
+				<Button href="/packages" variant="ghost">
+					Browse the packages
+				</Button>
+			</div>
+		</div>
+	</section>
+
+</Layout>
