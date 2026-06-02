@@ -7,12 +7,18 @@ import InstallBlock from '../components/InstallBlock.astro';
 import ProofList from '../components/ProofList.astro';
 import Beat from '../components/Beat.astro';
 
-// WP-12 — broad-audience hero (G-20: "give Claude Code a home").
+// WP-12 — broad-audience hero (G-21: the blend — "a home for your Claude Code
+// setup, proven by skills doing real work"; two co-equal on-ramps). Refined
+// from the G-20 cockpit-first lead the founder rejected (R5/R6, 2026-06-01).
 // Visual language: site design system D-01 "Forge, tempered" — warm Dusk Wood,
 // IM Fell serif display, deliberate kola-amber glow, disciplined --space-*
 // rhythm. Consumes the .sk-* kit + --site-* tokens (plans/site-design-system).
-// Install CTA is LIVE (WP-13); install.sh is x86_64-only, hence the caption.
+// Both CTAs are LIVE: app install one-liner (WP-13, install.sh is x86_64-only,
+// hence the caption) and the skills on-ramp (npx, verified public 2026-06-01).
 const INSTALL = 'curl -fsSL https://ikenga.dev/install.sh | sh';
+// Honest inventory (G-21): only groundwork + artifact-builder ship standalone
+// today — atelier/video-studio are "coming", never claimed live-standalone.
+const SKILL = 'npx skills add royalti-io/groundwork';
 const GITHUB = 'https://github.com/Royalti-io/ikenga';
 ---
 
@@ -26,7 +32,7 @@ const GITHUB = 'https://github.com/Royalti-io/ikenga';
 		<title>Ikenga — give Claude Code a home</title>
 		<meta
 			name="description"
-			content="An open-source, local-first desktop workspace for Claude Code — a visual cockpit and package manager for your agents, skills, commands, and MCP servers."
+			content="The open-source, local-first desktop home for your Claude Code setup. Skills like groundwork and artifact-builder run anywhere in plain Claude Code — and get a visual home in Ikenga, alongside the packages you install and manage."
 		/>
 		<link rel="canonical" href="https://ikenga.dev/" />
 		<!-- Open Graph / Twitter (WP-24 owns the canonical set; mirrored here) -->
@@ -35,7 +41,7 @@ const GITHUB = 'https://github.com/Royalti-io/ikenga';
 		<meta property="og:title" content="Ikenga — give Claude Code a home" />
 		<meta
 			property="og:description"
-			content="A visual cockpit and package manager for your Claude Code setup — agents, skills, commands, MCP. Open-source, local-first."
+			content="Skills that run anywhere in Claude Code, plus the packages you install and manage — all with a visual home. Open-source, local-first."
 		/>
 		<meta property="og:image" content="https://ikenga.dev/assets/shell/og-card.png" />
 		<meta name="twitter:card" content="summary_large_image" />
@@ -56,13 +62,15 @@ const GITHUB = 'https://github.com/Royalti-io/ikenga';
 					<p class="sk-eyebrow">Ikenga</p>
 					<h1 class="sk-display">Give Claude&nbsp;Code <em>a home.</em></h1>
 					<p class="sk-lede">
-						A visual cockpit and package manager for your agents, skills,
-						commands, and MCP servers — on your own machine.
+						Skills like <strong>groundwork</strong> and <strong>artifact-builder</strong>
+						run anywhere in plain Claude Code — and get a visual home in Ikenga,
+						alongside the mini-apps and tools you install and manage like packages.
 					</p>
 					<p class="sk-body">
-						See and manage every part of your Claude Code setup from one
-						screen. Install and update them like apps — no more hand-editing
-						<code>~/.claude</code> dotfiles. Open-source, local-first, yours to extend.
+						See your whole Claude Code setup in one place and watch it do real
+						work — live CLIs running in panes, boards tracking the job, artifacts
+						taking shape — with no more hand-editing <code>~/.claude</code> dotfiles.
+						Open-source, local-first, yours to extend.
 					</p>
 
 					<div class="sk-hero__cta">
@@ -70,10 +78,17 @@ const GITHUB = 'https://github.com/Royalti-io/ikenga';
 						<Button href={GITHUB} variant="ghost" rel="noopener">View on GitHub</Button>
 					</div>
 
+					<!-- Two co-equal on-ramps (G-21): the app, and a skill for the
+					     Claude Code you already run. Both live. -->
+					<p class="sk-body sk-hero__onramp-lead">
+						<strong>Two ways in</strong> — run the app, or add a skill to the
+						Claude Code you already have:
+					</p>
+
 					<InstallBlock cmd={INSTALL}>
 						<p class="sk-install__note">
-							<strong>Pre-release.</strong> macOS &amp; Linux on x86_64 today; Apple
-							Silicon and Windows are in progress.
+							<strong>Run the app.</strong> macOS &amp; Linux on x86_64 today;
+							Apple Silicon and Windows are in progress.
 						</p>
 						<p class="sk-install__note">
 							Linux pulls the <strong>~60&nbsp;MB</strong> <code>.deb</code> when
@@ -81,6 +96,24 @@ const GITHUB = 'https://github.com/Royalti-io/ikenga';
 							no sudo) — give the download a minute over GitHub&rsquo;s CDN.
 						</p>
 					</InstallBlock>
+
+					<!-- Skills on-ramp — inline .sk-install so the InstallBlock copy
+					     script binds it automatically; own id (#install is taken,
+					     and deep-linked from 10+ other pages). -->
+					<div class="sk-install" id="skills">
+						<div class="sk-install__cmd">
+							<code class="sk-install__code">{SKILL}</code>
+							<button type="button" class="sk-install__copy" aria-label="Copy skill install command"
+								>Copy</button
+							>
+						</div>
+						<p class="sk-install__note">
+							<strong>Or skip the app.</strong> Add a skill to plain Claude Code
+							anywhere — <code>groundwork</code> and
+							<code>ikenga-artifact-builder</code> work with or without Ikenga.
+							More skills are coming.
+						</p>
+					</div>
 
 					<div class="sk-hero__proof">
 						<ProofList
@@ -93,6 +126,11 @@ const GITHUB = 'https://github.com/Royalti-io/ikenga';
 						/>
 					</div>
 
+					<!-- TODO(WP-26): swap for the real-work composite — file tree + live
+					     Claude/Gemini CLIs in split panes + the groundwork board, cropped
+					     to content panes (no side-menu/header chrome). This ngwa-cockpit.png
+					     is the RETIRED design render (G-21) kept only so the page renders
+					     until the capture lands; update src/alt/caption together. -->
 					<figure class="sk-shot sk-hero__shot">
 						<img
 							src="/assets/shell/ngwa-cockpit.png"
@@ -102,7 +140,7 @@ const GITHUB = 'https://github.com/Royalti-io/ikenga';
 							loading="eager"
 							decoding="async"
 						/>
-						<figcaption>The cockpit — every agent, skill, command and MCP server, one screen.</figcaption>
+						<figcaption>Ikenga doing real work — your setup, running on your machine.</figcaption>
 					</figure>
 				</div>
 			</section>
@@ -145,9 +183,10 @@ const GITHUB = 'https://github.com/Royalti-io/ikenga';
 				<div class="sk-wrap sk-obi">
 					<h2 class="sk-display">Welcome to your Obi.</h2>
 					<p class="sk-lede">
-						Your home for Claude Code — a cockpit and package manager that puts
-						you in control of your whole setup: open-source, local-first, and
-						built to be made your own. We built it to run our own company. Now it's yours.
+						Your home for Claude Code — where the skills you run anywhere and the
+						packages you install all live in one place: open-source, local-first,
+						and built to be made your own. We built it to run our own company. Now
+						it's yours.
 					</p>
 					<div class="sk-obi__cta">
 						<Button href="#install" variant="primary">Install Ikenga</Button>

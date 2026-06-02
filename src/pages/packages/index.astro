@@ -70,12 +70,16 @@ const grouped = CATEGORIES.map((c) => ({
 	rows: visible.filter(c.match).sort((a, b) => a.name.localeCompare(b.name)),
 })).filter((c) => c.rows.length);
 
-const FEATURED = [
-	{ name: 'Tasks', line: 'A local-first task manager that lives inside your workspace — lists, triage, and agenda in one pane.', href: '/packages/tasks', cta: 'Learn more' },
-	{ name: 'mcp-iyke', line: 'Give any MCP client — Claude, Cursor, or your own tool — live control over the running shell.', href: '/packages/mcp-iyke', cta: 'Learn more' },
-	{ name: 'Groundwork', line: 'A research → plan → act workflow scaffold — fully published, installs with npx, no shell required.', href: '/packages/groundwork', cta: 'No shell required', install: 'npx skills add royalti-io/groundwork' },
-	{ name: 'Artifacts', line: 'Author self-contained interactive HTML artifacts that render standalone — and light up with live data in the shell.', href: '/packages/artifacts', cta: 'No shell required', install: 'npx skills add royalti-io/ikenga-artifact-builder' },
-	{ name: 'Engines', line: 'Claude Code is the default. Gemini and Codex are pluggable adapters — same setup, different engine.', href: '/packages/engines', cta: 'Learn more' },
+// Two co-equal on-ramps (G-21). Skills run anywhere in plain Claude Code AND
+// get a visual home here; packages install + update inside the shell.
+const SKILLS_ONRAMP = [
+	{ name: 'Groundwork', line: 'A research → plan → act workflow scaffold. Runs in plain Claude Code via npx — and gets a live board view in the shell.', href: '/packages/groundwork', install: 'npx skills add royalti-io/groundwork' },
+	{ name: 'Artifacts', line: 'Author self-contained interactive HTML artifacts that render anywhere — then review, compare, and promote them in the shell.', href: '/packages/artifacts', install: 'npx skills add royalti-io/ikenga-artifact-builder' },
+];
+const PKG_ONRAMP = [
+	{ name: 'Tasks', line: 'A local-first task manager that lives inside your workspace — lists, triage, and agenda in one pane.', href: '/packages/tasks' },
+	{ name: 'mcp-iyke', line: 'Give any MCP client — Claude, Cursor, or your own tool — live control over the running shell.', href: '/packages/mcp-iyke' },
+	{ name: 'Engines', line: 'Claude Code is the default. Gemini and Codex are pluggable adapters — same setup, different engine.', href: '/packages/engines' },
 ];
 
 const updated = new Date(registry.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -90,25 +94,43 @@ const desc = "Browse what's published for your Claude Code setup — mini-apps, 
 			<h1 class="sk-display">Install and update like <em>apps.</em></h1>
 			<p class="sk-lede">
 				Everything that extends your Claude Code setup — mini-apps, MCP tool
-				servers, skill bundles, engine adapters — is a package.
+				servers, engine adapters — is a package. Some, like our skills, also run
+				anywhere in plain Claude Code with no shell at all.
 			</p>
 			<p class="sk-body">
-				Browse what's published, install with one command, and update
-				automatically. The catalog is generated live from the registry — only
-				what's actually published appears here.
+				Two ways in: install and update packages inside the shell, or add a
+				skill via <code>npx</code> and use it with or without Ikenga. The catalog
+				below is generated live from the registry — only what's actually
+				published appears here.
 			</p>
 		</div>
 	</section>
 
-	<!-- Featured strip (editorial — spans both install channels) -->
+	<!-- Featured strip (editorial) — the two co-equal on-ramps (G-21):
+	     skills that work anywhere, and packages you install in the shell. -->
 	<section class="sk-section">
 		<div class="sk-wrap">
-			<h2 class="sk-h2">Featured</h2>
+			<h2 class="sk-h2">Two ways in</h2>
+
+			<h3 class="pk-cat__head">
+				Skills <span class="pk-cat__blurb">— work anywhere via <code>npx</code>, with or without the shell</span>
+			</h3>
 			<div class="sk-grid">
-				{FEATURED.map((f) => (
-					<Card title={f.name} href={f.href} tag={f.install ? 'no shell' : 'flagship'}>
+				{SKILLS_ONRAMP.map((f) => (
+					<Card title={f.name} href={f.href} tag="no shell">
 						{f.line}
-						{f.install && <><br /><code class="pk-cmd">{f.install}</code></>}
+						<br /><code class="pk-cmd">{f.install}</code>
+					</Card>
+				))}
+			</div>
+
+			<h3 class="pk-cat__head" style="margin-top: var(--space-8);">
+				Packages <span class="pk-cat__blurb">— install and update inside the shell</span>
+			</h3>
+			<div class="sk-grid">
+				{PKG_ONRAMP.map((f) => (
+					<Card title={f.name} href={f.href} tag="in shell">
+						{f.line}
 					</Card>
 				))}
 			</div>
