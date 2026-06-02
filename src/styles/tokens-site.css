@@ -1,0 +1,55 @@
+/**
+ * tokens-site.css — site-tier semantic layer for ikenga.dev.
+ *
+ * Part of the site design system (see ../../../plans/site-design-system/).
+ * This is the ONE place the marketing site names its brand intent. Every
+ * site component should consume `--site-*` here, never reach for an upstream
+ * token directly. The upstream primitives live in `@ikenga/tokens`
+ * (imported just before this file in global.css); these vars ALIAS them so
+ * the brand can be retuned in one place and the site is decoupled from any
+ * single upstream slot.
+ *
+ * Locked visual direction: D-01 "Forge, tempered" (Round 1).
+ * Canonical world: Theme A · Dusk Wood, dark. Pages MUST set
+ * `data-theme="A" data-mode="dark"` on <html> (see the `theming` foundation
+ * part) — `--achievement` only exists under `[data-theme]`, so without the
+ * pin `--site-accent` resolves empty. The pin is the contract; this file
+ * does not paper over a missing one.
+ */
+
+:root {
+	/* ── Brand accent (was: direct `--achievement` everywhere) ───────────── */
+	--site-accent: var(--achievement); /* kola-amber — Theme A: hsl(42,78%,54%) */
+	--site-accent-soft: var(--achievement-soft);
+	--site-accent-hot: var(--ember); /* ember hsl(14,78%,52%) — hottest moments */
+
+	/* The D-01 amber glow — spent deliberately on the hero headline +
+	   primary CTA only, never on every element. Honor reduced-motion at use. */
+	--site-glow: 0 0 24px hsl(42 78% 54% / 0.35);
+
+	/* ── Surfaces & lines (was: hardcoded hsl(36,14%,…) / #110d0a fallbacks) ─ */
+	--site-bg: var(--bg-base);
+	--site-surface: var(--bg-surface);
+	--site-raised: var(--bg-raised);
+	--site-border: var(--border);
+	--site-border-soft: var(--border-soft);
+
+	/* ── Foreground ramp ─────────────────────────────────────────────────── */
+	--site-fg: var(--fg);
+	--site-muted: var(--fg-muted);
+	--site-faint: var(--fg-faint);
+
+	/* ── Type ────────────────────────────────────────────────────────────── */
+	/* Display swaps to Redaction in ONE place when acquired; IM Fell English
+	   is the interim stand-in (loaded by the page that uses it). */
+	--site-font-display: 'IM Fell English', Georgia, 'Times New Roman', serif;
+	--site-font-body: var(--font-sans); /* Plus Jakarta Sans */
+	--site-font-mono: var(--font-mono);
+
+	/* Site rhythm — section padding derived from the --space-* ramp so every
+	   page breathes on one scale (the discipline half of D-01). */
+	--site-section-pad: clamp(3rem, 7vw, 5.5rem);
+	--site-measure-display: 18ch;
+	--site-measure-lede: 46ch;
+	--site-measure-body: 64ch;
+}

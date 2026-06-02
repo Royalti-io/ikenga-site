@@ -1,0 +1,19 @@
+---
+// Header — site nav. Component: header-nav (Navigation).
+interface Props {
+	github?: string;
+}
+const { github = 'https://github.com/Royalti-io/ikenga' } = Astro.props;
+---
+
+<header class="sk-nav">
+	<a class="sk-brand" href="/">
+		<span class="sk-brand__mark" aria-hidden="true">⌗</span>
+		<span class="sk-brand__name">Ikenga</span>
+	</a>
+	<nav class="sk-nav__links" aria-label="Primary">
+		<a href="/docs/">Docs</a>
+		<a href="/docs/packages/">Packages</a>
+		<a href={github} rel="noopener">GitHub</a>
+	</nav>
+</header>

@@ -1,0 +1,16 @@
+---
+// Card — Display. Feature / pkg card. Renders as a link when href is given.
+interface Props {
+	title: string;
+	href?: string;
+	tag?: string;
+}
+const { title, href, tag } = Astro.props;
+const Tag = href ? 'a' : 'div';
+---
+
+<Tag class="sk-card" href={href}>
+	{tag && <span class="sk-card__tag">{tag}</span>}
+	<h3 class="sk-card__title">{title}</h3>
+	<p class="sk-card__body"><slot /></p>
+</Tag>

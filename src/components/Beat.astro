@@ -1,0 +1,44 @@
+---
+// Beat — Pattern. Alternating copy + screenshot rhythm.
+// Default slot = the copy body (rendered after the heading).
+interface Props {
+	heading: string;
+	img: string;
+	alt: string;
+	caption: string;
+	reverse?: boolean;
+	width?: number;
+	height?: number;
+	eager?: boolean;
+}
+const {
+	heading,
+	img,
+	alt,
+	caption,
+	reverse = false,
+	width = 1680,
+	height = 1050,
+	eager = false,
+} = Astro.props;
+---
+
+<section class="sk-section">
+	<div class="sk-wrap sk-beat" class:list={[{ 'sk-beat--reverse': reverse }]}>
+		<div class="sk-beat__copy">
+			<h2 class="sk-h2">{heading}</h2>
+			<slot />
+		</div>
+		<figure class="sk-shot sk-beat__shot">
+			<img
+				src={img}
+				alt={alt}
+				width={width}
+				height={height}
+				loading={eager ? 'eager' : 'lazy'}
+				decoding="async"
+			/>
+			<figcaption>{caption}</figcaption>
+		</figure>
+	</div>
+</section>

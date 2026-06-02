@@ -1,0 +1,46 @@
+---
+// InstallBlock — Display + Action. One-line install command with copy button.
+// Slot = the notes below the command (platform/size caveats).
+interface Props {
+	cmd: string;
+	center?: boolean;
+}
+const { cmd, center = false } = Astro.props;
+---
+
+<div class="sk-install" class:list={[{ 'sk-install--center': center }]} id="install">
+	<div class="sk-install__cmd">
+		<code class="sk-install__code">{cmd}</code>
+		<button type="button" class="sk-install__copy" aria-label="Copy install command">Copy</button>
+	</div>
+	<slot />
+</div>
+
+<style>
+	.sk-install--center {
+		margin-inline: auto;
+	}
+</style>
+
+<script>
+	// Copy the install command. Scoped by class so multiple blocks work.
+	for (const block of document.querySelectorAll<HTMLElement>('.sk-install')) {
+		const btn = block.querySelector<HTMLButtonElement>('.sk-install__copy');
+		const code = block.querySelector<HTMLElement>('.sk-install__code');
+		btn?.addEventListener('click', async () => {
+			const text = code?.textContent?.trim() ?? '';
+			try {
+				await navigator.clipboard.writeText(text);
+				const prev = btn.textContent;
+				btn.textContent = 'Copied';
+				btn.dataset.state = 'ok';
+				setTimeout(() => {
+					btn.textContent = prev;
+					delete btn.dataset.state;
+				}, 1600);
+			} catch {
+				/* clipboard unavailable — no-op */
+			}
+		});
+	}
+</script>

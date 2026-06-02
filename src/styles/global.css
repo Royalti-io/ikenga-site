@@ -1,6 +1,10 @@
 /* Tailwind v4 + Starlight v4 layer order */
 @layer base, starlight, theme, components, utilities;
 
+/* Fonts — IM Fell English (display, interim for Redaction), Plus Jakarta Sans
+   (body), JetBrains Mono (code). Must precede other @imports per CSS spec. */
+@import url('https://fonts.googleapis.com/css2?family=IM+Fell+English:ital@0;1&family=JetBrains+Mono:wght@400;500&family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap');
+
 @import '@astrojs/starlight-tailwind';
 @import 'tailwindcss/theme.css' layer(theme);
 @import 'tailwindcss/utilities.css' layer(utilities);
@@ -8,9 +12,34 @@
 /* Ikenga design tokens — shared with the shell and every UI pkg. */
 @import '@ikenga/tokens/tokens.css';
 
+/* Theme: pin Dusk Wood as the :root base (decoupled from data-theme) +
+   map Starlight chrome onto Ikenga tokens. Foundation: theming. */
+@import './theming.css';
+
+/* Site-tier semantic layer — the brand's `--site-*` aliases over the tokens
+   above. The ONE place site components read brand intent from. See the
+   site design system: plans/site-design-system/ (foundation: site-tokens). */
+@import './tokens-site.css';
+
+/* Component + pattern kit (.sk-*) — Phase 1 + 2 of the site design system. */
+@import './site-kit.css' layer(components);
+
 /* Re-map Starlight accents onto the Ikenga ember/kola palette. */
 :root {
 	--sl-color-accent-low: hsl(14, 70%, 18%);
 	--sl-color-accent: hsl(14, 78%, 52%);
 	--sl-color-accent-high: hsl(14, 80%, 78%);
+}
+
+/* Global reduced-motion policy — foundation: motion. Any animation on the
+   site must degrade here. (Functional state transitions stay near-instant.) */
+@media (prefers-reduced-motion: reduce) {
+	*,
+	*::before,
+	*::after {
+		animation-duration: 0.01ms !important;
+		animation-iteration-count: 1 !important;
+		transition-duration: 0.01ms !important;
+		scroll-behavior: auto !important;
+	}
 }

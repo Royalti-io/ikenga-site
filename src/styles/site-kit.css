@@ -1,0 +1,389 @@
+/**
+ * site-kit.css — the marketing-site component + pattern layer.
+ *
+ * Site design system: Phase 1 (Components) + Phase 2 (Patterns).
+ * Locked visual direction: D-01 "Forge, tempered" (Round 1) —
+ * warm Dusk Wood + IM Fell serif display + deliberate kola-amber glow,
+ * with disciplined --space-* rhythm and capped measures.
+ *
+ * Every class reads `--site-*` (see tokens-site.css), never an upstream
+ * token directly. Consumed by the Astro components in src/components/ and
+ * by page templates. Scoped to plain class names so it composes with
+ * Astro scoped styles and Starlight without collision (.sk- prefix).
+ */
+
+/* ── Page base ───────────────────────────────────────────────────────────── */
+.sk-page {
+	background: var(--site-bg);
+	color: var(--site-fg);
+	font-family: var(--site-font-body);
+	line-height: 1.6;
+	-webkit-font-smoothing: antialiased;
+}
+.sk-wrap {
+	max-width: 64rem;
+	margin-inline: auto;
+	padding-inline: var(--space-6);
+}
+.sk-section {
+	padding-block: var(--site-section-pad);
+	border-top: 1px solid var(--site-border-soft);
+}
+.sk-section--flush {
+	border-top: 0;
+}
+
+/* ── Type ────────────────────────────────────────────────────────────────── */
+.sk-eyebrow {
+	font-family: var(--site-font-mono);
+	letter-spacing: 0.3em;
+	text-transform: uppercase;
+	font-size: 0.75rem;
+	color: var(--site-accent);
+	margin: 0 0 var(--space-4);
+}
+.sk-display {
+	font-family: var(--site-font-display);
+	font-weight: 600;
+	font-size: clamp(2.6rem, 6.5vw, 4.5rem);
+	line-height: 1.04;
+	letter-spacing: -0.02em;
+	max-width: var(--site-measure-display);
+	margin: 0 0 var(--space-5);
+}
+.sk-display em {
+	font-style: italic;
+	color: var(--site-accent);
+	/* the D-01 glow — spent here + the primary CTA only */
+	text-shadow: var(--site-glow);
+}
+.sk-h2 {
+	font-family: var(--site-font-display);
+	font-weight: 600;
+	font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+	line-height: 1.12;
+	letter-spacing: -0.015em;
+	margin: 0 0 var(--space-4);
+}
+.sk-lede {
+	font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+	line-height: 1.4;
+	color: var(--site-fg);
+	max-width: var(--site-measure-lede);
+	margin: 0 0 var(--space-5);
+}
+.sk-body {
+	font-size: 1.0625rem;
+	color: var(--site-muted);
+	max-width: var(--site-measure-body);
+	margin: 0 0 var(--space-5);
+}
+.sk-body code,
+.sk-lede code {
+	font-family: var(--site-font-mono);
+	color: var(--site-accent);
+	background: var(--site-accent-soft);
+	padding: 1px 6px;
+	border-radius: var(--radius-sm, 4px);
+	font-size: 0.9em;
+}
+
+/* ── Buttons (Actions) ───────────────────────────────────────────────────── */
+.sk-btn {
+	display: inline-flex;
+	align-items: center;
+	justify-content: center;
+	gap: var(--space-2);
+	padding: 12px 22px;
+	border-radius: var(--radius-md, 6px);
+	font-family: var(--site-font-body);
+	font-weight: 600;
+	font-size: 0.9375rem;
+	text-decoration: none;
+	border: 1px solid transparent;
+	cursor: pointer;
+	transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+.sk-btn:focus-visible {
+	outline: 2px solid var(--site-accent);
+	outline-offset: 2px;
+}
+.sk-btn--primary {
+	background: var(--site-accent);
+	color: hsl(28, 30%, 8%);
+}
+.sk-btn--primary:hover {
+	box-shadow: var(--site-glow);
+}
+.sk-btn--ghost {
+	background: transparent;
+	color: var(--site-fg);
+	border-color: var(--site-border);
+}
+.sk-btn--ghost:hover {
+	border-color: var(--site-accent);
+	color: var(--site-accent);
+}
+
+/* ── Proof list (Display) ────────────────────────────────────────────────── */
+.sk-proof {
+	list-style: none;
+	display: flex;
+	flex-wrap: wrap;
+	gap: var(--space-2) var(--space-4);
+	padding: 0;
+	margin: 0;
+	font-size: 0.8125rem;
+	color: var(--site-muted);
+}
+.sk-proof li {
+	position: relative;
+	padding-left: 18px;
+}
+.sk-proof li::before {
+	content: '◆';
+	position: absolute;
+	left: 0;
+	top: 3px;
+	font-size: 9px;
+	color: var(--site-accent);
+}
+
+/* ── Install block (Display + Action) ────────────────────────────────────── */
+.sk-install {
+	max-width: 32rem;
+}
+.sk-install__cmd {
+	display: flex;
+	align-items: center;
+	gap: var(--space-3);
+	background: var(--site-surface);
+	border: 1px solid var(--site-border);
+	border-radius: var(--radius-md, 6px);
+	padding: 10px 10px 10px 16px;
+}
+.sk-install__cmd code {
+	flex: 1;
+	min-width: 0;
+	overflow-x: auto;
+	white-space: nowrap;
+	font-family: var(--site-font-mono);
+	font-size: 0.84rem;
+	color: var(--site-fg);
+}
+.sk-install__copy {
+	flex: none;
+	padding: 6px 12px;
+	border-radius: var(--radius-sm, 4px);
+	border: 1px solid var(--site-border);
+	background: transparent;
+	color: var(--site-muted);
+	font: inherit;
+	font-size: 0.8125rem;
+	cursor: pointer;
+	transition: color 0.15s ease, border-color 0.15s ease;
+}
+.sk-install__copy:hover,
+.sk-install__copy:focus-visible {
+	color: var(--site-accent);
+	border-color: var(--site-accent);
+}
+.sk-install__copy[data-state='ok'] {
+	color: var(--site-accent);
+	border-color: var(--site-accent);
+}
+.sk-install__note {
+	font-size: 0.8125rem;
+	color: var(--site-muted);
+	margin: var(--space-3) 0 0;
+}
+.sk-install__note strong {
+	color: var(--site-accent);
+	font-weight: 600;
+}
+
+/* ── Code block (Display) ────────────────────────────────────────────────── */
+.sk-code {
+	background: var(--site-surface);
+	border: 1px solid var(--site-border);
+	border-radius: var(--radius-md, 6px);
+	padding: var(--space-4) var(--space-5);
+	overflow-x: auto;
+	font-family: var(--site-font-mono);
+	font-size: 0.84rem;
+	line-height: 1.6;
+	color: var(--site-fg);
+}
+
+/* ── Card (Display) ──────────────────────────────────────────────────────── */
+.sk-card {
+	display: block;
+	background: var(--site-surface);
+	border: 1px solid var(--site-border);
+	border-radius: var(--radius-lg, 10px);
+	padding: var(--space-5);
+	text-decoration: none;
+	color: inherit;
+	transition: border-color 0.15s ease, box-shadow 0.15s ease;
+}
+.sk-card:hover {
+	border-color: var(--site-border-strong, var(--site-accent));
+	box-shadow: var(--shadow-3);
+}
+.sk-card__tag {
+	display: inline-block;
+	font-family: var(--site-font-mono);
+	font-size: 0.6875rem;
+	letter-spacing: 0.08em;
+	text-transform: uppercase;
+	color: var(--site-accent);
+	background: var(--site-accent-soft);
+	padding: 2px 8px;
+	border-radius: var(--radius-pill, 999px);
+	margin-bottom: var(--space-3);
+}
+.sk-card__title {
+	font-family: var(--site-font-display);
+	font-weight: 600;
+	font-size: 1.125rem;
+	margin: 0 0 var(--space-2);
+}
+.sk-card__body {
+	font-size: 0.9375rem;
+	color: var(--site-muted);
+	margin: 0;
+}
+
+/* ── Screenshot frame (Display) ──────────────────────────────────────────── */
+.sk-shot {
+	margin: 0;
+	border-radius: var(--radius-lg, 10px);
+	overflow: hidden;
+	border: 1px solid var(--site-border);
+	background: var(--site-surface);
+	box-shadow: 0 24px 64px -24px hsla(0, 0%, 0%, 0.6);
+}
+.sk-shot img {
+	display: block;
+	width: 100%;
+	height: auto;
+}
+.sk-shot figcaption {
+	font-size: 0.8125rem;
+	color: var(--site-muted);
+	text-align: center;
+	padding: var(--space-3) var(--space-4);
+	border-top: 1px solid var(--site-border-soft);
+}
+
+/* ── Header / nav (Navigation) ───────────────────────────────────────────── */
+.sk-nav {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	max-width: 64rem;
+	margin-inline: auto;
+	padding: var(--space-5) var(--space-6);
+}
+.sk-brand {
+	display: inline-flex;
+	align-items: center;
+	gap: var(--space-2);
+	text-decoration: none;
+	color: var(--site-fg);
+}
+.sk-brand__mark {
+	color: var(--site-accent);
+	font-size: 20px;
+}
+.sk-brand__name {
+	font-family: var(--site-font-display);
+	font-weight: 600;
+	font-size: 1.125rem;
+}
+.sk-nav__links {
+	display: flex;
+	gap: var(--space-5);
+}
+.sk-nav__links a {
+	color: var(--site-muted);
+	text-decoration: none;
+	font-size: 0.9375rem;
+	transition: color 0.15s ease;
+}
+.sk-nav__links a:hover {
+	color: var(--site-fg);
+}
+
+/* ── Footer (Navigation) ─────────────────────────────────────────────────── */
+.sk-footer {
+	border-top: 1px solid var(--site-border-soft);
+	padding-block: var(--space-8);
+	color: var(--site-muted);
+	font-size: 0.8125rem;
+}
+.sk-footer a {
+	color: var(--site-muted);
+	text-decoration: none;
+}
+.sk-footer a:hover {
+	color: var(--site-accent);
+}
+
+/* ── Pattern: hero ───────────────────────────────────────────────────────── */
+.sk-hero {
+	padding-block: clamp(3rem, 8vw, 6rem) var(--space-8);
+}
+.sk-hero__cta {
+	display: flex;
+	gap: var(--space-3);
+	flex-wrap: wrap;
+	margin: var(--space-6) 0;
+}
+
+/* ── Pattern: beat (alternating copy + shot) ─────────────────────────────── */
+.sk-beat {
+	display: grid;
+	grid-template-columns: 1fr 1.2fr;
+	gap: clamp(1.5rem, 4vw, 3.5rem);
+	align-items: center;
+}
+.sk-beat--reverse .sk-beat__copy {
+	order: 2;
+}
+@media (max-width: 720px) {
+	.sk-beat {
+		grid-template-columns: 1fr;
+	}
+	.sk-beat--reverse .sk-beat__copy {
+		order: 0;
+	}
+}
+
+/* ── Pattern: closing CTA (Obi) ──────────────────────────────────────────── */
+.sk-obi {
+	text-align: center;
+}
+.sk-obi .sk-display,
+.sk-obi .sk-lede {
+	margin-inline: auto;
+}
+.sk-obi__cta {
+	display: flex;
+	gap: var(--space-3);
+	justify-content: center;
+	flex-wrap: wrap;
+	margin: var(--space-6) 0 var(--space-4);
+}
+.sk-obi__gloss {
+	font-size: 0.8125rem;
+	color: var(--site-faint);
+	font-style: italic;
+}
+
+/* ── Pattern: catalog grid ───────────────────────────────────────────────── */
+.sk-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+	gap: var(--space-4);
+}

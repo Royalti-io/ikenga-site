@@ -1,0 +1,14 @@
+---
+// Button — Actions. variant: primary | ghost.
+interface Props {
+	href: string;
+	variant?: 'primary' | 'ghost';
+	rel?: string;
+	id?: string;
+}
+const { href, variant = 'primary', rel, id } = Astro.props;
+---
+
+<a class={`sk-btn sk-btn--${variant}`} href={href} rel={rel} id={id}>
+	<slot />
+</a>

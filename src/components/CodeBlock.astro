@@ -1,0 +1,9 @@
+---
+// CodeBlock — Display. A fenced code sample (non-install). Slot = the code.
+interface Props {
+	lang?: string;
+}
+const { lang } = Astro.props;
+---
+
+<pre class="sk-code" data-lang={lang}><code><slot /></code></pre>

@@ -1,0 +1,27 @@
+---
+// Footer — site footer. Component: footer (Navigation).
+interface Props {
+	github?: string;
+}
+const { github = 'https://github.com/Royalti-io/ikenga' } = Astro.props;
+---
+
+<footer class="sk-footer">
+	<div class="sk-wrap">
+		<p>
+			Lore drawn from the <em>Ikenga</em> tradition of the Igbo people and from
+			Chinua Achebe's <em>Things Fall Apart</em>. See
+			<a href="/docs/">About → Lore</a> for full credits.
+		</p>
+		<p class="sk-footer__meta">
+			Apache-2.0 · <a href={github} rel="noopener">github.com/Royalti-io/ikenga</a>
+		</p>
+	</div>
+</footer>
+
+<style>
+	.sk-footer__meta {
+		margin-top: var(--space-2);
+		color: var(--site-faint);
+	}
+</style>

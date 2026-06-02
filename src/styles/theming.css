@@ -1,0 +1,93 @@
+/**
+ * theming.css — pin Theme A · Dusk Wood as the site's :root base.
+ *
+ * Site design system foundation: `theming` (plans/site-design-system/).
+ *
+ * Why this file exists: `@ikenga/tokens` ships a COOL hsl(220,…) palette as
+ * the bare `:root` default; the warm Dusk Wood world lives only under
+ * `[data-theme="A"]`. Relying on a page setting that attribute is fragile
+ * (a page that forgets it renders cool-blue) and collides with Starlight's
+ * own `data-theme` (which means light/dark MODE, not palette).
+ *
+ * Resolution (locked, Round-1 follow-up): make Dusk Wood the base at `:root`,
+ * decoupled from `data-theme`. Same selectors as the upstream Theme A block,
+ * imported AFTER `@ikenga/tokens` in global.css, so order wins. Every page —
+ * landing AND Starlight docs — gets the warm world with no attribute needed.
+ *
+ * This is the site's override; it never edits the upstream package.
+ */
+
+/* ── Dusk Wood as base — dark (default) ──────────────────────────────────── */
+:root,
+:root[data-mode='dark'],
+:root[data-theme='dark'] {
+	--bg-base: hsl(28, 18%, 4%);
+	--bg-surface: hsl(28, 14%, 7%);
+	--bg-raised: hsl(28, 11%, 11%);
+	--bg-sunken: hsl(28, 22%, 2.5%);
+	--fg: hsl(36, 28%, 90%);
+	--fg-muted: hsl(32, 11%, 56%);
+	--fg-faint: hsl(28, 9%, 36%);
+	--border: hsl(28, 14%, 15%);
+	--border-soft: hsl(28, 14%, 11%);
+	--primary: hsl(20, 50%, 34%);
+	--primary-fg: hsl(36, 30%, 92%);
+	--primary-soft: hsl(20, 40%, 14%);
+	--achievement: hsl(42, 78%, 54%);
+	--achievement-soft: hsl(42, 48%, 18%);
+	--danger: hsl(8, 68%, 46%);
+	--danger-fg: hsl(0, 0%, 98%);
+	--danger-soft: hsl(8, 50%, 16%);
+	--systemic: hsl(170, 28%, 34%);
+	--systemic-soft: hsl(170, 22%, 16%);
+	color-scheme: dark;
+}
+
+/* ── Dusk Wood — light (Starlight's light toggle) ────────────────────────── */
+:root[data-mode='light'],
+:root[data-theme='light'] {
+	--bg-base: hsl(36, 22%, 96%);
+	--bg-surface: hsl(36, 18%, 93%);
+	--bg-raised: hsl(36, 14%, 89%);
+	--bg-sunken: hsl(36, 26%, 98%);
+	--fg: hsl(28, 30%, 14%);
+	--fg-muted: hsl(28, 14%, 38%);
+	--fg-faint: hsl(28, 12%, 56%);
+	--border: hsl(32, 16%, 78%);
+	--border-soft: hsl(32, 16%, 84%);
+	--primary: hsl(20, 50%, 34%);
+	--primary-fg: hsl(36, 26%, 98%);
+	--primary-soft: hsl(20, 50%, 90%);
+	--achievement: hsl(42, 78%, 42%);
+	--achievement-soft: hsl(42, 60%, 90%);
+	--danger: hsl(8, 68%, 42%);
+	--danger-fg: hsl(0, 0%, 98%);
+	--danger-soft: hsl(8, 60%, 92%);
+	--systemic: hsl(170, 36%, 32%);
+	--systemic-soft: hsl(170, 30%, 90%);
+	color-scheme: light;
+}
+
+/* ── Starlight chrome → Ikenga tokens (docs cohesion) ────────────────────── */
+/* Map Starlight's own palette vars onto Dusk Wood so the docs read as one
+   site with the landing, not stock Starlight. Accent was already remapped in
+   global.css; this extends it to surfaces, text, and hairlines. */
+:root {
+	--sl-color-bg: var(--bg-base);
+	--sl-color-bg-nav: var(--bg-surface);
+	--sl-color-bg-sidebar: var(--bg-surface);
+	--sl-color-bg-inline-code: var(--bg-raised);
+	--sl-color-text: var(--fg);
+	--sl-color-text-accent: var(--achievement);
+	--sl-color-white: var(--fg);
+	--sl-color-gray-1: var(--fg);
+	--sl-color-gray-2: var(--fg-muted);
+	--sl-color-gray-3: var(--fg-muted);
+	--sl-color-gray-4: var(--fg-faint);
+	--sl-color-gray-5: var(--border);
+	--sl-color-gray-6: var(--border-soft);
+	--sl-color-gray-7: var(--bg-raised);
+	--sl-color-hairline: var(--border-soft);
+	--sl-color-hairline-light: var(--border);
+	--sl-color-hairline-shade: var(--bg-sunken);
+}
