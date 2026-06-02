@@ -49,7 +49,7 @@ const GITHUB = 'https://github.com/Royalti-io/ikenga';
 	<body class="sk-page">
 		<Header github={GITHUB} />
 
-		<main>
+		<main id="main-content">
 			<!-- ───────────────── Hero ───────────────── -->
 			<section class="sk-hero">
 				<div class="sk-wrap">
@@ -111,8 +111,8 @@ const GITHUB = 'https://github.com/Royalti-io/ikenga';
 			<Beat
 				heading="Everything is a package."
 				img="/assets/shell/oba-store.png"
-				alt="The Ọba store — install, enable and update packages like apps, with provenance and scope."
-				caption="Ọba — your package manager. Install, update, and inspect every piece."
+				alt="The package manager — install, enable and update packages like apps, with provenance and scope."
+				caption="Your package manager. Install, update, and inspect every piece."
 			>
 				<p class="sk-body">
 					The cockpit is just the start. Mini-apps, tool servers, engine
@@ -173,6 +173,7 @@ const GITHUB = 'https://github.com/Royalti-io/ikenga';
 							inputmode="email"
 							autocomplete="email"
 							placeholder="you@example.com"
+							aria-describedby="subscribe-msg"
 							required
 						/>
 						<button type="submit" id="subscribe-btn">Subscribe</button>
@@ -211,8 +212,11 @@ const GITHUB = 'https://github.com/Royalti-io/ikenga';
 				if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) {
 					msg.textContent = 'Enter a valid email address.';
 					msg.dataset.state = 'error';
+					emailEl.setAttribute('aria-invalid', 'true');
+					emailEl.focus();
 					return;
 				}
+				emailEl.removeAttribute('aria-invalid');
 				btn.disabled = true;
 				const original = btn.textContent;
 				btn.textContent = 'Subscribing…';
@@ -255,28 +259,6 @@ const GITHUB = 'https://github.com/Royalti-io/ikenga';
 			}
 			.sk-hero__shot {
 				margin-top: var(--space-4);
-			}
-			.sk-list {
-				list-style: none;
-				padding: 0;
-				margin: 0;
-				display: grid;
-				gap: var(--space-3);
-				max-width: var(--site-measure-body);
-			}
-			.sk-list li {
-				position: relative;
-				padding-left: 22px;
-				color: var(--site-muted);
-				font-size: 1.0625rem;
-			}
-			.sk-list li::before {
-				content: '◆';
-				position: absolute;
-				left: 0;
-				top: 2px;
-				font-size: 10px;
-				color: var(--site-accent);
 			}
 
 			/* subscribe form */
@@ -325,10 +307,14 @@ const GITHUB = 'https://github.com/Royalti-io/ikenga';
 				font-weight: 600;
 				font-size: 0.9375rem;
 				cursor: pointer;
-				transition: box-shadow 0.15s ease;
+				transition: filter 0.15s ease;
 			}
 			.subscribe-row button:hover {
-				box-shadow: var(--site-glow);
+				filter: brightness(1.08);
+			}
+			.subscribe-row button:focus-visible {
+				outline: 2px solid var(--site-accent);
+				outline-offset: 2px;
 			}
 			.subscribe-row button:disabled {
 				opacity: 0.6;
@@ -352,10 +338,10 @@ const GITHUB = 'https://github.com/Royalti-io/ikenga';
 				min-height: 1.2em;
 			}
 			.subscribe-msg[data-state='ok'] {
-				color: var(--systemic, var(--site-accent));
+				color: var(--site-success);
 			}
 			.subscribe-msg[data-state='error'] {
-				color: var(--danger);
+				color: var(--site-danger);
 			}
 		</style>
 	</body>

@@ -42,4 +42,8 @@
 		transition-duration: 0.01ms !important;
 		scroll-behavior: auto !important;
 	}
+	/* the static headline glow is decorative motion-adjacent — drop it too */
+	.sk-display em {
+		text-shadow: none;
+	}
 }

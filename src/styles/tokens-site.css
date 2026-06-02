@@ -23,9 +23,13 @@
 	--site-accent-soft: var(--achievement-soft);
 	--site-accent-hot: var(--ember); /* ember hsl(14,78%,52%) — hottest moments */
 
+	--site-danger: var(--danger);
+	--site-success: var(--systemic);
+
 	/* The D-01 amber glow — spent deliberately on the hero headline +
-	   primary CTA only, never on every element. Honor reduced-motion at use. */
-	--site-glow: 0 0 24px hsl(42 78% 54% / 0.35);
+	   primary CTA only, never on every element. Honor reduced-motion at use.
+	   Value matches the locked board (spread + alpha give the signature heat). */
+	--site-glow: 0 0 28px -4px hsl(42 78% 54% / 0.55);
 
 	/* ── Surfaces & lines (was: hardcoded hsl(36,14%,…) / #110d0a fallbacks) ─ */
 	--site-bg: var(--bg-base);
@@ -33,11 +37,17 @@
 	--site-raised: var(--bg-raised);
 	--site-border: var(--border);
 	--site-border-soft: var(--border-soft);
+	/* Interactive-component borders (ghost button, inputs) need ≥3:1 vs bg
+	   per WCAG 1.4.11 — the subtle --border (1.32:1) is for dividers only. */
+	--site-border-strong: hsl(28, 14%, 30%);
 
 	/* ── Foreground ramp ─────────────────────────────────────────────────── */
 	--site-fg: var(--fg);
 	--site-muted: var(--fg-muted);
 	--site-faint: var(--fg-faint);
+	/* Canonical board-spec names (aliases of the above for cross-ref). */
+	--site-fg-muted: var(--fg-muted);
+	--site-fg-faint: var(--fg-faint);
 
 	/* ── Type ────────────────────────────────────────────────────────────── */
 	/* Display swaps to Redaction in ONE place when acquired; IM Fell English

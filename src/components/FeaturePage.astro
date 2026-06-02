@@ -1,0 +1,64 @@
+---
+// FeaturePage — Pattern. The flagship feature-page skeleton from the launch
+// brief: what-it-is → problem → beats → install → works-with → links.
+// Compose inside Layout. Beats go in the default slot (use <Beat> components);
+// install + works-with + links are props/named slots.
+import Button from './Button.astro';
+import InstallBlock from './InstallBlock.astro';
+interface Props {
+	eyebrow: string;
+	title: string;
+	lede: string;
+	problem: string;
+	install?: string; // npx or curl one-liner; omit if shell-install-gated
+	worksWith?: string; // honest "works with / requires" note
+	docsHref?: string;
+	catalogHref?: string;
+}
+const {
+	eyebrow,
+	title,
+	lede,
+	problem,
+	install,
+	worksWith,
+	docsHref = '/docs/',
+	catalogHref = '/docs/packages/',
+} = Astro.props;
+---
+
+<article>
+	<!-- what it is -->
+	<section class="sk-hero">
+		<div class="sk-wrap">
+			<p class="sk-eyebrow">{eyebrow}</p>
+			<h1 class="sk-display">{title}</h1>
+			<p class="sk-lede">{lede}</p>
+			<p class="sk-body">{problem}</p>
+			{install && (
+				<InstallBlock cmd={install}>
+					{worksWith && <p class="sk-install__note">{worksWith}</p>}
+				</InstallBlock>
+			)}
+		</div>
+	</section>
+
+	<!-- beats (how it works) -->
+	<slot />
+
+	<!-- links back -->
+	<section class="sk-section">
+		<div class="sk-wrap sk-fp__links">
+			<Button href={catalogHref} variant="ghost">Back to packages</Button>
+			<Button href={docsHref} variant="ghost">Read the docs</Button>
+		</div>
+	</section>
+</article>
+
+<style>
+	.sk-fp__links {
+		display: flex;
+		gap: var(--space-3);
+		flex-wrap: wrap;
+	}
+</style>

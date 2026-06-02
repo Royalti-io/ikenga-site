@@ -38,9 +38,30 @@
 	font-family: var(--site-font-mono);
 	letter-spacing: 0.3em;
 	text-transform: uppercase;
-	font-size: 0.75rem;
+	font-size: 0.75rem; /* 12px — at this size keep weight ≥500 for the contrast budget */
+	font-weight: 500;
 	color: var(--site-accent);
 	margin: 0 0 var(--space-4);
+}
+
+/* Skip-to-content link (WCAG 2.4.1) — visually hidden until focused. */
+.sk-skip {
+	position: absolute;
+	left: var(--space-3);
+	top: -3rem;
+	z-index: 100;
+	padding: var(--space-2) var(--space-4);
+	background: var(--site-surface);
+	color: var(--site-fg);
+	border: 1px solid var(--site-border-strong);
+	border-radius: var(--radius-md, 6px);
+	text-decoration: none;
+	transition: top 0.15s ease;
+}
+.sk-skip:focus-visible {
+	top: var(--space-3);
+	outline: 2px solid var(--site-accent);
+	outline-offset: 2px;
 }
 .sk-display {
 	font-family: var(--site-font-display);
@@ -60,15 +81,20 @@
 .sk-h2 {
 	font-family: var(--site-font-display);
 	font-weight: 600;
-	font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+	font-size: clamp(1.7rem, 3.5vw, 2.6rem);
 	line-height: 1.12;
 	letter-spacing: -0.015em;
+	max-width: var(--site-measure-display);
 	margin: 0 0 var(--space-4);
+}
+.sk-h2 em {
+	font-style: italic;
+	color: var(--site-accent);
 }
 .sk-lede {
 	font-size: clamp(1.1rem, 2.2vw, 1.5rem);
-	line-height: 1.4;
-	color: var(--site-fg);
+	line-height: 1.45;
+	color: var(--site-muted); /* muted vs the H1 for type hierarchy (board spec) */
 	max-width: var(--site-measure-lede);
 	margin: 0 0 var(--space-5);
 }
@@ -94,7 +120,7 @@
 	align-items: center;
 	justify-content: center;
 	gap: var(--space-2);
-	padding: 12px 22px;
+	padding: var(--space-3) var(--space-5);
 	border-radius: var(--radius-md, 6px);
 	font-family: var(--site-font-body);
 	font-weight: 600;
@@ -110,7 +136,7 @@
 }
 .sk-btn--primary {
 	background: var(--site-accent);
-	color: hsl(28, 30%, 8%);
+	color: hsl(28, 18%, 8%);
 }
 .sk-btn--primary:hover {
 	box-shadow: var(--site-glow);
@@ -118,11 +144,22 @@
 .sk-btn--ghost {
 	background: transparent;
 	color: var(--site-fg);
-	border-color: var(--site-border);
+	border-color: var(--site-border-strong); /* ≥3:1 vs bg (WCAG 1.4.11) */
 }
 .sk-btn--ghost:hover {
 	border-color: var(--site-accent);
 	color: var(--site-accent);
+	background: var(--site-accent-soft);
+}
+
+/* Focus-visible for all other interactive surfaces (WCAG 2.4.7). */
+.sk-brand:focus-visible,
+.sk-nav__links a:focus-visible,
+.sk-card:focus-visible,
+.sk-footer a:focus-visible {
+	outline: 2px solid var(--site-accent);
+	outline-offset: 3px;
+	border-radius: 3px;
 }
 
 /* ── Proof list (Display) ────────────────────────────────────────────────── */
@@ -173,9 +210,9 @@
 }
 .sk-install__copy {
 	flex: none;
-	padding: 6px 12px;
+	padding: var(--space-2) var(--space-3);
 	border-radius: var(--radius-sm, 4px);
-	border: 1px solid var(--site-border);
+	border: 1px solid var(--site-border-strong);
 	background: transparent;
 	color: var(--site-muted);
 	font: inherit;
@@ -306,6 +343,8 @@
 	gap: var(--space-5);
 }
 .sk-nav__links a {
+	display: inline-block;
+	padding-block: 6px; /* ≥24px target (WCAG 2.5.8) */
 	color: var(--site-muted);
 	text-decoration: none;
 	font-size: 0.9375rem;
@@ -323,6 +362,8 @@
 	font-size: 0.8125rem;
 }
 .sk-footer a {
+	display: inline-block;
+	padding-block: 4px; /* ≥24px target (WCAG 2.5.8) */
 	color: var(--site-muted);
 	text-decoration: none;
 }
@@ -379,6 +420,30 @@
 	font-size: 0.8125rem;
 	color: var(--site-faint);
 	font-style: italic;
+}
+
+/* ── Stacked ◆-list (Display) — vertical sibling of .sk-proof ────────────── */
+.sk-list {
+	list-style: none;
+	padding: 0;
+	margin: 0;
+	display: grid;
+	gap: var(--space-3);
+	max-width: var(--site-measure-body);
+}
+.sk-list li {
+	position: relative;
+	padding-left: 22px;
+	color: var(--site-muted);
+	font-size: 1.0625rem;
+}
+.sk-list li::before {
+	content: '◆';
+	position: absolute;
+	left: 0;
+	top: 2px;
+	font-size: 10px;
+	color: var(--site-accent);
 }
 
 /* ── Pattern: catalog grid ───────────────────────────────────────────────── */

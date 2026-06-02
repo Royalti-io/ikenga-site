@@ -27,7 +27,8 @@
 	--bg-sunken: hsl(28, 22%, 2.5%);
 	--fg: hsl(36, 28%, 90%);
 	--fg-muted: hsl(32, 11%, 56%);
-	--fg-faint: hsl(28, 9%, 36%);
+	/* --fg-faint brightened from 36% (2.98:1) to meet AA for small text. */
+	--fg-faint: hsl(28, 10%, 54%);
 	--border: hsl(28, 14%, 15%);
 	--border-soft: hsl(28, 14%, 11%);
 	--primary: hsl(20, 50%, 34%);
@@ -35,10 +36,12 @@
 	--primary-soft: hsl(20, 40%, 14%);
 	--achievement: hsl(42, 78%, 54%);
 	--achievement-soft: hsl(42, 48%, 18%);
-	--danger: hsl(8, 68%, 46%);
+	/* --danger brightened from 46% (3.79:1) so error text clears AA. */
+	--danger: hsl(8, 78%, 62%);
 	--danger-fg: hsl(0, 0%, 98%);
 	--danger-soft: hsl(8, 50%, 16%);
-	--systemic: hsl(170, 28%, 34%);
+	/* --systemic brightened from 34% (3.46:1) so success text clears AA. */
+	--systemic: hsl(170, 42%, 54%);
 	--systemic-soft: hsl(170, 22%, 16%);
 	color-scheme: dark;
 }
@@ -52,13 +55,16 @@
 	--bg-sunken: hsl(36, 26%, 98%);
 	--fg: hsl(28, 30%, 14%);
 	--fg-muted: hsl(28, 14%, 38%);
-	--fg-faint: hsl(28, 12%, 56%);
+	/* --fg-faint darkened from 56% (2.93:1) to meet AA on the light bg. */
+	--fg-faint: hsl(28, 12%, 38%);
 	--border: hsl(32, 16%, 78%);
 	--border-soft: hsl(32, 16%, 84%);
 	--primary: hsl(20, 50%, 34%);
 	--primary-fg: hsl(36, 26%, 98%);
 	--primary-soft: hsl(20, 50%, 90%);
-	--achievement: hsl(42, 78%, 42%);
+	/* --achievement darkened from 42% (2.74:1) so accent-as-text clears AA in
+	   light mode (reachable via the Starlight docs theme toggle). */
+	--achievement: hsl(32, 80%, 30%);
 	--achievement-soft: hsl(42, 60%, 90%);
 	--danger: hsl(8, 68%, 42%);
 	--danger-fg: hsl(0, 0%, 98%);
