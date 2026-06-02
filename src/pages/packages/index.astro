@@ -43,6 +43,16 @@ const visible = (registry.pkgs || []).filter(
 	(p) => p.visibility !== 'hidden' && !HIDDEN.has(p.name)
 );
 
+// Per-pkg reference-doc deep links (where a doc exists).
+const DOC_LINKS = {
+	'@ikenga/pkg-tasks': '/docs/pkgs/tasks',
+	'@ikenga/pkg-suite': '/docs/pkgs/suite',
+	'@ikenga/mcp-browser': '/docs/pkgs/mcp-browser',
+	'@ikenga/mcp-iyke': '/docs/mcp-iyke',
+	'@ikenga/pkg-engine-claude-code': '/docs/engines',
+	'@ikenga/pkg-engine-codex': '/docs/engines',
+	'@ikenga/pkg-engine-gemini': '/docs/engines',
+};
 const label = (name) => name.replace(/^@ikenga\//, '');
 const oneLine = (d) => {
 	const s = (d || '').split(/(?<=\.)\s/)[0].trim();
@@ -124,7 +134,10 @@ const desc = "Browse what's published for your Claude Code setup — mini-apps, 
 									<span class="pk-row__ver">v{p.latest}</span>
 								</div>
 								<p class="pk-row__desc">{oneLine(p.description)}</p>
-								<code class="pk-cmd">ikenga add {p.name}</code>
+								<div class="pk-row__foot">
+									<code class="pk-cmd">ikenga add {p.name}</code>
+									{DOC_LINKS[p.name] && <a class="pk-row__doc" href={DOC_LINKS[p.name]}>Docs →</a>}
+								</div>
 							</li>
 						))}
 					</ul>
@@ -221,7 +234,21 @@ const desc = "Browse what's published for your Claude Code setup — mini-apps, 
 		border: 1px solid var(--site-border-strong);
 		border-radius: var(--radius-sm, 4px);
 		padding: var(--space-1) var(--space-3);
+	}
+	.pk-row__foot {
+		display: flex;
+		align-items: center;
+		gap: var(--space-4);
 		margin-top: var(--space-2);
+		flex-wrap: wrap;
+	}
+	.pk-row__doc {
+		font-size: 0.8125rem;
+		color: var(--site-accent);
+		text-decoration: none;
+	}
+	.pk-row__doc:hover {
+		text-decoration: underline;
 	}
 	.pk-soon {
 		opacity: 0.72;
