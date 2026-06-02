@@ -1,79 +1,246 @@
 ---
 import '../styles/global.css';
+
+// WP-12 — broad-audience hero (G-20: "give Claude Code a home").
+// Static, production hero (the D-11 Three.js/GLB "monument" prototype is a
+// separate progressive-enhancement port). The product cockpit screenshot is
+// the visual "monument" here. Install CTA is LIVE (WP-13 verified the one-liner
+// against shell v0.1.1); install.sh is x86_64-only, hence the honest caption.
+const INSTALL = 'curl -fsSL https://ikenga.dev/install.sh | sh';
+const GITHUB = 'https://github.com/Royalti-io/ikenga';
 ---
 
 <!doctype html>
-<html lang="en" data-mode="dark">
+<html lang="en" data-theme="A" data-mode="dark">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
 		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
 		<meta name="generator" content={Astro.generator} />
-		<title>Ikenga — coming soon</title>
+		<title>Ikenga — give Claude Code a home</title>
 		<meta
 			name="description"
-			content="Your personal seat of strength for AI-augmented work. Coming soon."
+			content="An open-source, local-first desktop workspace for Claude Code — a visual cockpit and package manager for your agents, skills, commands, and MCP servers."
 		/>
+		<link rel="canonical" href="https://ikenga.dev/" />
+		<!-- Open Graph / Twitter (WP-24 owns the canonical set; mirrored here) -->
+		<meta property="og:type" content="website" />
+		<meta property="og:url" content="https://ikenga.dev/" />
+		<meta property="og:title" content="Ikenga — give Claude Code a home" />
+		<meta
+			property="og:description"
+			content="A visual cockpit and package manager for your Claude Code setup — agents, skills, commands, MCP. Open-source, local-first."
+		/>
+		<meta property="og:image" content="https://ikenga.dev/assets/shell/og-card.png" />
+		<meta name="twitter:card" content="summary_large_image" />
+		<meta name="twitter:image" content="https://ikenga.dev/assets/shell/og-card.png" />
 		<!-- Cloudflare Web Analytics -->
 		<script
 			defer
 			src="https://static.cloudflareinsights.com/beacon.min.js"
-			data-cf-beacon='{"token": "3fdcdf8ab9ba4ca68bd46410d1527108"}'
-		></script>
+			data-cf-beacon='{"token": "3fdcdf8ab9ba4ca68bd46410d1527108"}'></script>
 	</head>
 	<body>
+		<header class="nav">
+			<a class="brand" href="/">
+				<span class="brand-mark" aria-hidden="true">⌗</span>
+				<span class="brand-name">Ikenga</span>
+			</a>
+			<nav class="nav-links" aria-label="Primary">
+				<a href="/docs/">Docs</a>
+				<a href="/docs/packages/">Packages</a>
+				<a href={GITHUB} rel="noopener">GitHub</a>
+			</nav>
+		</header>
+
 		<main>
-			<div class="mark" aria-hidden="true">I</div>
-			<h1>Ikenga</h1>
-			<p class="tagline">
-				Your personal seat of strength for AI-augmented work.
-			</p>
-
-			<p class="welcome">Welcome to your Obi.</p>
-			<p class="gloss">
-				<em>Obi</em> — the meeting house; the home of your workspace.
-			</p>
-
-			<p class="status">Coming soon</p>
-
-			<form class="subscribe" id="subscribe-form" novalidate>
-				<label class="subscribe-label" for="subscribe-email">
-					Get the <em>ozi</em> — dispatches when Ikenga ships:
-					releases, new packages, and notes from the build.
-				</label>
-				<div class="subscribe-row">
-					<input
-						id="subscribe-email"
-						name="email"
-						type="email"
-						inputmode="email"
-						autocomplete="email"
-						placeholder="you@example.com"
-						required
-					/>
-					<button type="submit" id="subscribe-btn">Subscribe</button>
-				</div>
-				<!-- honeypot: hidden from humans, catches bots -->
-				<input
-					class="subscribe-hp"
-					type="text"
-					name="company"
-					tabindex="-1"
-					autocomplete="off"
-					aria-hidden="true"
-				/>
-				<p class="subscribe-consent">
-					Double opt-in — we email you once to confirm. No spam, unsubscribe anytime.
+			<!-- ───────────────── Hero ───────────────── -->
+			<section class="hero">
+				<p class="eyebrow">IKENGA</p>
+				<h1>Give Claude&nbsp;Code a home.</h1>
+				<p class="lede">
+					A visual cockpit and package manager for your agents, skills,
+					commands, and MCP servers — on your own machine.
 				</p>
-				<p class="subscribe-msg" id="subscribe-msg" role="status" aria-live="polite"></p>
-			</form>
+				<p class="sub">
+					See and manage every part of your Claude Code setup from one
+					screen. Install and update them like apps — no more hand-editing
+					<code>~/.claude</code> dotfiles. Open-source, local-first, yours to extend.
+				</p>
 
-			<p class="links">
-				<a href="/docs/">Read the docs →</a>
-			</p>
+				<div class="cta-row">
+					<a class="btn btn-primary" href="#install">Install Ikenga</a>
+					<a class="btn btn-ghost" href={GITHUB} rel="noopener">View on GitHub</a>
+				</div>
+
+				<div class="install" id="install">
+					<div class="install-cmd">
+						<code id="install-code">{INSTALL}</code>
+						<button type="button" id="copy-btn" aria-label="Copy install command">Copy</button>
+					</div>
+					<p class="install-note">
+						<strong>Pre-release.</strong> macOS &amp; Linux on x86_64 today; Apple
+						Silicon and Windows are in progress.
+					</p>
+					<p class="install-note install-size">
+						Linux pulls the <strong>~60&nbsp;MB</strong> <code>.deb</code> when
+						<code>dpkg</code> is present (or a <strong>~140&nbsp;MB</strong> AppImage,
+						no sudo) — give the download a minute over GitHub&rsquo;s CDN.
+					</p>
+				</div>
+
+				<ul class="proof" aria-label="What Ikenga is">
+					<li>Apache-2.0</li>
+					<li>Local-first</li>
+					<li>No account required</li>
+					<li>Claude-first · Gemini &amp; Codex too</li>
+				</ul>
+
+				<figure class="shot shot-hero">
+					<img
+						src="/assets/shell/ngwa-cockpit.png"
+						alt="The Ikenga cockpit — a list of skills, agents and commands with a detail pane, managed across projects from one screen."
+						width="1680"
+						height="1050"
+						loading="eager"
+						decoding="async"
+					/>
+					<figcaption>The cockpit — every agent, skill, command and MCP server, one screen.</figcaption>
+				</figure>
+			</section>
+
+			<!-- ─────────── Beat 1 — everything is a package ─────────── -->
+			<section class="beat">
+				<div class="beat-copy">
+					<h2>Everything is a package.</h2>
+					<p>
+						The cockpit is just the start. Mini-apps, tool servers, engine
+						adapters — every capability docks into your workspace as an
+						independently installable package. Add what you need, retire what you don't.
+					</p>
+					<p class="beat-sub">
+						Composed from independent packages, managed from one screen, running on your machine.
+					</p>
+				</div>
+				<figure class="shot">
+					<img
+						src="/assets/shell/oba-store.png"
+						alt="The Ọba store — install, enable and update packages like apps, with provenance and scope."
+						width="1680"
+						height="1050"
+						loading="lazy"
+						decoding="async"
+					/>
+					<figcaption>Ọba — your package manager. Install, update, and inspect every piece.</figcaption>
+				</figure>
+			</section>
+
+			<!-- ─────────── Beat 2 — the workspace becomes you ─────────── -->
+			<section class="beat beat-reverse">
+				<div class="beat-copy">
+					<h2>The workspace becomes you.</h2>
+					<ul class="grain">
+						<li>Your config lives on your machine — readable as files, versioned in git.</li>
+						<li>Every agent, skill, and command you install is yours to inspect and change.</li>
+						<li>The cockpit keeps you in sync across projects — no dotfile archaeology.</li>
+						<li>Claude-first. Open to Gemini and Codex when you want them.</li>
+					</ul>
+				</div>
+				<figure class="shot">
+					<img
+						src="/assets/shell/capability-graph.png"
+						alt="The capability graph — a radial map of how agents, skills, commands and MCP servers connect."
+						width="1680"
+						height="1050"
+						loading="lazy"
+						decoding="async"
+					/>
+					<figcaption>See how everything connects — the capability graph across your setup.</figcaption>
+				</figure>
+			</section>
+
+			<!-- ─────────── Beat 3 — Welcome to your Obi (closing CTA) ─────────── -->
+			<section class="obi">
+				<h2>Welcome to your Obi.</h2>
+				<p class="obi-body">
+					Your home for Claude Code — a cockpit and package manager that puts
+					you in control of your whole setup: open-source, local-first, and
+					built to be made your own. We built it to run our own company. Now it's yours.
+				</p>
+				<div class="cta-row cta-center">
+					<a class="btn btn-primary" href="#install">Install Ikenga</a>
+					<a class="btn btn-ghost" href={GITHUB} rel="noopener">Star on GitHub</a>
+				</div>
+				<p class="obi-proof">Apache-2.0. No account required. Read every line.</p>
+				<p class="obi-gloss"><em>Obi</em> — the meeting house; the home of your workspace.</p>
+			</section>
+
+			<!-- ─────────── Subscribe (WP-29 — live newsletter) ─────────── -->
+			<section class="subscribe-wrap">
+				<form class="subscribe" id="subscribe-form" novalidate>
+					<label class="subscribe-label" for="subscribe-email">
+						Get the <em>ozi</em> — dispatches when Ikenga ships: releases, new
+						packages, and notes from the build.
+					</label>
+					<div class="subscribe-row">
+						<input
+							id="subscribe-email"
+							name="email"
+							type="email"
+							inputmode="email"
+							autocomplete="email"
+							placeholder="you@example.com"
+							required
+						/>
+						<button type="submit" id="subscribe-btn">Subscribe</button>
+					</div>
+					<!-- honeypot: hidden from humans, catches bots -->
+					<input
+						class="subscribe-hp"
+						type="text"
+						name="company"
+						tabindex="-1"
+						autocomplete="off"
+						aria-hidden="true"
+					/>
+					<p class="subscribe-consent">
+						Double opt-in — we email you once to confirm. No spam, unsubscribe anytime.
+					</p>
+					<p class="subscribe-msg" id="subscribe-msg" role="status" aria-live="polite"></p>
+				</form>
+			</section>
 		</main>
 
+		<footer>
+			<p>
+				Lore drawn from the <em>Ikenga</em> tradition of the Igbo people and from
+				Chinua Achebe's <em>Things Fall Apart</em>. See
+				<a href="/docs/">About → Lore</a> for full credits.
+			</p>
+			<p class="footer-meta">Apache-2.0 · <a href={GITHUB} rel="noopener">github.com/Royalti-io/ikenga</a></p>
+		</footer>
+
 		<script>
+			// Copy the install command.
+			const copyBtn = document.getElementById('copy-btn') as HTMLButtonElement | null;
+			const code = document.getElementById('install-code');
+			copyBtn?.addEventListener('click', async () => {
+				const text = code?.textContent?.trim() ?? '';
+				try {
+					await navigator.clipboard.writeText(text);
+					const prev = copyBtn.textContent;
+					copyBtn.textContent = 'Copied';
+					copyBtn.dataset.state = 'ok';
+					setTimeout(() => {
+						copyBtn.textContent = prev;
+						delete copyBtn.dataset.state;
+					}, 1600);
+				} catch {
+					/* clipboard unavailable — no-op */
+				}
+			});
+
+			// Subscribe form (WP-29) — posts to the Listmonk Pages Function.
 			const form = document.getElementById('subscribe-form') as HTMLFormElement | null;
 			const emailEl = document.getElementById('subscribe-email') as HTMLInputElement | null;
 			const btn = document.getElementById('subscribe-btn') as HTMLButtonElement | null;
@@ -119,105 +286,351 @@ import '../styles/global.css';
 			});
 		</script>
 
-		<footer>
-			<p>
-				Lore drawn from the <em>Ikenga</em> tradition of the Igbo people
-				and from Chinua Achebe's <em>Things Fall Apart</em>. See
-				<a href="/docs/">About → Lore</a> for full credits.
-			</p>
-		</footer>
-
 		<style>
+			:root {
+				--maxw: 64rem;
+			}
 			html,
 			body {
-				height: 100%;
+				margin: 0;
+				background: var(--bg-base);
+				color: var(--fg);
 			}
 			body {
-				margin: 0;
 				font-family: var(--font-sans);
-				background: var(--bg-base);
-				color: hsl(220, 10%, 92%);
-				display: grid;
-				grid-template-rows: 1fr auto;
-				padding: var(--space-8);
+				line-height: 1.6;
+				-webkit-font-smoothing: antialiased;
 			}
-			main {
-				max-width: 32rem;
-				text-align: center;
-				margin: auto;
+			code {
+				font-family: var(--font-mono);
 			}
-			.mark {
-				display: inline-grid;
-				place-items: center;
-				width: 64px;
-				height: 64px;
-				margin: 0 auto var(--space-6);
-				border-radius: var(--radius-lg);
-				background: var(--ember);
-				color: var(--bg-base);
+			a {
+				color: var(--achievement);
+			}
+
+			/* nav */
+			.nav {
+				display: flex;
+				align-items: center;
+				justify-content: space-between;
+				max-width: var(--maxw);
+				margin: 0 auto;
+				padding: var(--space-5) var(--space-6);
+			}
+			.brand {
+				display: inline-flex;
+				align-items: center;
+				gap: var(--space-2);
+				text-decoration: none;
+				color: var(--fg);
+			}
+			.brand-mark {
+				color: var(--achievement);
+				font-size: 20px;
+			}
+			.brand-name {
 				font-family: var(--font-display);
-				font-weight: 700;
-				font-size: 32px;
-				line-height: 1;
+				font-weight: 600;
+				font-size: 18px;
+			}
+			.nav-links {
+				display: flex;
+				gap: var(--space-5);
+			}
+			.nav-links a {
+				color: var(--fg-muted);
+				text-decoration: none;
+				font-size: 15px;
+			}
+			.nav-links a:hover {
+				color: var(--fg);
+			}
+
+			main {
+				max-width: var(--maxw);
+				margin: 0 auto;
+				padding: 0 var(--space-6);
+			}
+
+			/* hero */
+			.hero {
+				text-align: center;
+				padding: clamp(2.5rem, 8vw, 6rem) 0 var(--space-8);
+			}
+			.eyebrow {
+				font-family: var(--font-mono);
+				letter-spacing: 0.32em;
+				font-size: 12px;
+				color: var(--achievement);
+				margin: 0 0 var(--space-4);
 			}
 			h1 {
 				font-family: var(--font-display);
-				font-size: 40px;
-				margin: 0 0 var(--space-3);
+				font-weight: 600;
+				font-size: clamp(2.6rem, 6.5vw, 4.5rem);
+				line-height: 1.04;
 				letter-spacing: -0.02em;
+				margin: 0 auto var(--space-5);
+				max-width: 18ch;
 			}
-			.tagline {
-				font-size: 16px;
-				margin: 0 0 var(--space-8);
-				opacity: 0.75;
-				line-height: 1.5;
+			.lede {
+				font-size: clamp(1.1rem, 2.2vw, 1.5rem);
+				line-height: 1.4;
+				color: var(--fg);
+				max-width: 38ch;
+				margin: 0 auto var(--space-5);
 			}
-			.welcome {
-				font-family: var(--font-display);
-				font-size: var(--text-h3);
-				margin: 0 0 var(--space-2);
-				color: var(--kola-amber-soft);
+			.sub {
+				font-size: 1.0625rem;
+				color: var(--fg-muted);
+				max-width: 56ch;
+				margin: 0 auto var(--space-7);
 			}
-			.gloss {
-				font-size: var(--text-caption);
-				opacity: 0.6;
+			.sub code {
+				color: var(--achievement);
+				background: hsla(42, 78%, 50%, 0.1);
+				padding: 1px 6px;
+				border-radius: var(--radius-sm, 4px);
+				font-size: 0.92em;
+			}
+
+			.cta-row {
+				display: flex;
+				gap: var(--space-3);
+				justify-content: center;
+				flex-wrap: wrap;
 				margin: 0 0 var(--space-6);
-				line-height: 1.5;
 			}
-			.status {
-				display: inline-block;
-				padding: 4px 10px;
-				border-radius: var(--radius-pill);
-				background: hsla(42, 78%, 50%, 0.12);
-				color: var(--kola-amber);
-				font-size: var(--text-caption);
-				letter-spacing: 0.04em;
-				text-transform: uppercase;
-				margin: 0 0 var(--space-6);
+			.cta-center {
+				justify-content: center;
 			}
-			.links a {
-				color: var(--ember-soft);
+			.btn {
+				display: inline-flex;
+				align-items: center;
+				justify-content: center;
+				padding: 12px 22px;
+				border-radius: var(--radius-md, 8px);
+				font-weight: 600;
+				font-size: 15px;
 				text-decoration: none;
-				border-bottom: 1px solid currentColor;
+				border: 1px solid transparent;
+				transition: background 0.15s, border-color 0.15s, color 0.15s;
 			}
-			.links a:hover {
-				color: var(--ember);
+			.btn-primary {
+				background: var(--achievement);
+				color: var(--bg-base);
+			}
+			.btn-primary:hover {
+				background: var(--achievement);
+			}
+			.btn-ghost {
+				background: transparent;
+				color: var(--fg);
+				border-color: var(--border, hsl(36, 14%, 28%));
+			}
+			.btn-ghost:hover {
+				border-color: var(--achievement);
+				color: var(--achievement);
+			}
+
+			/* install block */
+			.install {
+				max-width: 30rem;
+				margin: 0 auto var(--space-5);
+			}
+			.install-cmd {
+				display: flex;
+				align-items: center;
+				gap: var(--space-3);
+				background: var(--bg-surface, hsl(30, 14%, 9%));
+				border: 1px solid var(--border, hsl(36, 14%, 24%));
+				border-radius: var(--radius-md, 8px);
+				padding: 10px 10px 10px 16px;
+			}
+			.install-cmd code {
+				flex: 1;
+				min-width: 0;
+				overflow-x: auto;
+				white-space: nowrap;
+				font-size: 13.5px;
+				color: var(--fg);
+				text-align: left;
+			}
+			.install-cmd button {
+				flex: none;
+				padding: 6px 12px;
+				border-radius: var(--radius-sm, 6px);
+				border: 1px solid var(--border, hsl(36, 14%, 28%));
+				background: transparent;
+				color: var(--fg-muted);
+				font: inherit;
+				font-size: 13px;
+				cursor: pointer;
+			}
+			.install-cmd button:hover {
+				color: var(--fg);
+				border-color: var(--achievement);
+			}
+			.install-cmd button[data-state='ok'] {
+				color: var(--achievement);
+				border-color: var(--achievement);
+			}
+			.install-note {
+				font-size: 13px;
+				color: var(--fg-muted);
+				margin: var(--space-3) 0 0;
+			}
+			.install-note strong {
+				color: var(--achievement);
+				font-weight: 600;
+			}
+
+			.proof {
+				list-style: none;
+				display: flex;
+				gap: var(--space-2) var(--space-4);
+				justify-content: center;
+				flex-wrap: wrap;
+				padding: 0;
+				margin: 0 0 var(--space-8);
+				font-size: 13px;
+				color: var(--fg-muted);
+			}
+			.proof li {
+				position: relative;
+				padding-left: 18px;
+			}
+			.proof li::before {
+				content: '◆';
+				position: absolute;
+				left: 0;
+				color: var(--achievement);
+				font-size: 9px;
+				top: 4px;
+			}
+
+			/* product screenshots */
+			.shot {
+				margin: 0;
+				border-radius: var(--radius-lg, 12px);
+				overflow: hidden;
+				border: 1px solid var(--border, hsl(36, 14%, 20%));
+				background: var(--bg-surface, #110d0a);
+				box-shadow: 0 24px 64px -24px hsla(0, 0%, 0%, 0.6);
+			}
+			.shot img {
+				display: block;
+				width: 100%;
+				height: auto;
+			}
+			.shot figcaption {
+				font-size: 13px;
+				color: var(--fg-muted);
+				text-align: center;
+				padding: var(--space-3) var(--space-4);
+				border-top: 1px solid var(--border, hsl(36, 14%, 16%));
+			}
+			.shot-hero {
+				margin-top: var(--space-4);
+			}
+
+			/* beats */
+			.beat {
+				display: grid;
+				grid-template-columns: 1fr 1.2fr;
+				gap: clamp(1.5rem, 4vw, 3.5rem);
+				align-items: center;
+				padding: clamp(3rem, 7vw, 5.5rem) 0;
+				border-top: 1px solid var(--border, hsl(36, 14%, 14%));
+			}
+			.beat-reverse .beat-copy {
+				order: 2;
+			}
+			.beat h2,
+			.obi h2 {
+				font-family: var(--font-display);
+				font-weight: 600;
+				font-size: clamp(1.7rem, 3.6vw, 2.6rem);
+				line-height: 1.1;
+				letter-spacing: -0.01em;
+				margin: 0 0 var(--space-4);
+			}
+			.beat-copy p {
+				color: var(--fg-muted);
+				margin: 0 0 var(--space-3);
+				max-width: 42ch;
+			}
+			.beat-sub {
+				font-size: 14px;
+				color: var(--fg-muted);
+				opacity: 0.8;
+			}
+			.grain {
+				list-style: none;
+				padding: 0;
+				margin: 0;
+				display: grid;
+				gap: var(--space-3);
+			}
+			.grain li {
+				position: relative;
+				padding-left: 22px;
+				color: var(--fg);
+				max-width: 44ch;
+			}
+			.grain li::before {
+				content: '—';
+				position: absolute;
+				left: 0;
+				color: var(--achievement);
+			}
+
+			/* obi closing */
+			.obi {
+				text-align: center;
+				padding: clamp(3.5rem, 8vw, 6rem) 0 clamp(2.5rem, 5vw, 4rem);
+				border-top: 1px solid var(--border, hsl(36, 14%, 14%));
+			}
+			.obi-body {
+				color: var(--fg-muted);
+				max-width: 52ch;
+				margin: 0 auto var(--space-6);
+				font-size: 1.0625rem;
+			}
+			.obi-proof {
+				font-size: 13px;
+				color: var(--fg-muted);
+				margin: var(--space-4) 0 var(--space-6);
+			}
+			.obi-gloss {
+				font-size: 13px;
+				color: var(--fg-muted);
+				opacity: 0.6;
+			}
+			.obi-gloss em,
+			.obi-body em {
+				color: var(--achievement);
+				font-style: italic;
+			}
+
+			/* subscribe (WP-29) */
+			.subscribe-wrap {
+				border-top: 1px solid var(--border, hsl(36, 14%, 14%));
+				padding: clamp(2.5rem, 6vw, 4rem) 0;
 			}
 			.subscribe {
-				max-width: 26rem;
-				margin: 0 auto var(--space-6);
-				text-align: left;
+				max-width: 30rem;
+				margin: 0 auto;
 			}
 			.subscribe-label {
 				display: block;
-				font-size: var(--text-caption);
-				opacity: 0.7;
-				line-height: 1.5;
-				margin: 0 0 var(--space-3);
+				font-size: 14px;
+				color: var(--fg-muted);
 				text-align: center;
+				margin: 0 0 var(--space-4);
 			}
 			.subscribe-label em {
-				color: var(--kola-amber-soft);
+				color: var(--achievement);
 				font-style: italic;
 			}
 			.subscribe-row {
@@ -227,24 +640,24 @@ import '../styles/global.css';
 			.subscribe-row input {
 				flex: 1;
 				min-width: 0;
-				padding: 10px 12px;
-				border-radius: var(--radius-md);
-				border: 1px solid var(--border, hsl(220, 10%, 30%));
-				background: var(--bg-surface, hsl(220, 14%, 12%));
+				padding: 11px 13px;
+				border-radius: var(--radius-md, 8px);
+				border: 1px solid var(--border, hsl(36, 14%, 28%));
+				background: var(--bg-surface, hsl(30, 14%, 9%));
 				color: inherit;
 				font: inherit;
 				font-size: 15px;
 			}
 			.subscribe-row input:focus-visible {
-				outline: 2px solid var(--ember);
+				outline: 2px solid var(--achievement);
 				outline-offset: 1px;
-				border-color: var(--ember);
+				border-color: var(--achievement);
 			}
 			.subscribe-row button {
-				padding: 10px 16px;
-				border-radius: var(--radius-md);
+				padding: 11px 18px;
+				border-radius: var(--radius-md, 8px);
 				border: 0;
-				background: var(--ember);
+				background: var(--achievement);
 				color: var(--bg-base);
 				font: inherit;
 				font-weight: 600;
@@ -252,7 +665,7 @@ import '../styles/global.css';
 				white-space: nowrap;
 			}
 			.subscribe-row button:hover {
-				background: var(--kola-amber, var(--ember));
+				background: var(--achievement);
 			}
 			.subscribe-row button:disabled {
 				opacity: 0.6;
@@ -266,38 +679,62 @@ import '../styles/global.css';
 				opacity: 0;
 			}
 			.subscribe-consent {
-				font-size: var(--text-caption);
-				opacity: 0.5;
-				line-height: 1.5;
-				margin: var(--space-3) 0 0;
+				font-size: 12.5px;
+				color: var(--fg-muted);
+				opacity: 0.7;
 				text-align: center;
+				margin: var(--space-3) 0 0;
 			}
 			.subscribe-msg {
-				font-size: var(--text-caption);
-				line-height: 1.5;
-				margin: var(--space-2) 0 0;
+				font-size: 13px;
 				text-align: center;
+				margin: var(--space-2) 0 0;
 				min-height: 1.2em;
 			}
 			.subscribe-msg[data-state='ok'] {
-				color: var(--kola-amber);
+				color: var(--achievement);
 			}
 			.subscribe-msg[data-state='error'] {
-				color: hsl(0, 70%, 70%);
+				color: hsl(2, 70%, 70%);
 			}
+
 			footer {
-				text-align: center;
-				font-size: var(--text-caption);
-				opacity: 0.45;
-				line-height: 1.5;
-				max-width: 36rem;
+				max-width: var(--maxw);
 				margin: 0 auto;
-				padding-top: var(--space-8);
+				padding: var(--space-6);
+				text-align: center;
+				font-size: 12.5px;
+				color: var(--fg-muted);
+				opacity: 0.7;
+				border-top: 1px solid var(--border, hsl(36, 14%, 12%));
 			}
 			footer a {
 				color: inherit;
 				text-decoration: underline;
 				text-underline-offset: 2px;
+			}
+			footer em {
+				font-style: italic;
+			}
+			.footer-meta {
+				margin: var(--space-2) 0 0;
+			}
+
+			@media (max-width: 720px) {
+				.beat {
+					grid-template-columns: 1fr;
+				}
+				.beat-reverse .beat-copy {
+					order: 0;
+				}
+				.nav-links {
+					gap: var(--space-3);
+				}
+			}
+			@media (prefers-reduced-motion: no-preference) {
+				html {
+					scroll-behavior: smooth;
+				}
 			}
 		</style>
 	</body>
