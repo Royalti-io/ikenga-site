@@ -13,7 +13,9 @@
 #   IKENGA_VERSION       Pin a release tag (default: latest published).
 #   IKENGA_INSTALL_DIR   Linux portable install dir (default: $HOME/.local/bin).
 #                        Ignored when IKENGA_FORMAT=deb (system install).
-#   IKENGA_FORMAT        Linux installer format: appimage (default) or deb.
+#   IKENGA_FORMAT        Linux installer format: deb or appimage. Default is
+#                        deb when dpkg is present (a ~60 MB system install) and
+#                        appimage otherwise (a ~140 MB no-sudo portable build).
 #                        deb requires dpkg + apt-get; sudo prompts are not
 #                        auto-run under `curl … | sh`, so the script prints
 #                        the apt-get command for you to paste with sudo.
@@ -29,7 +31,9 @@ set -eu
 
 REPO="${IKENGA_REPO:-royalti-io/ikenga}"
 VERSION="${IKENGA_VERSION:-latest}"
-FORMAT="${IKENGA_FORMAT:-appimage}"
+# `auto` is resolved per-OS below (Linux: deb when dpkg is present, else
+# appimage). An explicit IKENGA_FORMAT=deb|appimage overrides the auto choice.
+FORMAT="${IKENGA_FORMAT:-auto}"
 
 # ─── colour helpers ────────────────────────────────────────────────────────
 if [ -t 1 ] && command -v tput >/dev/null 2>&1 && [ "$(tput colors 2>/dev/null || echo 0)" -ge 8 ]; then
@@ -144,6 +148,18 @@ if [ "$os" = "darwin" ]; then
 fi
 
 if [ "$os" = "linux" ]; then
+	# Resolve the `auto` default: prefer the smaller .deb when dpkg is present
+	# (a ~60 MB system install) over the ~140 MB no-sudo AppImage. The AppImage
+	# is ~3× larger and reads as a "hang" on a slow connection, so it's the
+	# fallback, not the default. An explicit IKENGA_FORMAT wins either way.
+	if [ "$FORMAT" = "auto" ]; then
+		if command -v dpkg >/dev/null 2>&1; then
+			FORMAT=deb
+		else
+			FORMAT=appimage
+		fi
+	fi
+
 	case "$FORMAT" in
 		appimage)
 			asset="Ikenga_${ver}_amd64.AppImage"
@@ -153,6 +169,10 @@ if [ "$os" = "linux" ]; then
 			bin="$dir/ikenga"
 
 			echo "→ Downloading $asset"
+			hint "  ~140 MB over GitHub's CDN — this can take a few minutes; it isn't stuck."
+			if command -v dpkg >/dev/null 2>&1; then
+				hint "  (Smaller system install available: IKENGA_FORMAT=deb — ~60 MB.)"
+			fi
 			mkdir -p "$dir"
 			download "$url" "$bin"
 			chmod +x "$bin"
@@ -191,6 +211,8 @@ if [ "$os" = "linux" ]; then
 			out="/tmp/$asset"
 
 			echo "→ Downloading $asset"
+			hint "  ~60 MB over GitHub's CDN, then one sudo paste to install."
+			hint "  (Prefer a no-sudo portable build? Re-run with IKENGA_FORMAT=appimage — ~140 MB.)"
 			download "$url" "$out"
 
 			echo
