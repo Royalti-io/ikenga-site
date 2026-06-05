@@ -1,25 +1,22 @@
 // Cloudflare Pages Function — POST /api/subscribe
 //
-// Adds newsletter sign-ups to the Listmonk "Ikenga" list via the authenticated
-// ADMIN API. The list is double opt-in and Listmonk's `send_optin_confirmation`
-// is enabled, so the subscriber is created `unconfirmed` and Listmonk emails the
-// opt-in confirmation; they only start receiving campaigns after they click it.
+// Single opt-in newsletter sign-up via Resend. Adds the contact to a dedicated
+// "Ikenga" audience, so Ikenga broadcasts (which target that audience) reach
+// only real sign-ups — fully separate from any other Royalti audience. Resend
+// handles unsubscribe + the List-Unsubscribe header on every broadcast.
 //
-// Credentials stay server-side (Cloudflare Pages env / secrets) — never in the
-// static bundle or the browser. Honeypot + email validation happen here.
+// Why Resend (not the shared Royalti Listmonk): contacts are upserted
+// gracefully (no "email already exists" 409 to swallow), and a dedicated
+// audience keeps the Ikenga list cleanly separated.
 //
-// Env vars (Pages → Settings → Variables & Secrets; mirror in site/.dev.vars for
+// Env (Pages → Settings → Variables; mirror in site/.dev.vars for
 // `wrangler pages dev`):
-//   LISTMONK_API_URL    e.g. https://listmonk.royalti.io  (default below)
-//   LISTMONK_USERNAME   Listmonk API user
-//   LISTMONK_PASSWORD   Listmonk API token/password   (mark as a Secret)
-//   IKENGA_LIST_ID      numeric list id (default 21)
+//   RESEND_API_KEY       Resend API key with Contacts access  (mark as Secret)
+//   IKENGA_AUDIENCE_ID   the "Ikenga" audience id             (default below)
 
 interface Env {
-	LISTMONK_API_URL?: string;
-	LISTMONK_USERNAME?: string;
-	LISTMONK_PASSWORD?: string;
-	IKENGA_LIST_ID?: string;
+	RESEND_API_KEY?: string;
+	IKENGA_AUDIENCE_ID?: string;
 }
 
 const json = (data: unknown, status = 200): Response =>
@@ -29,6 +26,7 @@ const json = (data: unknown, status = 200): Response =>
 	});
 
 const EMAIL_RE = /^[^@\s]+@[^@\s]+\.[^@\s]+$/;
+const DEFAULT_AUDIENCE_ID = '77f60f7e-f220-42da-84c6-28db8f0b05db';
 
 export const onRequestPost = async (context: {
 	request: Request;
@@ -53,40 +51,33 @@ export const onRequestPost = async (context: {
 		return json({ error: 'Enter a valid email address.' }, 400);
 	}
 
-	const apiUrl = (env.LISTMONK_API_URL ?? 'https://listmonk.royalti.io').replace(/\/+$/, '');
-	const listId = Number(env.IKENGA_LIST_ID ?? '21');
-	if (!env.LISTMONK_USERNAME || !env.LISTMONK_PASSWORD || !Number.isFinite(listId)) {
+	if (!env.RESEND_API_KEY) {
 		return json({ error: 'Subscriptions are not configured yet.' }, 500);
 	}
-
-	const auth = 'Basic ' + btoa(`${env.LISTMONK_USERNAME}:${env.LISTMONK_PASSWORD}`);
+	const audienceId = env.IKENGA_AUDIENCE_ID ?? DEFAULT_AUDIENCE_ID;
 
 	let res: Response;
 	try {
-		res = await fetch(`${apiUrl}/api/subscribers`, {
+		res = await fetch(`https://api.resend.com/audiences/${audienceId}/contacts`, {
 			method: 'POST',
-			headers: { 'content-type': 'application/json', authorization: auth },
-			body: JSON.stringify({
-				email,
-				name: '',
-				status: 'enabled',
-				lists: [listId],
-				// double opt-in: leave unconfirmed so Listmonk sends the opt-in email
-				preconfirm_subscriptions: false,
-			}),
+			headers: {
+				'content-type': 'application/json',
+				authorization: `Bearer ${env.RESEND_API_KEY}`,
+			},
+			body: JSON.stringify({ email, unsubscribed: false }),
 		});
 	} catch {
 		return json({ error: 'Could not reach the mailing service.' }, 502);
 	}
 
+	// 2xx → added (Resend upserts an existing contact idempotently).
 	if (res.ok) {
 		return json({ ok: true });
 	}
 
-	// Already on the list → success from the visitor's POV. Listmonk returns
-	// 409 (or a "already exists" message) for a duplicate email.
+	// Already a contact in the audience → success from the visitor's POV.
 	const text = await res.text().catch(() => '');
-	if (res.status === 409 || /already|exists|duplicate/i.test(text)) {
+	if (res.status === 409 || /already|exists|registered/i.test(text)) {
 		return json({ ok: true });
 	}
 

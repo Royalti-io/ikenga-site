@@ -231,7 +231,7 @@ const GITHUB = 'https://github.com/Royalti-io/ikenga';
 						aria-hidden="true"
 					/>
 					<p class="subscribe-consent">
-						Double opt-in — we email you once to confirm. No spam, unsubscribe anytime.
+						No spam — just Ikenga updates. Unsubscribe anytime in one click.
 					</p>
 					<p class="subscribe-msg" id="subscribe-msg" role="status" aria-live="polite"></p>
 				</form>
@@ -274,7 +274,7 @@ const GITHUB = 'https://github.com/Royalti-io/ikenga';
 					const data = (await res.json().catch(() => ({}))) as { ok?: boolean; error?: string };
 					if (res.ok && data.ok) {
 						form.reset();
-						msg.textContent = 'Almost there — check your inbox to confirm.';
+						msg.textContent = "You're on the list. Welcome.";
 						msg.dataset.state = 'ok';
 					} else {
 						msg.textContent = data.error ?? 'Could not subscribe right now. Please try again.';
