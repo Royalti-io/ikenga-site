@@ -16,7 +16,7 @@ export default defineConfig({
 				{
 					icon: 'github',
 					label: 'GitHub',
-					href: 'https://github.com/royalti-io',
+					href: 'https://github.com/Royalti-io/ikenga',
 				},
 			],
 			customCss: ['./src/styles/global.css'],
