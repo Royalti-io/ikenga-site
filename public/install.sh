@@ -1,5 +1,6 @@
 #!/usr/bin/env sh
-# install.sh — Ikenga installer (macOS + Linux + Windows-under-bash, x86_64).
+# install.sh — Ikenga installer (macOS incl. Apple Silicon · Linux x86_64 ·
+#              Windows x64 under bash).
 #
 # Usage (macOS / Linux):
 #   curl -fsSL https://ikenga.dev/install.sh | sh
@@ -59,16 +60,12 @@ case "$uname_s" in
 	*) fail "Unsupported OS: $uname_s" ;;
 esac
 
+# arm64 is supported on macOS (native Apple Silicon build). Linux + Windows
+# ship x86_64 only today, so those arm64 cases fail gracefully in their
+# per-OS blocks below rather than here.
 case "$uname_m" in
 	x86_64|amd64) arch=amd64 ;;
-	arm64|aarch64)
-		warn "Ikenga does not yet ship an $uname_m build."
-		warn "Current releases support x86_64 only."
-		echo
-		hint "Track arm64 progress: https://github.com/$REPO/issues"
-		hint "Or build from source:  git clone https://github.com/$REPO"
-		exit 1
-		;;
+	arm64|aarch64) arch=arm64 ;;
 	*) fail "Unsupported architecture: $uname_m" ;;
 esac
 
@@ -107,7 +104,11 @@ download() {
 
 # ─── platform install ──────────────────────────────────────────────────────
 if [ "$os" = "darwin" ]; then
-	asset="Ikenga_${ver}_x64.dmg"
+	if [ "$arch" = "arm64" ]; then
+		asset="Ikenga_${ver}_aarch64.dmg"
+	else
+		asset="Ikenga_${ver}_x64.dmg"
+	fi
 	url="https://github.com/$REPO/releases/download/$tag/$asset"
 	echo "→ Downloading $asset"
 	download "$url" "$tmp/$asset"
@@ -148,6 +149,13 @@ if [ "$os" = "darwin" ]; then
 fi
 
 if [ "$os" = "linux" ]; then
+	if [ "$arch" = "arm64" ]; then
+		warn "Ikenga doesn't ship a prebuilt arm64 Linux build yet — x86_64 only."
+		echo
+		hint "Build from source: git clone https://github.com/$REPO"
+		hint "Track arm64 Linux:  https://github.com/$REPO/issues"
+		exit 1
+	fi
 	# Resolve the `auto` default: prefer the smaller .deb when dpkg is present
 	# (a ~60 MB system install) over the ~140 MB no-sudo AppImage. The AppImage
 	# is ~3× larger and reads as a "hang" on a slow connection, so it's the
@@ -236,6 +244,12 @@ if [ "$os" = "linux" ]; then
 fi
 
 if [ "$os" = "windows" ]; then
+	if [ "$arch" = "arm64" ]; then
+		warn "Ikenga ships a Windows x64 installer only (no native arm64 yet)."
+		hint "On Windows on ARM the x64 build runs under emulation — download it manually:"
+		hint "  https://github.com/$REPO/releases/latest"
+		exit 1
+	fi
 	asset="Ikenga_${ver}_x64-setup.exe"
 	url="https://github.com/$REPO/releases/download/$tag/$asset"
 

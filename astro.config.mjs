@@ -2,6 +2,7 @@ import { defineConfig } from 'astro/config';
 import starlight from '@astrojs/starlight';
 import sitemap from '@astrojs/sitemap';
 import react from '@astrojs/react';
+import icon from 'astro-icon';
 import tailwindcss from '@tailwindcss/vite';
 
 // https://astro.build/config
@@ -55,6 +56,7 @@ export default defineConfig({
 			],
 		}),
 		react(),
+		icon(),
 		sitemap(),
 	],
 	vite: {

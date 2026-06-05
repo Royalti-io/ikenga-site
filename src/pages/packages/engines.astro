@@ -6,6 +6,7 @@
 import Layout from '../../layouts/Layout.astro';
 import FeaturePage from '../../components/FeaturePage.astro';
 import Button from '../../components/Button.astro';
+import BrandIcon from '../../components/BrandIcon.astro';
 import InstallBlock from '../../components/InstallBlock.astro';
 ---
 
@@ -180,19 +181,19 @@ import InstallBlock from '../../components/InstallBlock.astro';
 						</thead>
 						<tbody>
 							<tr>
-								<td><strong>Claude Code</strong></td>
+								<td><BrandIcon name="claude" /> <strong>Claude Code</strong></td>
 								<td><code>com.ikenga.engine-claude-code</code></td>
 								<td><code>claude login</code> / <code>ANTHROPIC_API_KEY</code></td>
 								<td><code>claude-sonnet-4-6</code></td>
 							</tr>
 							<tr>
-								<td><strong>Gemini CLI</strong></td>
+								<td><BrandIcon name="gemini" /> <strong>Gemini CLI</strong></td>
 								<td><code>com.ikenga.engine-gemini</code></td>
 								<td><code>gemini auth</code> / <code>GEMINI_API_KEY</code></td>
 								<td><code>gemini-2.0-flash</code></td>
 							</tr>
 							<tr>
-								<td><strong>Codex CLI</strong></td>
+								<td><BrandIcon name="codex" /> <strong>Codex CLI</strong></td>
 								<td><code>com.ikenga.engine-codex</code></td>
 								<td><code>codex login</code> / <code>OPENAI_API_KEY</code></td>
 								<td><code>o4-mini</code></td>

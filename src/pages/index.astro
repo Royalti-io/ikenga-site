@@ -3,6 +3,8 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import Button from '../components/Button.astro';
+import Downloads from '../components/Downloads.astro';
+import BrandIcon from '../components/BrandIcon.astro';
 import InstallBlock from '../components/InstallBlock.astro';
 import ProofList from '../components/ProofList.astro';
 import Beat from '../components/Beat.astro';
@@ -73,27 +75,23 @@ const GITHUB = 'https://github.com/Royalti-io/ikenga';
 						Open-source, local-first, yours to extend.
 					</p>
 
-					<div class="sk-hero__cta">
-						<Button href="#install" variant="primary">Install Ikenga</Button>
-						<Button href={GITHUB} variant="ghost" rel="noopener">View on GitHub</Button>
-					</div>
+					<!-- On-ramp 1 (the app): OS-detected download button + the full
+					     platform matrix. Picks the right build for the visitor and
+					     keeps every build one tap away. -->
+					<Downloads github={GITHUB} />
 
-					<!-- Two co-equal on-ramps (G-21): the app, and a skill for the
-					     Claude Code you already run. Both live. -->
+					<!-- On-ramp 1, scripted alternative: the one-liner (kept). -->
 					<p class="sk-body sk-hero__onramp-lead">
-						<strong>Two ways in</strong> — run the app, or add a skill to the
-						Claude Code you already have:
+						<strong>Prefer the terminal?</strong> One line installs the app on
+						macOS, Linux, and Windows:
 					</p>
 
 					<InstallBlock cmd={INSTALL}>
 						<p class="sk-install__note">
-							<strong>Run the app.</strong> macOS &amp; Linux on x86_64 today;
-							Apple Silicon and Windows are in progress.
-						</p>
-						<p class="sk-install__note">
-							Linux pulls the <strong>~60&nbsp;MB</strong> <code>.deb</code> when
-							<code>dpkg</code> is present (or a <strong>~140&nbsp;MB</strong> AppImage,
-							no sudo) — give the download a minute over GitHub&rsquo;s CDN.
+							Auto-detects your platform. On Linux it pulls the
+							<strong>~17&nbsp;MB</strong> <code>.deb</code> when <code>dpkg</code> is
+							present (or a <strong>~101&nbsp;MB</strong> AppImage, no sudo); on
+							Windows, <code>winget install Ikenga.Shell</code> also works.
 						</p>
 					</InstallBlock>
 
@@ -174,7 +172,11 @@ const GITHUB = 'https://github.com/Royalti-io/ikenga';
 					<li>Your config lives on your machine — readable as files, versioned in git.</li>
 					<li>Every agent, skill, and command you install is yours to inspect and change.</li>
 					<li>The cockpit keeps you in sync across projects — no dotfile archaeology.</li>
-					<li>Claude-first. Open to Gemini and Codex when you want them.</li>
+					<li>
+						<BrandIcon name="claude" /> Claude-first — open to
+						<BrandIcon name="gemini" /> Gemini and <BrandIcon name="codex" /> Codex
+						when you want them.
+					</li>
 				</ul>
 			</Beat>
 
@@ -189,8 +191,10 @@ const GITHUB = 'https://github.com/Royalti-io/ikenga';
 						it's yours.
 					</p>
 					<div class="sk-obi__cta">
-						<Button href="#install" variant="primary">Install Ikenga</Button>
-						<Button href={GITHUB} variant="ghost" rel="noopener">Star on GitHub</Button>
+						<Button href="#downloads" variant="primary">Download Ikenga</Button>
+						<Button href={GITHUB} variant="ghost" rel="noopener">
+							<BrandIcon name="github" /> Star on GitHub
+						</Button>
 					</div>
 					<p class="sk-obi__proof">Apache-2.0. No account required. Read every line.</p>
 					<p class="sk-obi__gloss"><em>Obi</em> — the meeting house; the home of your workspace.</p>

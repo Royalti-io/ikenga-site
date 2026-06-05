@@ -5,6 +5,7 @@
 import Layout from '../../layouts/Layout.astro';
 import Button from '../../components/Button.astro';
 import Card from '../../components/Card.astro';
+import BrandIcon from '../../components/BrandIcon.astro';
 
 const REGISTRY_URL = 'https://royalti-io.github.io/ikenga-registry/index.json';
 
@@ -73,14 +74,18 @@ const grouped = CATEGORIES.map((c) => ({
 // Two co-equal on-ramps (G-21). Skills run anywhere in plain Claude Code AND
 // get a visual home here; packages install + update inside the shell.
 const SKILLS_ONRAMP = [
-	{ name: 'Groundwork', line: 'A research → plan → act workflow scaffold. Runs in plain Claude Code via npx — and gets a live board view in the shell.', href: '/packages/groundwork', install: 'npx skills add royalti-io/groundwork' },
-	{ name: 'Artifacts', line: 'Author self-contained interactive HTML artifacts that render anywhere — then review, compare, and promote them in the shell.', href: '/packages/artifacts', install: 'npx skills add royalti-io/ikenga-artifact-builder' },
+	{ name: 'Groundwork', icons: ['claude', 'npm'], line: 'A research → plan → act workflow scaffold. Runs in plain Claude Code via npx — and gets a live board view in the shell.', href: '/packages/groundwork', install: 'npx skills add royalti-io/groundwork' },
+	{ name: 'Artifacts', icons: ['claude', 'npm'], line: 'Author self-contained interactive HTML artifacts that render anywhere — then review, compare, and promote them in the shell.', href: '/packages/artifacts', install: 'npx skills add royalti-io/ikenga-artifact-builder' },
 ];
 const PKG_ONRAMP = [
-	{ name: 'Tasks', line: 'A local-first task manager that lives inside your workspace — lists, triage, and agenda in one pane.', href: '/packages/tasks' },
-	{ name: 'mcp-iyke', line: 'Give any MCP client — Claude, Cursor, or your own tool — live control over the running shell.', href: '/packages/mcp-iyke' },
-	{ name: 'Engines', line: 'Claude Code is the default. Gemini and Codex are pluggable adapters — same setup, different engine.', href: '/packages/engines' },
+	{ name: 'Tasks', icons: [], line: 'A local-first task manager that lives inside your workspace — lists, triage, and agenda in one pane.', href: '/packages/tasks' },
+	{ name: 'mcp-iyke', icons: ['claude'], line: 'Give any MCP client — Claude, Cursor, or your own tool — live control over the running shell.', href: '/packages/mcp-iyke' },
+	{ name: 'Engines', icons: ['claude', 'gemini', 'codex'], line: 'Claude Code is the default. Gemini and Codex are pluggable adapters — same setup, different engine.', href: '/packages/engines' },
 ];
+
+// Per-engine brand glyph for the generated catalog rows.
+const engineIcon = (name) =>
+	name.includes('claude') ? 'claude' : name.includes('gemini') ? 'gemini' : name.includes('codex') ? 'codex' : null;
 
 const updated = new Date(registry.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 const title = 'Packages for Ikenga — install and update like apps';
@@ -118,6 +123,9 @@ const desc = "Browse what's published for your Claude Code setup — mini-apps, 
 			<div class="sk-grid">
 				{SKILLS_ONRAMP.map((f) => (
 					<Card title={f.name} href={f.href} tag="no shell">
+						{f.icons.length > 0 && (
+							<span class="pk-onramp-icons">{f.icons.map((n) => <BrandIcon name={n} />)}</span>
+						)}
 						{f.line}
 						<br /><code class="pk-cmd">{f.install}</code>
 					</Card>
@@ -130,6 +138,9 @@ const desc = "Browse what's published for your Claude Code setup — mini-apps, 
 			<div class="sk-grid">
 				{PKG_ONRAMP.map((f) => (
 					<Card title={f.name} href={f.href} tag="in shell">
+						{f.icons.length > 0 && (
+							<span class="pk-onramp-icons">{f.icons.map((n) => <BrandIcon name={n} />)}</span>
+						)}
 						{f.line}
 					</Card>
 				))}
@@ -152,6 +163,7 @@ const desc = "Browse what's published for your Claude Code setup — mini-apps, 
 						{cat.rows.map((p) => (
 							<li class="pk-row">
 								<div class="pk-row__top">
+									{engineIcon(p.name) && <BrandIcon name={engineIcon(p.name)} />}
 									<code class="pk-row__id">{label(p.name)}</code>
 									<span class="pk-row__ver">v{p.latest}</span>
 								</div>
@@ -274,5 +286,12 @@ const desc = "Browse what's published for your Claude Code setup — mini-apps, 
 	}
 	.pk-soon {
 		opacity: 0.72;
+	}
+	.pk-onramp-icons {
+		display: inline-flex;
+		gap: var(--space-2);
+		align-items: center;
+		margin-right: var(--space-2);
+		vertical-align: -0.1em;
 	}
 </style>

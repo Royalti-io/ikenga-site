@@ -1,0 +1,327 @@
+---
+// Downloads — OS-detected primary download button + an always-visible
+// all-platforms matrix, with the install one-liner kept alongside (in the
+// hero). Direct links point at the version-stamped release assets; the version
+// is resolved at BUILD time from the latest GitHub release (pinned fallback for
+// offline/rate-limited builds), so a rebuild tracks new releases automatically.
+//
+// Arch note: Intel-vs-Apple-Silicon can't be read reliably in Safari/Firefox
+// (only Chromium exposes userAgentData.architecture). So on an undetectable
+// Mac we default the primary to the Intel build — it runs on both, natively on
+// Intel and via Rosetta on Apple Silicon — and offer the native arm64 build
+// one tap away. The reverse default would hand Intel users a broken binary.
+import Button from './Button.astro';
+import BrandIcon from './BrandIcon.astro';
+
+interface Props {
+	github: string;
+}
+const { github } = Astro.props;
+
+const REPO = 'royalti-io/ikenga';
+const FALLBACK_TAG = 'v0.2.3';
+
+let tag = FALLBACK_TAG;
+let assetNames: Set<string> = new Set();
+try {
+	const res = await fetch(`https://api.github.com/repos/${REPO}/releases/latest`, {
+		headers: { accept: 'application/vnd.github+json' },
+	});
+	if (res.ok) {
+		const data = await res.json();
+		if (data?.tag_name) tag = data.tag_name;
+		for (const a of data?.assets ?? []) assetNames.add(a.name);
+	}
+} catch {
+	/* offline at build — use the pinned fallback tag + canonical asset set */
+}
+
+const ver = tag.replace(/^v/, '');
+const base = `https://github.com/${REPO}/releases/download/${tag}`;
+// When we have the live asset list, only surface assets that actually exist;
+// offline (empty set) we trust the canonical v0.2.x set (all five ship).
+const has = (name: string) => assetNames.size === 0 || assetNames.has(name);
+
+const N = {
+	macArm: `Ikenga_${ver}_aarch64.dmg`,
+	macIntel: `Ikenga_${ver}_x64.dmg`,
+	linuxDeb: `Ikenga_${ver}_amd64.deb`,
+	linuxApp: `Ikenga_${ver}_amd64.AppImage`,
+	windows: `Ikenga_${ver}_x64-setup.exe`,
+};
+
+const PLATFORMS = [
+	{ id: 'mac-arm', os: 'mac', arch: 'arm', icon: 'apple', label: 'macOS', sub: 'Apple Silicon', ext: '.dmg', name: N.macArm },
+	{ id: 'mac-intel', os: 'mac', arch: 'x86', icon: 'apple', label: 'macOS', sub: 'Intel', ext: '.dmg', name: N.macIntel },
+	{ id: 'linux-deb', os: 'linux', arch: 'x86', icon: 'linux', label: 'Linux', sub: 'Debian / Ubuntu', ext: '.deb', name: N.linuxDeb },
+	{ id: 'linux-app', os: 'linux', arch: 'x86', icon: 'linux', label: 'Linux', sub: 'AppImage · no sudo', ext: '.AppImage', name: N.linuxApp },
+	{ id: 'windows', os: 'windows', arch: 'x86', icon: 'windows', label: 'Windows', sub: 'x64 installer', ext: '.exe', name: N.windows },
+]
+	.filter((p) => has(p.name))
+	.map((p) => ({ ...p, url: `${base}/${p.name}` }));
+
+const detectData = JSON.stringify({ ver, repo: REPO, platforms: PLATFORMS });
+---
+
+<div class="dl">
+	<div class="dl__cta">
+		<a id="dl-primary" class="sk-btn sk-btn--primary" href={`https://github.com/${REPO}/releases/latest`}>
+			<span class="dl-pi dl-pi--default" aria-hidden="true">↓</span>
+			<span class="dl-pi" data-os="mac" hidden><BrandIcon name="apple" size="1.05em" /></span>
+			<span class="dl-pi" data-os="linux" hidden><BrandIcon name="linux" size="1.05em" /></span>
+			<span class="dl-pi" data-os="windows" hidden><BrandIcon name="windows" size="1.05em" /></span>
+			<span id="dl-primary-label">Download Ikenga</span>
+		</a>
+		<Button href={github} variant="ghost" rel="noopener">View on GitHub</Button>
+	</div>
+
+	<p id="dl-note" class="dl__note">Ikenga {ver} — macOS, Linux &amp; Windows.</p>
+
+	<details id="downloads" class="dl__more">
+		<summary class="dl__more-summary">All platforms &amp; sizes</summary>
+		<div class="dl__matrix" aria-label="All downloads">
+			{
+				PLATFORMS.map((p) => (
+					<a class="dl__row" href={p.url} data-id={p.id} data-os={p.os} data-arch={p.arch}>
+						<BrandIcon name={p.icon} size="1.4rem" />
+						<span class="dl__row-main">
+							<strong>{p.label}</strong>
+							<span class="dl__row-sub">{p.sub}</span>
+						</span>
+						<span class="dl__row-ext">{p.ext}</span>
+					</a>
+				))
+			}
+		</div>
+	</details>
+</div>
+
+<script is:inline define:vars={{ DATA: detectData }}>
+	(function () {
+		var data = JSON.parse(DATA);
+		var ua = navigator.userAgent || '';
+		var plat = navigator.platform || '';
+		var os = 'other';
+		if (/iPhone|iPad|iPod/.test(ua)) os = 'ios';
+		else if (/Android/.test(ua)) os = 'android';
+		else if (/Mac/.test(plat) || /Mac OS X/.test(ua)) os = 'mac';
+		else if (/Win/.test(plat) || /Windows/.test(ua)) os = 'windows';
+		else if (/Linux|X11|CrOS/.test(plat) || /Linux/.test(ua)) os = 'linux';
+
+		var primary = document.getElementById('dl-primary');
+		var label = document.getElementById('dl-primary-label');
+		var note = document.getElementById('dl-note');
+		if (!primary || !label || !note) return;
+		var pis = primary.querySelectorAll('.dl-pi');
+		var byId = function (id) {
+			return data.platforms.find(function (x) { return x.id === id; });
+		};
+		function showIcon(o) {
+			pis.forEach(function (s) {
+				s.hidden = s.classList.contains('dl-pi--default') || s.getAttribute('data-os') !== o;
+			});
+		}
+		function setPrimary(p, text, osKey) {
+			if (!p) return;
+			primary.href = p.url;
+			label.textContent = text;
+			showIcon(osKey);
+		}
+		function highlight(id) {
+			var row = document.querySelector('.dl__row[data-id="' + id + '"]');
+			if (row) row.classList.add('dl__row--detected');
+		}
+
+		function archThen(cb) {
+			if (navigator.userAgentData && navigator.userAgentData.getHighEntropyValues) {
+				navigator.userAgentData
+					.getHighEntropyValues(['architecture'])
+					.then(function (v) { cb(/arm/i.test(v.architecture || '') ? 'arm' : 'x86'); })
+					.catch(function () { cb('unknown'); });
+			} else {
+				cb('unknown');
+			}
+		}
+
+		// Any link/button that targets the platform list opens the disclosure
+		// (so "Other builds ↓", the closing CTA, and direct #downloads links all
+		// reveal it rather than just scrolling to a collapsed summary).
+		var more = document.getElementById('downloads');
+		function openMore() {
+			if (more && more.tagName === 'DETAILS') more.open = true;
+		}
+		document.addEventListener('click', function (e) {
+			if (e.target.closest && e.target.closest('a[href="#downloads"]')) openMore();
+		});
+		if (location.hash === '#downloads') openMore();
+		window.addEventListener('hashchange', function () {
+			if (location.hash === '#downloads') openMore();
+		});
+
+		if (os === 'mac') {
+			archThen(function (arch) {
+				if (arch === 'arm') {
+					setPrimary(byId('mac-arm'), 'Download for Mac · Apple Silicon', 'mac');
+					highlight('mac-arm');
+					note.innerHTML = 'Detected macOS · Apple Silicon. <a href="#downloads">Other builds ↓</a>';
+				} else {
+					// x86 or undetectable → Intel build (runs on both via Rosetta)
+					setPrimary(byId('mac-intel'), 'Download for Mac', 'mac');
+					highlight('mac-intel');
+					note.innerHTML =
+						'macOS — Intel build (runs on Apple Silicon via Rosetta too). On Apple Silicon? <a href="#downloads">grab the native build ↓</a>';
+				}
+			});
+		} else if (os === 'windows') {
+			setPrimary(byId('windows'), 'Download for Windows', 'windows');
+			highlight('windows');
+			note.innerHTML = 'Detected Windows · x64. <a href="#downloads">Other builds ↓</a>';
+		} else if (os === 'linux') {
+			archThen(function (arch) {
+				if (arch === 'arm') {
+					primary.href = 'https://github.com/' + data.repo;
+					label.textContent = 'Build from source · arm64 Linux';
+					showIcon('linux');
+					note.innerHTML =
+						'No prebuilt arm64 Linux yet — <a href="https://github.com/' +
+						data.repo +
+						'">build from source</a>, or pick an x86_64 build below.';
+				} else {
+					setPrimary(byId('linux-deb'), 'Download for Linux · .deb', 'linux');
+					highlight('linux-deb');
+					note.innerHTML = 'Detected Linux · x86_64. Prefer no-sudo? <a href="#downloads">AppImage ↓</a>';
+				}
+			});
+		} else if (os === 'ios' || os === 'android') {
+			label.textContent = 'Desktop only — see downloads';
+			primary.href = '#downloads';
+			note.innerHTML = 'Ikenga is a desktop app (macOS, Linux, Windows). Open this on your computer to install.';
+		}
+	})();
+</script>
+
+<style>
+	.dl {
+		margin-block: var(--space-2) 0;
+	}
+	.dl__cta {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-3);
+		align-items: center;
+	}
+	#dl-primary .dl-pi {
+		display: inline-flex;
+		align-items: center;
+	}
+	/* The [hidden] attribute must win over the ID-specificity display rule
+	   above, or every platform glyph shows at once. */
+	#dl-primary .dl-pi[hidden] {
+		display: none;
+	}
+	#dl-primary .dl-pi--default {
+		font-weight: 700;
+	}
+	.dl__note {
+		font-size: 0.8125rem;
+		color: var(--site-muted);
+		margin: var(--space-3) 0 0;
+	}
+	.dl__note a {
+		color: var(--site-accent);
+		text-decoration: none;
+	}
+	.dl__note a:hover {
+		text-decoration: underline;
+	}
+
+	/* Collapsed "All platforms" disclosure — a subtle toggle, not a button. */
+	.dl__more {
+		margin-top: var(--space-4);
+		max-width: 46rem;
+		scroll-margin-top: var(--space-8);
+	}
+	.dl__more-summary {
+		cursor: pointer;
+		width: max-content;
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		font-size: 0.8125rem;
+		font-weight: 600;
+		color: var(--site-accent);
+		list-style: none;
+	}
+	.dl__more-summary::-webkit-details-marker {
+		display: none;
+	}
+	.dl__more-summary::before {
+		content: '▸';
+		font-size: 0.7em;
+		transition: transform 0.15s ease;
+	}
+	.dl__more[open] .dl__more-summary::before {
+		transform: rotate(90deg);
+	}
+	.dl__more-summary:hover {
+		text-decoration: underline;
+	}
+	.dl__more-summary:focus-visible {
+		outline: 2px solid var(--site-accent);
+		outline-offset: 3px;
+		border-radius: 3px;
+	}
+
+	/* All-platforms matrix (inside the disclosure) */
+	.dl__matrix {
+		margin-top: var(--space-4);
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(15rem, 1fr));
+		gap: var(--space-3);
+		max-width: 46rem;
+		scroll-margin-top: var(--space-8);
+	}
+	.dl__row {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3);
+		padding: var(--space-3) var(--space-4);
+		border: 1px solid var(--site-border);
+		border-radius: var(--radius-md, 6px);
+		background: var(--site-surface);
+		text-decoration: none;
+		color: var(--site-fg);
+		transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease;
+	}
+	.dl__row:hover {
+		border-color: var(--site-accent);
+		background: var(--site-raised);
+	}
+	.dl__row:focus-visible {
+		outline: 2px solid var(--site-accent);
+		outline-offset: 2px;
+	}
+	.dl__row--detected {
+		border-color: var(--site-accent);
+		box-shadow: var(--site-glow);
+	}
+	.dl__row-main {
+		display: flex;
+		flex-direction: column;
+		line-height: 1.25;
+		margin-right: auto;
+	}
+	.dl__row-main strong {
+		font-size: 0.9375rem;
+		font-weight: 600;
+	}
+	.dl__row-sub {
+		font-size: 0.75rem;
+		color: var(--site-muted);
+	}
+	.dl__row-ext {
+		font-family: var(--site-font-mono);
+		font-size: 0.75rem;
+		color: var(--site-accent);
+	}
+</style>

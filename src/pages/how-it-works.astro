@@ -2,6 +2,7 @@
 import Layout from '../layouts/Layout.astro';
 import Beat from '../components/Beat.astro';
 import Button from '../components/Button.astro';
+import BrandIcon from '../components/BrandIcon.astro';
 ---
 
 <Layout
@@ -62,9 +63,11 @@ import Button from '../components/Button.astro';
 		<div class="sk-wrap">
 			<h2 class="sk-h2">The engine is swappable</h2>
 			<p class="sk-body">
-				The reasoning core — your Chi — is a pluggable adapter. Claude Code is fully wired today;
-				Codex and Gemini plug into the same slot. Switch the engine without rebuilding your workspace,
-				because the engine ships as a package, separate from the shell.
+				The reasoning core — your Chi — is a pluggable adapter.
+				<BrandIcon name="claude" /> Claude Code is fully wired today;
+				<BrandIcon name="codex" /> Codex and <BrandIcon name="gemini" /> Gemini plug into the
+				same slot. Switch the engine without rebuilding your workspace, because the engine
+				ships as a package, separate from the shell.
 			</p>
 		</div>
 	</section>

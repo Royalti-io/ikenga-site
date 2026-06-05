@@ -1,5 +1,6 @@
 ---
 // Footer — site footer. Component: footer (Navigation).
+import BrandIcon from './BrandIcon.astro';
 interface Props {
 	github?: string;
 }
@@ -13,7 +14,9 @@ const { github = 'https://github.com/Royalti-io/ikenga' } = Astro.props;
 			Chinua Achebe's <em>Things Fall Apart</em>.
 		</p>
 		<p class="sk-footer__meta">
-			Apache-2.0 · <a href={github} rel="noopener">github.com/Royalti-io/ikenga</a>
+			Apache-2.0 · <a href={github} rel="noopener"
+				><BrandIcon name="github" size="1em" /> github.com/Royalti-io/ikenga</a
+			>
 		</p>
 	</div>
 </footer>

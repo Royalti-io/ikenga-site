@@ -1,0 +1,55 @@
+---
+// BrandIcon — one place that maps a semantic agent/platform name to the right
+// iconify glyph + treatment, so the rest of the site just writes
+// <BrandIcon name="claude" />. Full-colour brand logos where the brand colour
+// reads on the warm dark theme (Claude clay, Gemini gradient, Windows blue,
+// npm red, Tux); white mono (currentColor) for marks whose "full colour" is
+// black and would vanish on Dusk Wood (Apple, GitHub, OpenAI/Codex) — which is
+// exactly how those brands render themselves on dark surfaces.
+import { Icon } from 'astro-icon/components';
+
+interface Props {
+	name: string;
+	size?: string;
+	title?: string;
+	class?: string;
+}
+const { name, size = '1.15em', title, class: cls } = Astro.props;
+
+const MAP: Record<string, { icon: string; mono?: boolean }> = {
+	claude: { icon: 'logos:claude' },
+	anthropic: { icon: 'logos:claude' },
+	gemini: { icon: 'logos:google-gemini' },
+	codex: { icon: 'simple-icons:openai', mono: true },
+	openai: { icon: 'simple-icons:openai', mono: true },
+	apple: { icon: 'simple-icons:apple', mono: true },
+	macos: { icon: 'simple-icons:apple', mono: true },
+	linux: { icon: 'logos:linux-tux' },
+	windows: { icon: 'logos:microsoft-windows-icon' },
+	github: { icon: 'simple-icons:github', mono: true },
+	npm: { icon: 'logos:npm-icon' },
+	bun: { icon: 'logos:bun' },
+};
+const entry = MAP[name] ?? { icon: name };
+const a11y = title ? { title, role: 'img' } : { 'aria-hidden': 'true' };
+---
+
+<Icon
+	name={entry.icon}
+	class:list={['bi', { 'bi--mono': entry.mono }, cls]}
+	style={`--bi-size:${size}`}
+	{...a11y}
+/>
+
+<style is:global>
+	.bi {
+		width: var(--bi-size, 1.15em);
+		height: var(--bi-size, 1.15em);
+		display: inline-block;
+		vertical-align: -0.18em;
+		flex: none;
+	}
+	.bi--mono {
+		color: var(--site-fg);
+	}
+</style>
