@@ -53,6 +53,10 @@ export default defineConfig({
 					label: 'MCP',
 					items: [{ label: 'mcp-iyke', slug: 'docs/mcp-iyke' }],
 				},
+				{
+					label: 'Contribute',
+					items: [{ label: 'Contributing', slug: 'docs/contributing' }],
+				},
 			],
 		}),
 		react(),
