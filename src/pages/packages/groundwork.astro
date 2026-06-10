@@ -78,7 +78,7 @@ const description =
 		<!-- Beat 3: Three profiles — copy-only -->
 		<section class="sk-section">
 			<div class="sk-wrap">
-				<h2 class="sk-h2">Three profiles, one spine</h2>
+				<h2 class="sk-h2">Four profiles, one spine</h2>
 				<p class="sk-body">
 					A <strong>profile</strong> swaps vocabulary and optional blocks without changing the
 					spine shape. Pick the one that fits:
@@ -96,7 +96,24 @@ const description =
 						<p class="gw-profile__name sk-eyebrow">content</p>
 						<p class="sk-body gw-profile__line">Editorial series, campaigns with key art — work unit: piece / asset</p>
 					</div>
+					<div class="gw-profile">
+						<p class="gw-profile__name sk-eyebrow">design-system</p>
+						<p class="sk-body gw-profile__line">Component &amp; token libraries — work unit: part; adds a parts gallery + quality gate</p>
+					</div>
 				</div>
+				<figure class="gw-shot">
+					<img
+						src="/assets/groundwork/designsystem-gallery.png"
+						alt="A design-system profile's living gallery — foundations and components rendered against their own tokens"
+						loading="lazy"
+						width="1500"
+						height="1000"
+					/>
+					<figcaption class="sk-body gw-shot__cap">
+						The <code>design-system</code> profile's living gallery: every part rendered against
+						its own tokens, tracked as it locks.
+					</figcaption>
+				</figure>
 			</div>
 		</section>
 
@@ -148,6 +165,31 @@ const description =
 					waves, work packages, gates, and current status derived from
 					<code>05-tracking.md</code>.
 				</p>
+				<figure class="gw-shot">
+					<img
+						src="/assets/groundwork/board-dag.png"
+						alt="The plan board, dependency-graph view — work packages by wave with freeze gates as choke points"
+						loading="lazy"
+						width="1600"
+						height="1000"
+					/>
+					<figcaption class="sk-body gw-shot__cap">
+						The dependency-graph view — waves left to right, freeze gates as choke points.
+						Mission&nbsp;Control and Kanban ship in the same file.
+					</figcaption>
+				</figure>
+				<figure class="gw-shot">
+					<img
+						src="/assets/groundwork/board-kanban.png"
+						alt="The plan board, Kanban view — status columns with a selected work package's brief"
+						loading="lazy"
+						width="1600"
+						height="1000"
+					/>
+					<figcaption class="sk-body gw-shot__cap">
+						The Kanban view — status columns, with a selected work package's brief alongside.
+					</figcaption>
+				</figure>
 			</div>
 		</section>
 
@@ -185,6 +227,11 @@ const description =
 					<li>
 						<strong>Claude Code</strong> (any version that supports skills) in your terminal —
 						groundwork is a Claude Code skill.
+					</li>
+					<li>
+						<strong>Codex, Gemini, Cursor &amp; more</strong> — groundwork ships in the open
+						<code>npx skills</code> format, which works across Claude Code, Codex, Gemini,
+						Cursor, OpenCode and dozens of other agents.
 					</li>
 					<li>
 						<strong>Node ≥ 18</strong> to run <code>npx skills add</code>.
@@ -260,5 +307,22 @@ const description =
 		display: flex;
 		gap: var(--space-3);
 		flex-wrap: wrap;
+	}
+
+	.gw-shot {
+		margin: 0 0 var(--space-5);
+	}
+	.gw-shot img {
+		display: block;
+		width: 100%;
+		height: auto;
+		border: 1px solid var(--site-border);
+		border-radius: var(--radius-md, 6px);
+		background: var(--site-surface);
+	}
+	.gw-shot__cap {
+		margin: var(--space-3) 0 0;
+		font-size: 0.875rem;
+		color: var(--site-faint, var(--site-fg));
 	}
 </style>
