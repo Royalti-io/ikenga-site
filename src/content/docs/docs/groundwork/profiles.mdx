@@ -1,0 +1,27 @@
+---
+title: Profiles
+description: Four profiles — software, general, content, design-system — swap vocabulary and optional blocks over one shared spine.
+sidebar:
+  order: 2
+---
+
+A **profile** swaps vocabulary and a few optional blocks — not the spine shape. Pick the one that fits the work; the safe-regeneration machinery underneath is identical.
+
+| Profile | For | Work unit | Produces designs |
+| --- | --- | --- | --- |
+| `software` | Features, code work, PRs | work package | yes |
+| `general` | Campaigns, org changes, research | workstream / deliverable | no |
+| `content` | Editorial series, campaigns with key art | piece / asset | yes |
+| `design-system` | Component & token libraries | part | yes |
+
+You choose the profile at `init`. It's recorded in `.groundwork.json` and read by every action.
+
+## The design-system profile
+
+`design-system` adds its own spine docs (a parts gallery + a per-part quality gate) on top of the standard six. Tokens, fixtures, and a quality gate per part — with a living gallery that tracks what's locked, tier by tier.
+
+![A design-system profile's living gallery — foundations and components rendered against their own tokens](/assets/groundwork/designsystem-gallery.png)
+
+## Custom profiles
+
+Profiles are data: a `profile.json` (vocabulary + optional blocks + spine overrides) plus any template overrides. Drop your own under `profiles/<name>/` and `init --profile <name>` resolves it like a built-in, once it passes the conformance gate. The four built-ins are the canonical worked examples.

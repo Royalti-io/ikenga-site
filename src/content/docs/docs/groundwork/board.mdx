@@ -1,0 +1,26 @@
+---
+title: The plan board
+description: A standalone HTML board — Mission Control, Kanban, and dependency-graph views — derived from your tracking file.
+sidebar:
+  order: 5
+---
+
+Every groundwork folder gets an `artifact/board.html` — a **standalone HTML file** that opens in any browser with no server. `refresh-board` (re)generates it from `05-tracking.md` + `.groundwork.json`. The same file gives you three views of one plan.
+
+## Kanban
+
+Status columns — queued, in progress, blocked, done — with a selected work package's brief alongside.
+
+![The plan board, Kanban view — status columns with a selected work-package brief](/assets/groundwork/board-kanban.png)
+
+## Dependency graph
+
+Work packages by wave, left to right, with freeze gates as choke points — the same graph the orchestrated build executes.
+
+![The plan board, dependency-graph view — work packages by wave with freeze gates as choke points](/assets/groundwork/board-dag.png)
+
+Mission Control (phases, gates, decisions, design coverage at a glance) ships in the same file.
+
+## An Ikenga artifact
+
+The board opens standalone anywhere, and lights up with **live status inside the Ikenga shell** — it renders next to your running sessions, with a "copy this brief" button on every task. Outside the shell it's a static file that still renders and works. You never need the shell; it's an additive layer.
