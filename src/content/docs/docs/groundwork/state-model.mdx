@@ -1,0 +1,41 @@
+---
+title: State model
+description: The anchor, generated-region fences, hash-diff re-runs, and stable IDs — what makes "augment, never overwrite" a guarantee.
+sidebar:
+  order: 4
+---
+
+Everything that makes stateless actions safe over an existing folder lives in four mechanisms. A small, dependency-free Python script is the authoritative executor — actions call it; they never hand-compute a hash or hand-edit the anchor.
+
+## 1. The anchor — `.groundwork.json`
+
+A JSON file at the folder root is the **identity + state anchor** every action reads first. It pins the profile and spine version, and records per-document hashes, the ID registry, design coverage, sub-plans, and research stamps. Its presence is what marks a directory as a groundwork plan; without it, every action except `init` refuses to run. Writes are atomic (`write tmp → rename`).
+
+## 2. Generated-region fences
+
+```markdown
+<!-- groundwork:auto:start ID -->
+(the only block an action may write)
+<!-- groundwork:auto:end ID -->
+```
+
+An action only ever writes the inner block. The fence comments and everything outside them are immutable. Unrecognised fences are left untouched — you can introduce your own.
+
+## 3. Hash-diff re-runs
+
+When an action touches a region it recomputes the content and hands it to the script, which writes **only if the new sha256 differs** from the recorded hash. Equal content is a no-op — no write, no timestamp churn. And if the bytes inside a fence don't match what was last written, the script assumes **you** edited them and refuses to clobber unless forced.
+
+That is the whole promise made concrete: *"augments, never overwrites"* is a sha256 comparison done by a script with no dependencies — not a behaviour the model is asked to remember. The agent proposes; the script decides whether a byte changes on disk.
+
+## 4. Stable IDs
+
+Traceable identifiers thread `01-plan` → `05-tracking` → `09-orchestration` → board:
+
+| ID | Format | Origin |
+| --- | --- | --- |
+| Gap | `G-NN` | a review finding folded into a Round |
+| Work package | `WP-NN` (+ optional letter slice) | derived from `05-tracking` sections |
+| Freeze gate | `G-<NAME>` | declared in the plan's gates |
+| Design | `D-NN` | one per locked `designs/*.html` |
+
+Each ID lives in the registry with its origin doc and the set of docs it touches. When a review changes something, the IDs say **exactly** which downstream regions to re-sync — no guessing. Once allocated, an ID never renumbers; deletion retires it instead of freeing the number.
