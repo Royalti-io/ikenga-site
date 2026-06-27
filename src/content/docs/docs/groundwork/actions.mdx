@@ -1,6 +1,6 @@
 ---
 title: Actions
-description: The groundwork action set — init, research, design, subplan, review, clarify, orchestrate, refresh-board, status.
+description: The groundwork action set — init, research, design, subplan, review, clarify, orchestrate, refresh-board, explorer, plans-index, status.
 sidebar:
   order: 3
 ---
@@ -17,6 +17,8 @@ Each action is a focused step you call when you need it. They're **stateless**: 
 | **clarify** | Readiness gate — scans for open questions, unspecified IDs, and missing locked designs before orchestrate. |
 | **orchestrate** | Generates `09-orchestration.md` (waves, gates, per-task briefs) from `05`. `--emit-workflow` also writes a runnable Workflow — see [Orchestrate & Workflow](/docs/groundwork/orchestrate). |
 | **refresh-board** | (Re)generates `artifact/board.html` from the current docs. |
+| **explorer** | (Re)generates `artifact/explorer.html` — a fully-offline file tree + tabbed viewer with search. See [The explorer](/docs/groundwork/explorer). |
+| **plans-index** | (Re)generates `<plans-dir>/_index.html` — a cross-plan dashboard, one card per plan with drill-in to each explorer / board. |
 | **status** | Read-only freshness + ID + design-coverage report. Safe to run anytime. |
 
 (`refresh-living-spec` regenerates the auto tabs of `artifact/index.html` and is there when you need it.)

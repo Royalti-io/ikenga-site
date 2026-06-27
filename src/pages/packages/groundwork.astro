@@ -193,6 +193,64 @@ const description =
 			</div>
 		</section>
 
+		<!-- Beat 6: The explorer + cross-plan index — copy-only -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">Browse the whole folder — and every plan at once</h2>
+				<p class="sk-body">
+					<code>groundwork explorer</code> adds a second view beside the board: a standalone
+					<code>artifact/explorer.html</code> that is a <strong>file browser for the plan</strong> —
+					a tree on the left, a tabbed viewer on the right (Markdown rendered inline; the board and
+					your designs open as live previews), and <strong>full-text search</strong> across every
+					embedded document. It opens the board and the living spec as tabs rather than
+					reimplementing them.
+				</p>
+				<figure class="gw-shot">
+					<img
+						src="/assets/groundwork/explorer.png"
+						alt="The groundwork explorer with the plan board open in a tab — file tree on the left, the live board rendered in the viewer, file metadata in the right rail"
+						loading="lazy"
+						width="1882"
+						height="1203"
+					/>
+					<figcaption class="sk-body gw-shot__cap">
+						The explorer opens the board, the living spec, and your designs as tabs — here the
+						plan board renders live inside the viewer.
+					</figcaption>
+				</figure>
+				<p class="sk-body">
+					It's a single <strong>fully-offline</strong> file — React, the Markdown renderer, and the
+					sanitizer are inlined and the view is pre-transpiled, so it opens air-gapped, in Claude
+					Desktop, or as a bare upload, with no network. The view adapts to the profile:
+					<code>design-system</code> opens gallery-first, <code>content</code> media-first.
+				</p>
+				<p class="sk-body">
+					And <code>groundwork plans-index</code> rolls every plan in a directory into one
+					dashboard — a card per plan with a work-package progress bar, drift indicator, and
+					drill-in to each plan's explorer and board.
+				</p>
+				<figure class="gw-shot">
+					<img
+						src="/assets/groundwork/plans-index.png"
+						alt="The cross-plan plans index — one card per plan with a work-package progress bar, profile chip, drift indicator, and drill-in buttons"
+						loading="lazy"
+						width="1882"
+						height="1203"
+					/>
+					<figcaption class="sk-body gw-shot__cap">
+						The cross-plan index — every plan in a project at a glance, with drill-in to each
+						explorer and board.
+					</figcaption>
+				</figure>
+				<p class="sk-body">
+					See them live (sample data, fully offline):
+					<a href="/demos/groundwork-explorer.html">explorer</a> ·
+					<a href="/demos/groundwork-explorer-design-system.html">design-system gallery</a> ·
+					<a href="/demos/groundwork-plans-index.html">plans index</a>.
+				</p>
+			</div>
+		</section>
+
 		<!-- Install section (second, expanded install with both options) -->
 		<section class="sk-section">
 			<div class="sk-wrap">
