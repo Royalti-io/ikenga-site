@@ -11,6 +11,13 @@ sidebar:
 groundwork explorer          # writes artifact/explorer.html for the current plan
 ```
 
+![The groundwork explorer with the plan board open in a tab — file tree on the left, the live board.html rendered in the viewer, file metadata in the right rail](/assets/groundwork/explorer.png)
+
+:::tip[Try it live]
+Open the actual templates in your browser — they render with sample data, fully offline:
+**[explorer](/demos/groundwork-explorer.html)** · **[design-system gallery](/demos/groundwork-explorer-design-system.html)** · **[plans index](/demos/groundwork-plans-index.html)**
+:::
+
 ## Left tree, right viewer
 
 The left pane is a tree grouped by kind — spine, sub-plans, artifact, designs, drafts — with at-a-glance badges: a drift dot (in sync / drifted from the last groundwork write), a lock badge on designs, a sub-plan archetype tag, and an `unreg` flag on files that exist on disk but aren't in `.groundwork.json`.
@@ -29,6 +36,8 @@ The default left-pane mode follows the [profile](/docs/groundwork/profiles):
 - **`content`** opens **media-first** — a lightbox grid of key art, PDFs, and slide renderers.
 - **`software`** and **`general`** open as the tree.
 
+![The design-system profile's explorer in gallery mode — a grid of live design-mockup thumbnails, lazy-loaded](/assets/groundwork/explorer-gallery.png)
+
 ## Fully offline — works anywhere, including Claude Desktop
 
 The explorer is a single self-contained HTML file with **no network dependency at all**: React, the Markdown renderer, and the sanitizer are inlined and the view is pre-transpiled, so a generated `explorer.html` opens air-gapped, in Claude Desktop, or as a bare file. Opened from inside the real plan folder (served, or in the Ikenga shell) the relative-`src` previews of the board and designs load live; opened as a lone uploaded file the embedded text still renders everything and the previews degrade to a graceful placeholder.
@@ -43,6 +52,8 @@ Re-running `groundwork explorer` is idempotent — a checksum decides what chang
 ## The cross-plan index
 
 `groundwork plans-index plans/` writes a `plans/_index.html` — one card per plan under the directory, with a work-package progress bar, profile, drift indicator, gate / design counts, and drill-in buttons to each plan's **Explorer**, **Board**, and **Spec** (disabled when that artifact doesn't exist yet, so the index doubles as a "what still needs generating" view). Aggregate stats, search, profile filters, and sort sit across the top. It reads the plans it lists and never writes into them.
+
+![The cross-plan plans index — one card per plan with a work-package progress bar, profile chip, drift indicator, and drill-in buttons to each plan's explorer and board](/assets/groundwork/plans-index.png)
 
 ## An Ikenga artifact
 
