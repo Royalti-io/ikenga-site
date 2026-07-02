@@ -1,0 +1,226 @@
+---
+// /blog/groundwork-explorer — groundwork 0.4.0 announcement: the explorer + plans index.
+// Copy source: .company/content/2026-07-02-groundwork-explorer/ikenga-version.md (royalti-co).
+// Longer narrative version: https://royalti.io/blog/groundwork-explorer
+import Layout from '../../layouts/Layout.astro';
+import Button from '../../components/Button.astro';
+import InstallBlock from '../../components/InstallBlock.astro';
+
+const title = 'groundwork 0.4.0 — the explorer and the plans index';
+const description =
+	'A file browser for a whole plan folder that is itself one offline HTML file, plus a cross-plan dashboard. Tree, tabbed viewer, full-text search — no server, no index step.';
+---
+
+<Layout
+	title={title}
+	description={description}
+	canonical="https://ikenga.dev/blog/groundwork-explorer/"
+	ogImage="https://ikenga.dev/assets/groundwork/explorer.png"
+>
+
+	<!-- Hero -->
+	<section class="sk-hero sk-section--flush">
+		<div class="sk-wrap">
+			<p class="sk-eyebrow">Blog · groundwork · 2026-07-02</p>
+			<h1 class="sk-display">groundwork 0.4.0 — the <em>explorer</em> and the plans index</h1>
+			<p class="sk-lede">
+				A file browser for a whole plan folder that is itself one offline HTML file, plus a
+				cross-plan dashboard. Tree, tabbed viewer, full-text search — no server, no index step.
+			</p>
+			<p class="sk-body">
+				By Chinedum Okerengwor ·
+				<a href="https://royalti.io/blog/groundwork-explorer">the longer story is on the Royalti blog</a>
+			</p>
+		</div>
+	</section>
+
+	<!-- Why -->
+	<section class="sk-section">
+		<div class="sk-wrap">
+			<p class="sk-body">
+				groundwork fixed my plans rotting; it did nothing about them <em>sprawling</em>. The
+				design-system plan for one of our products is 200 files — spine docs, two sub-plans,
+				96 design mockups — and the plan board only answers "what's the status." Finding
+				<em>where a decision lives</em> across 200 files meant opening documents one at a time.
+			</p>
+			<p class="sk-body">Version 0.4.0 ships two new views for that.</p>
+		</div>
+	</section>
+
+	<!-- The explorer -->
+	<section class="sk-section">
+		<div class="sk-wrap">
+			<h2 class="sk-h2"><code>groundwork explorer</code></h2>
+			<p class="sk-body">
+				Writes an <code>artifact/explorer.html</code> for the plan — a file browser for the
+				whole folder, as one self-contained HTML file.
+			</p>
+			<figure class="gw-shot">
+				<img
+					src="/assets/groundwork/explorer.png"
+					alt="The groundwork explorer with the plan board open in a tab — file tree on the left, live board in the viewer, file metadata in the right rail"
+					loading="eager"
+					width="1882"
+					height="1203"
+				/>
+				<figcaption class="sk-body gw-shot__cap">
+					The explorer with the plan board open in a tab — tree on the left, live board in the
+					viewer, file metadata in the right rail.
+				</figcaption>
+			</figure>
+			<ul class="sk-list">
+				<li>
+					<strong>Left tree, grouped by kind</strong> — spine, sub-plans, artifact, designs,
+					drafts — with a drift dot on files changed since the last groundwork write, a lock
+					badge on frozen designs, and an <code>unreg</code> flag on files on disk that were
+					never registered in <code>.groundwork.json</code>.
+				</li>
+				<li>
+					<strong>Right viewer, dispatched by type</strong> — Markdown renders inline with the
+					generated regions visibly boxed and a Raw toggle; HTML artifacts and designs open as
+					live previews with a Source sub-tab; images get a lightbox; JSON, code, and SVG render
+					read-only. Files stay open as closeable tabs, with a metadata rail showing IDs, fence
+					inventory, drift, and copy-path.
+				</li>
+				<li>
+					<strong>Full-text search, no server</strong> — filename <em>and</em> content matching
+					over every embedded document, with highlighted snippets. The bodies are embedded in
+					the file, so search needs no index step and no localhost.
+				</li>
+				<li>
+					<strong>A sibling to the board, not a replacement</strong> — <code>board.html</code>,
+					the living spec, and <code>designs/*.html</code> open as iframe tabs. The explorer is
+					the navigational shell that contains them.
+				</li>
+				<li>
+					<strong>Profile-aware default view</strong> — <code>design-system</code> plans open
+					gallery-first (a lazy-loaded grid of live mockup thumbnails), <code>content</code>
+					plans open media-first, <code>software</code> and <code>general</code> open as the tree.
+				</li>
+			</ul>
+			<figure class="gw-shot">
+				<img
+					src="/assets/groundwork/explorer-gallery.png"
+					alt="The design-system profile's explorer in gallery mode — a grid of live design-mockup thumbnails"
+					loading="lazy"
+					width="1882"
+					height="1203"
+				/>
+				<figcaption class="sk-body gw-shot__cap">
+					The <code>design-system</code> profile opens gallery-first — 200 files, 96 embedded,
+					lazy-loaded so the tab doesn't choke.
+				</figcaption>
+			</figure>
+			<p class="sk-body">
+				Fully offline by construction: React, the Markdown renderer, and the sanitizer are
+				inlined and pre-transpiled, so the file opens air-gapped, in Claude Desktop, or
+				double-clicked. Served or opened in the Ikenga shell, previews load live; as a lone
+				file, embedded text still renders everything and previews degrade to a labeled
+				placeholder. One honest constraint: embedding works against a 768&nbsp;KB budget,
+				spine-first — files past the line are referenced instead of embedded (they still
+				preview live; they don't travel inside the lone file or appear in full-text search),
+				and the header tells you exactly how many.
+			</p>
+		</div>
+	</section>
+
+	<!-- The plans index -->
+	<section class="sk-section">
+		<div class="sk-wrap">
+			<h2 class="sk-h2"><code>groundwork plans-index</code></h2>
+			<p class="sk-body">
+				Writes a <code>plans/_index.html</code> one level up: a card per plan with a
+				work-package progress bar, profile chip, drift indicator, and drill-in buttons to that
+				plan's explorer, board, and spec. Buttons disable when the artifact doesn't exist yet,
+				so the index doubles as a "what still needs generating" view. Aggregate stats, search,
+				profile filters, and sort across the top. It reads the plans it lists and never writes
+				into them.
+			</p>
+			<figure class="gw-shot">
+				<img
+					src="/assets/groundwork/plans-index.png"
+					alt="The cross-plan plans index — one card per plan with progress bars and drill-in buttons"
+					loading="lazy"
+					width="1882"
+					height="1203"
+				/>
+				<figcaption class="sk-body gw-shot__cap">
+					Every plan in a project at a glance — progress, drift, and drill-in to each explorer
+					and board.
+				</figcaption>
+			</figure>
+		</div>
+	</section>
+
+	<!-- Bookkeeping -->
+	<section class="sk-section">
+		<div class="sk-wrap">
+			<h2 class="sk-h2">The bookkeeping stays boring</h2>
+			<p class="sk-body">
+				Re-running is idempotent — a checksum decides what changes on disk, like the rest of
+				the skill. Backfill a whole project with
+				<code>generate_explorer.py --all-under plans/ --missing-only</code>; keep one live with
+				the watch script, which regenerates on edit and reloads the served page.
+			</p>
+			<p class="sk-body">
+				Like the board, the explorer is an Ikenga artifact: it stands alone in any browser and
+				lights up inside the shell — theme tracking, send-file-to-chat. You never need the shell.
+			</p>
+		</div>
+	</section>
+
+	<!-- Try it -->
+	<section class="sk-section">
+		<div class="sk-wrap">
+			<h2 class="sk-h2">Try it</h2>
+			<p class="sk-body">The templates render with sample data, fully offline:</p>
+			<div class="gw-links">
+				<Button href="/demos/groundwork-explorer" variant="ghost">explorer</Button>
+				<Button href="/demos/groundwork-explorer-design-system" variant="ghost">design-system gallery</Button>
+				<Button href="/demos/groundwork-plans-index" variant="ghost">plans index</Button>
+			</div>
+			<p class="sk-body" style="margin-top: var(--space-5);">
+				Docs: <a href="/docs/groundwork/explorer/">the explorer</a>. Install:
+			</p>
+			<InstallBlock cmd="npx skills add royalti-io/groundwork">
+				<p class="sk-install__note">
+					Apache-2.0, runs in plain Claude Code — and in Codex, Gemini, Cursor, and dozens of
+					other agents through the open skills format.
+				</p>
+			</InstallBlock>
+			<div class="gw-links" style="margin-top: var(--space-5);">
+				<Button href="/packages/groundwork/" variant="ghost">The groundwork package page</Button>
+				<Button
+					href="https://royalti.io/blog/groundwork-explorer"
+					variant="ghost"
+					rel="noopener noreferrer"
+				>The longer story — Royalti blog</Button>
+			</div>
+		</div>
+	</section>
+
+</Layout>
+
+<style>
+	.gw-shot {
+		margin: 0 0 var(--space-5);
+	}
+	.gw-shot img {
+		display: block;
+		width: 100%;
+		height: auto;
+		border: 1px solid var(--site-border);
+		border-radius: var(--radius-md, 6px);
+		background: var(--site-surface);
+	}
+	.gw-shot__cap {
+		margin: var(--space-3) 0 0;
+		font-size: 0.875rem;
+		color: var(--site-faint, var(--site-fg));
+	}
+	.gw-links {
+		display: flex;
+		gap: var(--space-3);
+		flex-wrap: wrap;
+	}
+</style>

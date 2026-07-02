@@ -1,0 +1,83 @@
+---
+// /blog — index of Ikenga blog posts. Hand-maintained list for now; migrate to a
+// content collection when the post count justifies it.
+import Layout from '../../layouts/Layout.astro';
+
+const posts = [
+	{
+		href: '/blog/groundwork-explorer/',
+		date: '2026-07-02',
+		title: 'groundwork 0.4.0 — the explorer and the plans index',
+		blurb:
+			'A file browser for a whole plan folder that is itself one offline HTML file, plus a cross-plan dashboard. Tree, tabbed viewer, full-text search — no server, no index step.',
+	},
+];
+---
+
+<Layout
+	title="Blog — Ikenga"
+	description="Release notes and essays from the Ikenga workspace — groundwork, artifacts, packages, and building in the open."
+	canonical="https://ikenga.dev/blog/"
+>
+
+	<section class="sk-hero sk-section--flush">
+		<div class="sk-wrap">
+			<p class="sk-eyebrow">Blog</p>
+			<h1 class="sk-display">Building in the <em>open</em></h1>
+			<p class="sk-lede">
+				Release notes and essays from the Ikenga workspace.
+			</p>
+		</div>
+	</section>
+
+	<section class="sk-section">
+		<div class="sk-wrap">
+			<ul class="blog-list">
+				{
+					posts.map((post) => (
+						<li class="blog-item">
+							<p class="sk-eyebrow blog-item__date">{post.date}</p>
+							<h2 class="sk-h2 blog-item__title">
+								<a href={post.href}>{post.title}</a>
+							</h2>
+							<p class="sk-body blog-item__blurb">{post.blurb}</p>
+						</li>
+					))
+				}
+			</ul>
+		</div>
+	</section>
+
+</Layout>
+
+<style>
+	.blog-list {
+		list-style: none;
+		margin: 0;
+		padding: 0;
+		display: grid;
+		gap: var(--space-6);
+	}
+	.blog-item {
+		background: var(--site-surface);
+		border: 1px solid var(--site-border);
+		border-radius: var(--radius-md, 6px);
+		padding: var(--space-6);
+	}
+	.blog-item__date {
+		margin-bottom: var(--space-2);
+	}
+	.blog-item__title {
+		margin: 0 0 var(--space-3);
+	}
+	.blog-item__title a {
+		color: inherit;
+		text-decoration: none;
+	}
+	.blog-item__title a:hover {
+		text-decoration: underline;
+	}
+	.blog-item__blurb {
+		margin: 0;
+	}
+</style>
