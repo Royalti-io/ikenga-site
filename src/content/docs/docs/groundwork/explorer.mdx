@@ -11,7 +11,7 @@ sidebar:
 groundwork explorer          # writes artifact/explorer.html for the current plan
 ```
 
-![The groundwork explorer with the plan board open in a tab, Kanban view — file tree on the left, two tabs open, the live board.html rendered in the viewer, file metadata in the right rail](/assets/groundwork/explorer.png)
+![The groundwork explorer with the plan board open in a tab, Kanban view — file tree on the left, two tabs open, the live board.html rendered in the viewer, file metadata in the right rail](/assets/groundwork/explorer-kanban.png)
 
 :::tip[Try it live]
 Open the actual templates in your browser — they render with sample data, fully offline:
@@ -36,7 +36,7 @@ The default left-pane mode follows the [profile](/docs/groundwork/profiles):
 - **`content`** opens **media-first** — a lightbox grid of key art, PDFs, and slide renderers.
 - **`software`** and **`general`** open as the tree.
 
-![The design-system profile's explorer in gallery mode with a design selected — a locked homepage direction previewing live in the viewer](/assets/groundwork/explorer-gallery.png)
+![The design-system profile's explorer in gallery mode with a design selected — a locked homepage direction previewing live in the viewer](/assets/groundwork/explorer-gallery-selected.png)
 
 ## Fully offline — works anywhere, including Claude Desktop
 
@@ -53,7 +53,7 @@ Re-running `groundwork explorer` is idempotent — a checksum decides what chang
 
 `groundwork plans-index plans/` writes a `plans/_index.html` — one card per plan under the directory, with a work-package progress bar, profile, drift indicator, gate / design counts, and drill-in buttons to each plan's **Explorer**, **Board**, and **Spec** (disabled when that artifact doesn't exist yet, so the index doubles as a "what still needs generating" view). Aggregate stats, search, profile filters, and sort sit across the top. It reads the plans it lists and never writes into them.
 
-![The cross-plan plans index — three plans, one per profile, each card with a work-package progress bar, profile chip, drift indicator, and drill-in buttons to that plan's explorer and board](/assets/groundwork/plans-index.png)
+![The cross-plan plans index — three plans, one per profile, each card with a work-package progress bar, profile chip, drift indicator, and drill-in buttons to that plan's explorer and board](/assets/groundwork/plans-index-3up.png)
 
 ## An Ikenga artifact
 
