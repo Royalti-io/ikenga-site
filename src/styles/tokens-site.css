@@ -31,6 +31,17 @@
 	   Value matches the locked board (spread + alpha give the signature heat). */
 	--site-glow: 0 0 28px -4px hsl(42 78% 54% / 0.55);
 
+	/* Ink color for text/icons drawn ON TOP OF --site-accent (button labels,
+	   accent-filled chips). Split from --site-fg because the accent's
+	   lightness inverts between poles (bright amber on dark → deep amber on
+	   light), so a single fixed ink color can't stay legible on both. */
+	--site-accent-ink: hsl(28, 18%, 8%);
+
+	/* Drop shadow for the screenshot frame (.sk-shot). Tone-scoped so the
+	   light pole doesn't inherit a pure-black shadow (reads as a smudge on
+	   parchment) — see [data-tone="light"] below. */
+	--site-shadow-shot: 0 24px 64px -24px hsla(0, 0%, 0%, 0.6);
+
 	/* ── Surfaces & lines (was: hardcoded hsl(36,14%,…) / #110d0a fallbacks) ─ */
 	--site-bg: var(--bg-base);
 	--site-surface: var(--bg-surface);
@@ -62,4 +73,64 @@
 	--site-measure-display: 18ch;
 	--site-measure-lede: 46ch;
 	--site-measure-body: 64ch;
+}
+
+/**
+ * ── Light pole (G-TONAL) ───────────────────────────────────────────────────
+ *
+ * The warm-parchment "light pole" of the tonal system (plans/site-redesign
+ * WP-02). Section-level scoping via `data-tone="light"` on a wrapper element
+ * — deliberately NOT the page-level `data-mode`/`data-theme` attributes,
+ * which stay pinned to Dusk Wood dark for the whole document (see the file
+ * banner above). A section that opts into `data-tone="light"` re-points
+ * every `--site-*` slot to the parchment values below; nothing outside that
+ * subtree is affected, and no page in production sets this attribute yet —
+ * this block is inert until a component/page opts in.
+ *
+ * Values are literal (not `var()` re-reads of the upstream --bg-base/--fg/…
+ * primitives) because those primitives stay dark for the page; the tone
+ * block intentionally diverges from the page-level palette rather than
+ * flipping it, so it must carry its own numbers. Seeded from the existing
+ * light-mode values in theming.css's `[data-mode='light']` block (same
+ * hues), plus new slots (border-strong / glow / shadow / accent-ink) tuned
+ * for this pole and verified by `node scripts/contrast-check.mjs`.
+ */
+[data-tone='light'] {
+	--site-bg: hsl(36, 22%, 96%);
+	--site-surface: hsl(36, 18%, 93%);
+	--site-raised: hsl(36, 14%, 89%);
+
+	--site-fg: hsl(28, 30%, 14%);
+	--site-muted: hsl(28, 14%, 38%);
+	--site-faint: hsl(28, 12%, 38%);
+	--site-fg-muted: hsl(28, 14%, 38%);
+	--site-fg-faint: hsl(28, 12%, 38%);
+
+	--site-border: hsl(32, 16%, 78%);
+	--site-border-soft: hsl(32, 16%, 84%);
+	/* Darker + more saturated than the dark-pole slot needs to be, because a
+	   light bg (96% L) needs a much heavier line to clear 3:1 than a near-
+	   black bg does. hsl(28,22%,42%) checks in at ~3.4:1 vs --site-bg. */
+	--site-border-strong: hsl(28, 22%, 42%);
+
+	--site-accent: hsl(32, 80%, 30%);
+	--site-accent-soft: hsl(42, 60%, 90%);
+	/* Ember darkened to match the light pole's deeper accent register — the
+	   dark-pole ember (52% L) would wash out and fail contrast on parchment. */
+	--site-accent-hot: hsl(14, 78%, 36%);
+	/* The accent itself is now a DEEP burnt-amber (30% L) rather than a bright
+	   one, so ink drawn on top of it (button labels) must flip light, not
+	   stay near-black like the dark pole's --site-accent-ink. */
+	--site-accent-ink: hsl(42, 60%, 97%);
+
+	--site-danger: hsl(8, 68%, 42%);
+	--site-success: hsl(170, 36%, 32%);
+
+	/* The D-01 amber glow reads as a lit ember against near-black; on
+	   parchment the same glow just looks like a smudge, so the light pole
+	   turns it off rather than re-tuning it. */
+	--site-glow: none;
+	/* Same reasoning for the screenshot frame's drop shadow: a heavy pure-
+	   black shadow reads as dirt on a warm light surface. Soften + warm it. */
+	--site-shadow-shot: 0 20px 48px -20px hsla(28, 30%, 14%, 0.18);
 }

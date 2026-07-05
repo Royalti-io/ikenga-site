@@ -136,7 +136,7 @@
 }
 .sk-btn--primary {
 	background: var(--site-accent);
-	color: hsl(28, 18%, 8%);
+	color: var(--site-accent-ink);
 }
 .sk-btn--primary:hover {
 	box-shadow: var(--site-glow);
@@ -298,7 +298,7 @@
 	overflow: hidden;
 	border: 1px solid var(--site-border);
 	background: var(--site-surface);
-	box-shadow: 0 24px 64px -24px hsla(0, 0%, 0%, 0.6);
+	box-shadow: var(--site-shadow-shot);
 }
 .sk-shot img {
 	display: block;
