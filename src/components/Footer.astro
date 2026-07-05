@@ -1,14 +1,28 @@
 ---
 // Footer — site footer. Component: footer (Navigation).
+//
+// WP-08 adds nav echoes (Packages/Docs/Blog/Newsletter) alongside the
+// existing lore line + Apache-2.0 + GitHub — same targets as the header nav,
+// so the footer works as a fallback wayfinding row on any page.
 import BrandIcon from './BrandIcon.astro';
 interface Props {
 	github?: string;
 }
 const { github = 'https://github.com/Royalti-io/ikenga' } = Astro.props;
+
+const NAV = [
+	{ href: '/packages/', label: 'Packages' },
+	{ href: '/docs/', label: 'Docs' },
+	{ href: '/blog/', label: 'Blog' },
+	{ href: '/newsletter/', label: 'Newsletter' },
+];
 ---
 
 <footer class="sk-footer">
 	<div class="sk-wrap">
+		<nav class="sk-footer__nav" aria-label="Footer">
+			{NAV.map((item) => <a href={item.href}>{item.label}</a>)}
+		</nav>
 		<p>
 			Lore drawn from the <em>Ikenga</em> tradition of the Igbo people and from
 			Chinua Achebe's <em>Things Fall Apart</em>.
@@ -22,6 +36,19 @@ const { github = 'https://github.com/Royalti-io/ikenga' } = Astro.props;
 </footer>
 
 <style>
+	.sk-footer__nav {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space-5);
+		margin-bottom: var(--space-5);
+	}
+	.sk-footer__nav a {
+		font-weight: 600;
+		color: var(--site-fg);
+	}
+	.sk-footer__nav a:hover {
+		color: var(--site-accent);
+	}
 	.sk-footer__meta {
 		margin-top: var(--space-2);
 		color: var(--site-faint);

@@ -1,23 +1,232 @@
 ---
 // Header — site nav. Component: header-nav (Navigation).
+//
+// D-01 rev 2 (plans/site-redesign/designs/home-hero-theatre.html) upgrades
+// the header to: sticky + blur, the fuller nav (Packages · How it works ·
+// Docs · Blog), a quiet engine cluster (Claude Code / Codex / Gemini CLI —
+// shipping engines only, G-21), GitHub, and an amber Download CTA.
+//
+// Mobile (≤760px): the design doc's `.hdr-nav, .engines { display: none; }`
+// just drops the nav with nothing to reach it by — WP-08 replaces that with
+// a real <details> disclosure (native, keyboard/AT-friendly, no JS) holding
+// the same links + engine cluster + GitHub, so nothing is lost, just tucked.
 import BrandIcon from './BrandIcon.astro';
+
 interface Props {
 	github?: string;
 }
 const { github = 'https://github.com/Royalti-io/ikenga' } = Astro.props;
+
+const NAV = [
+	{ href: '/packages/', label: 'Packages' },
+	{ href: '/how-it-works/', label: 'How it works' },
+	{ href: '/docs/', label: 'Docs' },
+	{ href: '/blog/', label: 'Blog' },
+];
+// Shipping engines only (G-21) — Antigravity joins when its engine pkg publishes.
+const ENGINES = ['claude', 'codex', 'gemini'] as const;
 ---
 
 <a class="sk-skip" href="#main-content">Skip to main content</a>
-<header class="sk-nav">
-	<a class="sk-brand" href="/">
-		<span class="sk-brand__mark" aria-hidden="true">⌗</span>
-		<span class="sk-brand__name">Ikenga</span>
-	</a>
-	<nav class="sk-nav__links" aria-label="Primary">
-		<a href="/packages/">Packages</a>
-		<a href="/how-it-works/">How it works</a>
-		<a href="/newsletter/">Newsletter</a>
-		<a href="/docs/">Docs</a>
-		<a href={github} rel="noopener"><BrandIcon name="github" size="1em" /> GitHub</a>
-	</nav>
+<header class="hnav">
+	<div class="hnav__bar">
+		<a class="sk-brand" href="/">
+			<span class="sk-brand__mark" aria-hidden="true">⌗</span>
+			<span class="sk-brand__name">Ikenga</span>
+		</a>
+
+		<nav class="hnav__links" aria-label="Primary">
+			{NAV.map((item) => <a href={item.href}>{item.label}</a>)}
+		</nav>
+
+		<span class="hnav__sp"></span>
+
+		<span class="hnav__engines" title="Engine-swappable: Claude Code, Codex, Gemini CLI">
+			{ENGINES.map((name) => <BrandIcon name={name} size="15px" />)}
+			<em>3 engines</em>
+		</span>
+
+		<a class="hnav__gh" href={github} rel="noopener" aria-label="GitHub">
+			<BrandIcon name="github" size="18px" />
+		</a>
+
+		<a class="sk-btn sk-btn--primary hnav__cta" href="#install">Download</a>
+
+		<details class="hnav__disclosure">
+			<summary class="hnav__disclosure-btn" aria-label="Open menu">
+				<span class="hnav__burger" aria-hidden="true"></span>
+			</summary>
+			<nav class="hnav__disclosure-panel" aria-label="Primary (mobile)">
+				{NAV.map((item) => <a href={item.href}>{item.label}</a>)}
+				<hr class="hnav__disclosure-rule" />
+				<span class="hnav__engines hnav__engines--panel" title="Engine-swappable: Claude Code, Codex, Gemini CLI">
+					{ENGINES.map((name) => <BrandIcon name={name} size="15px" />)}
+					<em>3 engines</em>
+				</span>
+				<a href={github} rel="noopener"><BrandIcon name="github" size="15px" /> GitHub</a>
+			</nav>
+		</details>
+	</div>
 </header>
+
+<style>
+	/* Sticky + blur (D-01 rev 2). `color-mix` keeps the translucency tied to
+	   the live --site-bg (works across the dark/light tonal poles) without
+	   hardcoding a hex; any browser without color-mix just gets an opaque bar
+	   (still correct, only loses the blur glass effect). */
+	.hnav {
+		position: sticky;
+		top: 0;
+		z-index: 40;
+		background: color-mix(in srgb, var(--site-bg) 82%, transparent);
+		backdrop-filter: blur(10px);
+		-webkit-backdrop-filter: blur(10px);
+		border-bottom: 1px solid var(--site-border-soft);
+	}
+	.hnav__bar {
+		display: flex;
+		align-items: center;
+		gap: var(--space-5);
+		max-width: 64rem;
+		margin-inline: auto;
+		padding: 10px var(--space-6);
+	}
+	.hnav__links {
+		display: flex;
+		gap: var(--space-5);
+	}
+	.hnav__links a {
+		display: inline-block;
+		padding-block: 8px;
+		color: var(--site-muted);
+		text-decoration: none;
+		font-size: 0.9375rem;
+		transition: color 0.15s ease;
+	}
+	.hnav__links a:hover {
+		color: var(--site-fg);
+	}
+	.hnav__sp {
+		flex: 1;
+	}
+	.hnav__engines {
+		display: inline-flex;
+		align-items: center;
+		gap: 7px;
+		border: 1px solid var(--site-border);
+		border-radius: 999px;
+		padding: 5px 12px 5px 9px;
+	}
+	.hnav__engines em {
+		font: 500 10px var(--site-font-mono);
+		font-style: normal;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--site-faint);
+	}
+	.hnav__gh {
+		display: inline-flex;
+		color: var(--site-muted);
+	}
+	.hnav__gh:hover {
+		color: var(--site-fg);
+	}
+
+	/* ── Mobile disclosure (native <details>, no JS) ──────────────────────── */
+	.hnav__disclosure {
+		display: none;
+	}
+	.hnav__disclosure-btn {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		width: 36px;
+		height: 36px;
+		border-radius: var(--radius-md, 6px);
+		border: 1px solid var(--site-border-strong);
+		cursor: pointer;
+		list-style: none;
+	}
+	.hnav__disclosure-btn::-webkit-details-marker {
+		display: none;
+	}
+	.hnav__disclosure-btn:focus-visible {
+		outline: 2px solid var(--site-accent);
+		outline-offset: 2px;
+	}
+	.hnav__burger,
+	.hnav__burger::before,
+	.hnav__burger::after {
+		display: block;
+		width: 16px;
+		height: 2px;
+		background: var(--site-fg);
+		border-radius: 1px;
+	}
+	.hnav__burger {
+		position: relative;
+	}
+	.hnav__burger::before,
+	.hnav__burger::after {
+		content: '';
+		position: absolute;
+		left: 0;
+	}
+	.hnav__burger::before {
+		top: -5px;
+	}
+	.hnav__burger::after {
+		top: 5px;
+	}
+	.hnav__disclosure[open] .hnav__disclosure-btn {
+		border-color: var(--site-accent);
+	}
+	.hnav__disclosure-panel {
+		position: absolute;
+		left: 0;
+		right: 0;
+		top: 100%;
+		display: flex;
+		flex-direction: column;
+		gap: var(--space-1, 4px);
+		padding: var(--space-4) var(--space-6) var(--space-6);
+		background: var(--site-bg);
+		border-bottom: 1px solid var(--site-border-soft);
+		box-shadow: var(--shadow-3, 0 16px 32px -16px hsla(0, 0%, 0%, 0.4));
+	}
+	.hnav__disclosure-panel a {
+		display: block;
+		padding: 10px 4px; /* ≥24px target (WCAG 2.5.8) */
+		color: var(--site-fg);
+		text-decoration: none;
+		font-size: 1rem;
+	}
+	.hnav__disclosure-panel a:hover {
+		color: var(--site-accent);
+	}
+	.hnav__disclosure-rule {
+		border: none;
+		border-top: 1px solid var(--site-border-soft);
+		margin: var(--space-2, 8px) 0;
+	}
+	.hnav__engines--panel {
+		align-self: flex-start;
+		margin-block: var(--space-2, 8px);
+	}
+
+	/* ── ≤760px: swap the full nav for the disclosure (no wrapping) ───────── */
+	@media (max-width: 760px) {
+		.hnav__links,
+		.hnav__engines:not(.hnav__engines--panel),
+		.hnav__gh {
+			display: none;
+		}
+		.hnav__bar {
+			position: relative;
+			gap: var(--space-3);
+		}
+		.hnav__disclosure {
+			display: block;
+		}
+	}
+</style>
