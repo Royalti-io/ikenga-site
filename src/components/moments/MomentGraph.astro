@@ -1,23 +1,42 @@
 ---
 /**
- * MomentGraph.astro — SPIKE-07 capability-graph moment island.
+ * MomentGraph.astro — capability-graph moment island (WP-07 production pass
+ * over SPIKE-07, PASSED @ 61be832 — see plans/site-redesign/04-discussion.md).
  *
- * Feasibility + budget proof for Phase-2 WP-07: ports ONLY the shell's
- * Bundle-mode visual language (radial edge-bundling, kind-band arcs,
- * hover-to-trace) from `shell/src/shell/claude-config/analyze/graph-view.tsx`
- * — no React, no zoom/drag/force/dag modes, no `deriveGraph`.
+ * Ports ONLY the shell's Bundle-mode visual language (radial edge-bundling,
+ * kind-band arcs, hover-to-trace) from
+ * `shell/src/shell/claude-config/analyze/graph-view.tsx` — no React, no
+ * zoom/drag/force/dag modes, no `deriveGraph`.
  *
  * SSG-first: the radial layout (d3-hierarchy `cluster` + d3-shape
  * `lineRadial`/`curveBundle`) runs HERE, at `astro build` time, in Node.
  * The full SVG — every arc, path, and text label — ships as static markup.
- * There is ZERO client JS required to see the complete graph; the script at
- * the bottom only adds hover-to-trace and an optional ambient draw-in, both
- * gated so the static frame is also the correct reduced-motion frame
- * (island contract: ./CONTRACT.md).
+ * There is ZERO client JS required to see the complete graph; `moment-graph.ts`
+ * only adds hover/focus-to-trace and an optional ambient draw-in, both gated
+ * so the static frame is also the correct reduced-motion frame (island
+ * contract: ./CONTRACT.md).
  *
  * Honesty: every node/edge comes from ./graph-fixture.ts, which derives
  * strictly from the vendored ./cast.json (registry-verified — see that
  * file's header comment and the spike report for the node-count drift note).
+ *
+ * Tone (per CONTRACT.md, locked at G-MOMENT): the shell/stage recreation is a
+ * tone-INDEPENDENT dark app object and never flips — only the outer copy
+ * (h2/sub/foot) is tone-aware via `--site-*`. What WP-07 changed: the stage's
+ * internal near-black/neutral literals are now named `--moment-*` custom
+ * properties (mirroring MomentHero's block) instead of scattered magic hsl()
+ * literals, so the "graph tokens" are a single documented surface — same
+ * spirit as re-deriving from tokens, without breaking the locked contract.
+ * Contrast was verified both poles (see WP-07 report): the stage's own
+ * palette is fixed, so its internal contrast (node-label-muted on stage-bg,
+ * kind-hue text on stage-bg) doesn't change with page tone; the surrounding
+ * `--site-*` copy was checked against both the dark and parchment poles.
+ *
+ * Packaging: client script stays under the small-asset inlining threshold
+ * Astro applies automatically (measured 753 B gz inline in the page HTML,
+ * 8x under the 6KB budget) — kept inline by not doing anything to force a
+ * separate chunk; a hashed chunk only pays off once this script grows enough
+ * to amortize an extra request, which isn't the case here.
  */
 import { cluster, hierarchy, type HierarchyNode } from 'd3-hierarchy';
 import { arc as d3arc, curveBundle, lineRadial } from 'd3-shape';
@@ -79,14 +98,50 @@ const bandArc = d3arc<{ a0: number; a1: number }>()
 	.startAngle((d) => ((d.a0 - 3) * Math.PI) / 180)
 	.endAngle((d) => ((d.a1 + 3) * Math.PI) / 180);
 
+/**
+ * Label declutter (WP-07, fixes the engine-band collision visible at 11
+ * nodes): a naive `mid = (a0+a1)/2` label angle coincides EXACTLY with a
+ * node's own angle whenever a band has an odd member count (the cluster
+ * layout spaces children evenly, so the middle child sits at the true
+ * midpoint) or exactly one member (a0 === a1 === that node's angle). At
+ * that shared angle the band label's fixed-radius text lands right inside
+ * the reach of the coincident node's own (much longer) tangential label —
+ * see the ENGINES/`pkg-engine-codex` collision in the spike capture.
+ *
+ * Fix: bias the label angle off any node's exact angle — for odd counts,
+ * nudge by half the local inter-node gap so it falls *between* the middle
+ * node and its neighbor; for a single-member band, nudge by a small fixed
+ * offset. Even counts already land between two nodes, untouched. This is
+ * angle-count-general, so it holds as the cast densifies toward ~25 nodes.
+ */
+const ARC_LABEL_SOLO_NUDGE_DEG = 6;
+
 const arcs = (root.children ?? []).map((g) => {
-	const xs = (g.children ?? []).map((c) => c.x ?? 0);
-	return { kind: g.data.kind as GraphKind, a0: Math.min(...xs), a1: Math.max(...xs) };
+	const xs = (g.children ?? []).map((c) => c.x ?? 0).sort((a, b) => a - b);
+	const a0 = xs[0] ?? 0;
+	const a1 = xs[xs.length - 1] ?? 0;
+	const count = xs.length;
+	const gap = count > 1 ? (a1 - a0) / (count - 1) : 0;
+	const mid =
+		count <= 1
+			? a0 + ARC_LABEL_SOLO_NUDGE_DEG
+			: count % 2 === 1
+				? (a0 + a1) / 2 + gap / 2
+				: (a0 + a1) / 2;
+	return { kind: g.data.kind as GraphKind, a0, a1, mid };
 });
 
 function degree(id: string): number {
 	return graphFixture.edges.filter((e) => e.source === id || e.target === id).length;
 }
+
+/** Hub = a node dense enough in links that its label earns mobile real
+ * estate; leaves fold their label away below ~720px (arcs + circles stay —
+ * see the responsive rule in <style>). Threshold picked against today's
+ * fixture (mcp-iyke:7, /release-status:4, pkg-tasks:3 vs. everything else
+ * ≤2) and stays meaningful as the cast densifies — hubs are always the
+ * minority by construction of a capability graph. */
+const HUB_DEGREE = 3;
 
 /** Display-only shortening (drops the `@ikenga/` scope) so long registry
  * names don't collide at this canvas size. The full name still ships in
@@ -95,6 +150,13 @@ function degree(id: string): number {
 function shortLabel(label: string): string {
 	return label.replace(/^@ikenga\//, '');
 }
+
+// Stable, build-time ids for the <title>/<desc> pair — this island only ever
+// mounts once per page (moment-lab previews it beside the hero; production
+// mounts one instance), so a fixed literal is fine and keeps SSR output
+// deterministic (no per-render random suffix to fight caching/diffing).
+const titleId = 'mg-title';
+const descId = 'mg-desc';
 ---
 
 <section class="mg" data-moment="graph" data-tone={tone === 'light' ? 'light' : undefined}>
@@ -110,14 +172,17 @@ function shortLabel(label: string): string {
 		<svg
 			class="mg-svg"
 			role="img"
-			aria-label={`Capability graph — ${graphFixture.nodes.length} nodes, ${graphFixture.edges.length} links, radial bundle layout`}
+			aria-labelledby={`${titleId} ${descId}`}
 			viewBox={`0 0 ${SIZE} ${SIZE}`}
 			preserveAspectRatio="xMidYMid meet"
 		>
+			<title id={titleId}>Ikenga capability graph</title>
+			<desc id={descId}>
+				{`Radial-bundle diagram of ${graphFixture.nodes.length} real, shipping capabilities -- skills, commands, MCPs, engines, and installed pkgs -- grouped into ${arcs.length} kind bands and joined by ${graphFixture.edges.length} links. Every node is keyboard-focusable via Tab; focusing or hovering one highlights its outgoing links in amber and incoming links in teal.`}
+			</desc>
 			<g transform={`translate(${SIZE / 2},${SIZE / 2})`}>
 				{arcs.map((a) => {
-					const mid = (a.a0 + a.a1) / 2;
-					const rad = ((mid - 90) * Math.PI) / 180;
+					const rad = ((a.mid - 90) * Math.PI) / 180;
 					const lr = R + 30;
 					const band = bandArc(a) ?? undefined;
 					return (
@@ -163,6 +228,7 @@ function shortLabel(label: string): string {
 							class="mg-node"
 							data-node-id={n.id}
 							data-kind={n.kind}
+							data-hub={deg >= HUB_DEGREE ? '' : undefined}
 							tabindex="0"
 							role="button"
 							aria-label={`${n.label} — ${KIND_LABEL[n.kind]}, ${deg} connection${deg === 1 ? '' : 's'}. ${n.detail}`}
@@ -170,6 +236,7 @@ function shortLabel(label: string): string {
 						>
 							<circle
 								r={r}
+								style={`--mg-node-r: ${r}px`}
 								fill={`color-mix(in srgb, ${KIND_COLOR[n.kind]} 24%, var(--moment-shell-bg, hsl(28, 22%, 2.5%)))`}
 								stroke={KIND_COLOR[n.kind]}
 								stroke-width="1.5"
@@ -192,14 +259,26 @@ function shortLabel(label: string): string {
 
 	<p class="mg-foot">
 		<span class="mg-hd" aria-hidden="true">◆</span> Staged demo — every node shown is a real, shipping
-		capability (SPIKE-07) · hover or tab through a node to trace its links
+		capability · hover or tab through a node to trace its links
 	</p>
 </section>
 
 <style>
-	/* ── SPIKE-07 capability-graph moment ─────────────────────────────────── */
+	/* ── capability-graph moment (WP-07 production pass over SPIKE-07) ────── */
 	.mg {
 		--mg-ease: cubic-bezier(0.22, 0.61, 0.16, 1);
+
+		/* --moment-* locals: the D-01 near-black shell-object internals,
+		   named as tokens (mirrors MomentHero's block). Fixed across tone
+		   poles — per CONTRACT.md the stage recreation is a dark app OBJECT,
+		   not page chrome, so it must NOT flip with [data-tone]. */
+		--moment-shell-bg: hsl(28, 22%, 2.5%);
+		--moment-shell-border: hsl(30 18% 18% / 0.9);
+		--moment-node-label: hsl(32, 11%, 62%);
+		--moment-node-label-hot: hsl(36, 28%, 92%);
+		--moment-accent: hsl(42, 78%, 54%);
+		--moment-success: hsl(170, 42%, 54%);
+
 		display: block;
 		padding-block: var(--space-8, 32px);
 		background: var(--site-bg);
@@ -240,8 +319,8 @@ function shortLabel(label: string): string {
 		display: block;
 		width: 100%;
 		aspect-ratio: 1 / 1;
-		background: hsl(28, 22%, 2.5%);
-		border: 1px solid hsl(30 18% 18% / 0.9);
+		background: var(--moment-shell-bg);
+		border: 1px solid var(--moment-shell-border);
 		border-radius: var(--radius-lg, 10px);
 		box-shadow: 0 32px 80px -28px hsl(0 0% 0% / 0.8);
 	}
@@ -259,12 +338,12 @@ function shortLabel(label: string): string {
 		stroke-opacity: 0.06;
 	}
 	.mg-edge.mg-edge-out {
-		stroke: hsl(42, 78%, 54%);
+		stroke: var(--moment-accent);
 		stroke-width: 2;
 		stroke-opacity: 0.9;
 	}
 	.mg-edge.mg-edge-in {
-		stroke: hsl(170, 42%, 54%);
+		stroke: var(--moment-success);
 		stroke-width: 2;
 		stroke-opacity: 0.9;
 	}
@@ -280,21 +359,21 @@ function shortLabel(label: string): string {
 	}
 	.mg-node-label {
 		font: 500 8px var(--site-font-mono);
-		fill: hsl(32, 11%, 62%);
+		fill: var(--moment-node-label);
 		transition: fill 0.15s var(--mg-ease);
 	}
 	.mg-node.mg-node-hot circle {
 		stroke-width: 2.5;
 	}
 	.mg-node.mg-node-hot .mg-node-label {
-		fill: hsl(36, 28%, 92%);
+		fill: var(--moment-node-label-hot);
 		font-weight: 600;
 	}
 	.mg-node.mg-node-dim {
 		opacity: 0.18;
 	}
 	.mg-node:focus-visible circle {
-		outline: 2px solid hsl(42, 78%, 54%);
+		outline: 2px solid var(--moment-accent);
 		outline-offset: 2px;
 	}
 
@@ -307,6 +386,29 @@ function shortLabel(label: string): string {
 	}
 	.mg-hd {
 		color: var(--site-accent);
+	}
+
+	/* ── Responsive simplify (WP-07): below ~720px the canvas itself still
+	   scales down via the 100%-width/1:1-aspect box above, so raw px values
+	   (node circle r, font-size) shrink right along with it. Compensate by
+	   bumping both relatively bigger, and declutter by dropping non-hub node
+	   labels (arcs, kind-band labels, and all edges/nodes stay — only the
+	   long tangential leaf labels that are most prone to crowding go). Hub
+	   nodes (data-hub, degree >= HUB_DEGREE) keep their label as the
+	   surviving orientation cues. ─────────────────────────────────────────── */
+	@media (max-width: 720px) {
+		.mg-node circle {
+			r: calc(var(--mg-node-r, 4px) * 1.4);
+		}
+		.mg-arc-label {
+			font-size: 10px;
+		}
+		.mg-node-label {
+			font-size: 9.5px;
+		}
+		.mg-node:not([data-hub]) .mg-node-label {
+			display: none;
+		}
 	}
 
 	@media (prefers-reduced-motion: reduce) {
