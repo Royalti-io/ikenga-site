@@ -1,100 +1,102 @@
 /**
  * moment-hero.ts — the proving-moment hero's beat, on the shared timeline engine.
  *
- * `MomentTimeline` (the reusable spine every "shell moment" on ikenga.dev
- * drives) now lives in `./timeline.ts` — extracted at WP-06 so the tasks and
- * install moments can share it verbatim. This module keeps only the
- * hero-specific wiring: the reveal helper, the beat schedule (type
- * `/groundwork status` → panes light up → artifact assembles → chips settle),
- * and the rotating-agent H1. Behavior here is unchanged by the extraction.
+ * WP-14 hybrid: the shell content is a real capture (see MomentHero.astro), so
+ * this beat no longer types a command or reveals recreated panes. It drives the
+ * overlay theatre over the real pixels — three pane scrims power on in sequence
+ * (tasks → terminal → artifact), a light sweep passes once, and a highlight ring
+ * settles on the assembled artifact — then clears to the clean capture. The
+ * rotating-agent H1 is unchanged.
  *
  * Motion rules (island contract): compositor-friendly properties only
- * (transform / opacity) via WAAPI; durations + easing from the token ramp
- * below. No CSS scroll-timeline dependency.
- *
- * `mountMomentHero` wires the hero beat on top of the generic engine. The
- * module self-initialises every `[data-moment="hero"]` root on load.
+ * (transform / opacity) via WAAPI; durations + easing from the token ramp below.
+ * `mountMomentHero` wires the beat on the generic engine; the module
+ * self-initialises every `[data-moment="hero"]` root on load.
  */
 import { MomentTimeline, type MomentTimelineOptions, type ScheduledStep } from './timeline';
 
 // ── Token ramp (mirrors the scoped CSS --mh-ease / durations) ─────────────
 const EASE = 'cubic-bezier(0.22, 0.61, 0.16, 1)';
-const REVEAL_MS = 300;
-const REVEAL_SHIFT = 6; // px of translateY the reveal rises through
+const LIFT_MS = 460; // a pane powering on
 
 // ── Hero-specific wiring ──────────────────────────────────────────────────
 
-/** WAAPI reveal — transform/opacity only, final state committed inline. */
-function reveal(el: HTMLElement): void {
-	el.style.opacity = '1';
-	el.style.transform = 'none';
-	el.animate(
-		[
-			{ opacity: 0, transform: `translateY(${REVEAL_SHIFT}px)` },
-			{ opacity: 1, transform: 'translateY(0)' },
-		],
-		{ duration: REVEAL_MS, easing: EASE, fill: 'both' },
-	);
+/** Lift a pane scrim (opacity → 0), committing the final state inline. */
+function liftScrim(el: HTMLElement): void {
+	el.style.opacity = '0';
+	el.animate([{ opacity: 0.86 }, { opacity: 0 }], { duration: LIFT_MS, easing: EASE, fill: 'both' });
 }
 
 export function mountMomentHero(root: HTMLElement): MomentTimeline {
-	const typed = root.querySelector<HTMLElement>('[data-typed]');
-	const cursor = root.querySelector<HTMLElement>('[data-cursor]');
-	const cmd = root.dataset.cmd ?? '';
-	const animated = () => Array.from(root.querySelectorAll<HTMLElement>('.mh-m'));
-	const group = (n: number) =>
-		Array.from(root.querySelectorAll<HTMLElement>(`.mh-m[data-step="${n}"]`));
+	const scrim = (k: string) => root.querySelector<HTMLElement>(`[data-fx="${k}"]`);
+	const scrims = Array.from(root.querySelectorAll<HTMLElement>('.mh-scrim'));
+	const sweep = root.querySelector<HTMLElement>('[data-sweep]');
+	const ring = root.querySelector<HTMLElement>('[data-ring]');
 
 	const reset = (): void => {
-		if (typed) typed.textContent = '';
-		if (cursor) cursor.style.display = '';
-		for (const el of animated()) {
+		for (const el of scrims) {
 			el.getAnimations().forEach((a) => a.cancel());
-			el.style.opacity = '';
-			el.style.transform = '';
+			el.style.opacity = ''; // → CSS armed state (0.86 under [data-anim=js])
+		}
+		if (sweep) {
+			sweep.getAnimations().forEach((a) => a.cancel());
+			sweep.style.opacity = '0';
+			sweep.style.transform = '';
+		}
+		if (ring) {
+			ring.getAnimations().forEach((a) => a.cancel());
+			ring.style.opacity = '0';
 		}
 	};
 
 	const finalFrame = (): void => {
-		if (typed) typed.textContent = cmd;
-		if (cursor) cursor.style.display = 'none';
-		for (const el of animated()) {
-			el.style.opacity = '1';
-			el.style.transform = 'none';
+		// Clean capture: every overlay off (also the reduced-motion frame).
+		for (const el of scrims) {
+			el.getAnimations().forEach((a) => a.cancel());
+			el.style.opacity = '0';
 		}
+		if (sweep) sweep.style.opacity = '0';
+		if (ring) ring.style.opacity = '0';
 	};
 
-	// Locked D-01 pacing: type → +420 status → +700 board → +900 artifact
-	// → +900 settle. Staggers per group match the board rev 2.
+	// Beat: sweep passes → tasks pane on → terminal on → artifact on + ring.
 	const build = (): ScheduledStep[] => {
 		const steps: ScheduledStep[] = [];
-		const START = 380;
-		const CHAR = 52;
-		for (let i = 0; i < cmd.length; i++) {
-			const upto = i + 1;
-			steps.push({
-				at: START + i * CHAR,
-				fn: () => {
-					if (typed) typed.textContent = cmd.slice(0, upto);
-				},
-			});
-		}
-		const typeDone = START + cmd.length * CHAR;
-		const t2 = typeDone + 420;
-		const t3 = t2 + 700;
-		const t4 = t3 + 900;
-		const t5 = t4 + 900;
-		const groups: Array<[number, number, number]> = [
-			[2, t2, 160],
-			[3, t3, 130],
-			[4, t4, 150],
-			[5, t5, 120],
+		steps.push({
+			at: 220,
+			fn: () => {
+				if (!sweep) return;
+				sweep.style.opacity = '1';
+				sweep.animate(
+					[
+						{ transform: 'translateX(-160%) skewX(-12deg)', opacity: 0 },
+						{ transform: 'translateX(-40%) skewX(-12deg)', opacity: 1, offset: 0.5 },
+						{ transform: 'translateX(180%) skewX(-12deg)', opacity: 0 },
+					],
+					{ duration: 1100, easing: EASE, fill: 'both' },
+				);
+			},
+		});
+		const order: Array<[string, number]> = [
+			['tasks', 360],
+			['term', 620],
+			['art', 900],
 		];
-		for (const [n, base, stagger] of groups) {
-			group(n).forEach((el, i) =>
-				steps.push({ at: base + i * stagger, fn: () => reveal(el) }),
-			);
+		for (const [k, at] of order) {
+			const el = scrim(k);
+			if (el) steps.push({ at, fn: () => liftScrim(el) });
 		}
+		steps.push({
+			at: 900 + LIFT_MS - 60,
+			fn: () => {
+				if (!ring) return;
+				ring.animate([{ opacity: 0 }, { opacity: 0.9, offset: 0.28 }, { opacity: 0.9, offset: 0.72 }, { opacity: 0 }], {
+					duration: 1500,
+					easing: EASE,
+					fill: 'both',
+				});
+			},
+		});
 		return steps;
 	};
 

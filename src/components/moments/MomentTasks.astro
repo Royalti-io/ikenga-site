@@ -1,27 +1,30 @@
 ---
 /**
- * MomentTasks.astro — the tasks/agenda beat (WP-06).
+ * MomentTasks.astro — the tasks/agenda beat (WP-06 · WP-14 hybrid).
  *
- * Recreates a slice of the D-01 shell language at pane scale: a boxed
- * "Agenda" pane fills from `cast.tasks_teaser`, the first row ticks done,
- * and the pane-head chip flips its open/done count. Anatomy mirrors
- * `MomentHero.astro` (pane head, boxed mono-uppercase chips, status dots) —
- * this island renders the pane on its own, not the full sidebar+rail shell
- * (that's the hero's job). All content is imported from `cast.json` at BUILD
- * time (SSG, no runtime fetch); reduced-motion / no-JS render the composed
- * final frame with zero script. Motion + lifecycle live in
- * `./moment-tasks.ts` (on the shared `./timeline.ts` engine). See
- * `./CONTRACT.md`.
+ * DEC-8 hybrid retrofit: the pane PIXELS are a real capture of the running
+ * Tasks pkg's Agenda view (`/assets/shell/tasks-shell-*.{avif,webp}`, cropped
+ * from the WP-11 staged-cast session — Sunday Jul 5, one overdue task pulled
+ * forward above two scheduled, the live "now" line). The DOM theatre survives
+ * as the tone-aware copy, the framed pane, and two overlays that demonstrably
+ * match the real surface: a highlight ring settles on the overdue card and a
+ * spark rides the real now-line. No DOM recreation of rows/checkboxes — the
+ * capture is the agenda.
  *
- * Honesty (G-19/G-21): `tasks_teaser.titles` are the cast's own launch-week
- * task copy — nothing invented. Which row ticks (the first) is a display
- * choice, not a claim about task ordering/priority in the product.
+ * Colour contract (unchanged): outer copy reads the tone-aware `--site-*`
+ * layer; the pane capture is a tone-independent dark object. Motion + lifecycle
+ * live in `./moment-tasks.ts` (on the shared `./timeline.ts` engine). See
+ * `./CONTRACT.md`. The frame carries an explicit aspect-ratio → zero CLS; the
+ * capture is lazy-loaded.
+ *
+ * Honesty (G-19/G-21): the agenda is the staged-cast's own launch-week tasks —
+ * nothing invented. The ring/spark only draw the eye to real pixels.
  */
 import castData from './cast.json';
 
 type Cast = typeof castData;
 export interface Props {
-	/** Tone pole for the OUTER copy only; the shell pane stays dark. */
+	/** Tone pole for the OUTER copy only; the pane capture stays dark. */
 	tone?: 'dark' | 'light';
 	/** Autoplay policy handed to the timeline engine. */
 	autoplay?: 'viewport' | 'immediate' | 'manual';
@@ -29,103 +32,77 @@ export interface Props {
 	cast?: Cast;
 }
 const { tone = 'dark', autoplay = 'viewport', cast = castData } = Astro.props;
-
-const titles = cast.tasks_teaser.titles;
-const tickIndex = 0; // the row baked as already-done — most launch-critical task first
-const chipOpen = `${titles.length} open`;
-const chipDone = `${Math.max(0, titles.length - 1)} open · 1 done`;
+// cast referenced for provenance parity with the other moments (SSG-only).
+void cast;
 
 const svg = (body: string, opts = 'fill="none" stroke="currentColor" stroke-width="1.6"') =>
 	`<svg viewBox="0 0 24 24" ${opts} aria-hidden="true">${body}</svg>`;
 const icons = {
-	tasks: svg(
-		'<rect x="3.5" y="4.5" width="17" height="15" rx="1.6"/><path d="M7.5 9.5h9M7.5 12.5h9M7.5 15.5h5.5" stroke-linecap="round"/>',
-	),
-	check: svg('<path d="M5 12.5 10 17.5 19 6.5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'),
 	replay: svg(
 		'<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3" stroke-linecap="round"/><path d="M19.5 3.5V9h-5.4z" fill="currentColor" stroke="none"/>',
 	),
 	diamond: svg('<path d="M12 3 21 12 12 21 3 12z"/>', 'fill="currentColor"'),
 };
+
+const TASKS = '/assets/shell/tasks-shell';
+const tasksSrcset = (ext: string) =>
+	`${TASKS}-643.${ext} 643w, ${TASKS}-965.${ext} 965w, ${TASKS}-1286.${ext} 1286w`;
+const TASKS_SIZES = '(min-width: 800px) 768px, 92vw';
 ---
 
 <section
 	class="mt"
 	data-moment="tasks"
 	data-autoplay={autoplay}
-	data-chip-open={chipOpen}
-	data-chip-done={chipDone}
 	data-tone={tone === 'light' ? 'light' : undefined}
 >
 	<div class="mt-copy">
 		<h2 class="mt-h2">Tasks that don't slip.</h2>
-		<p class="mt-sub">The agenda fills itself from what's due — check one off, the count moves with it.</p>
+		<p class="mt-sub">The agenda fills itself from what's due — overdue work is pulled forward, past the line marked now.</p>
 	</div>
 
 	<div class="mt-stage">
 		<div
 			class="mt-shell"
-			aria-label="Ikenga tasks pane — a launch-week agenda fills in, then the top task is checked off and the open count updates."
+			aria-label="The Ikenga Tasks pane, Agenda view for Sunday July 5 — an overdue launch task pulled forward above two scheduled tasks, with a live now-line."
 		>
-			<div class="mt-crumb">
-				<s class="mt-mk" set:html={icons.tasks} /> <b>{cast.project.slug}</b>
-				<span class="mt-crumb-sep">›</span> Tasks · Agenda
-			</div>
-			<div class="mt-pane">
-				<div class="mt-pane-head">
-					<span class="mt-n">Agenda</span> · today
-					<span class="mt-sp"></span>
-					<span class="mt-chip" data-chip>{chipDone}</span>
-				</div>
-				<div class="mt-pane-body">
-					{titles.map((t, i) => {
-						const done = i === tickIndex;
-						return (
-							<div class:list={['mt-row mt-m', done && 'done']} data-row={i}>
-								<span class:list={['mt-box', done && 'on']} data-box>
-									<span class="mt-checkglyph" data-checkglyph set:html={icons.check} />
-								</span>
-								<span class="mt-t">{t}</span>
-								<span class="mt-sp"></span>
-								<span class="mt-chip done mt-rowchip" data-rowchip>done</span>
-							</div>
-						);
-					})}
-				</div>
+			<picture>
+				<source type="image/avif" srcset={tasksSrcset('avif')} sizes={TASKS_SIZES} />
+				<source type="image/webp" srcset={tasksSrcset('webp')} sizes={TASKS_SIZES} />
+				<img
+					class="mt-img"
+					src={`${TASKS}-965.webp`}
+					width="1286"
+					height="472"
+					loading="lazy"
+					decoding="async"
+					alt="Screenshot of the Ikenga Tasks Agenda for Sunday, July 5 — an overdue 'Fix the OG card' task pulled forward, then two in-progress launch tasks, above a green now-line."
+				/>
+			</picture>
+
+			<div class="mt-fx" aria-hidden="true">
+				<span class="mt-ring" data-ring style="left:30.4%;top:37%;width:64.4%;height:14%"></span>
+				<span class="mt-nowline" data-nowline style="left:25.5%;top:83.1%;width:68.3%">
+					<span class="mt-spark" data-spark></span>
+				</span>
 			</div>
 		</div>
 
 		<div class="mt-foot">
-			<span class="mt-honest"><span class="mt-hd" set:html={icons.diamond} /> Staged demo — the real Tasks pkg ships today</span>
+			<span class="mt-honest"><span class="mt-hd" set:html={icons.diamond} /> Real capture of the Tasks pkg — ships today</span>
 			<button class="mt-replay" data-replay type="button"><span class="mt-ri" set:html={icons.replay} /> replay</button>
 		</div>
 	</div>
 </section>
 
 <style>
-	/* ── Moment island: tasks/agenda beat ─────────────────────────────────── */
+	/* ── Moment island: tasks/agenda beat (WP-14 hybrid) ──────────────────── */
 	.mt {
 		--mt-ease: cubic-bezier(0.22, 0.61, 0.16, 1);
-		/* --moment-* locals: same tone-independent dark shell object as the
-		   hero (MomentHero.astro) — a self-contained pane, not page chrome. */
 		--moment-shell-bg: hsl(28, 22%, 2.5%);
 		--moment-shell-border: hsl(30 18% 18% / 0.9);
-		--moment-mn-bg: hsl(28, 20%, 3%);
-		--moment-crumb-sep: hsl(28, 10%, 28%);
-		--moment-pane-bg: hsl(28, 20%, 3%);
-		--moment-row-bg: hsl(28, 14%, 5%);
-		--moment-head: hsl(28, 10%, 40%);
-		--moment-head-n: hsl(28, 10%, 52%);
-		--moment-fg: hsl(36, 28%, 90%);
-		--moment-fg-muted: hsl(32, 11%, 56%);
-		--moment-fg-faint: hsl(28, 10%, 44%);
-		--moment-border: hsl(28, 14%, 15%);
-		--moment-border-soft: hsl(28, 14%, 11%);
 		--moment-accent: hsl(42, 78%, 54%);
 		--moment-success: hsl(170, 42%, 54%);
-		--moment-dim-dot: hsl(28, 10%, 26%);
-		--moment-chip-done-bg: hsl(170 30% 10% / 0.5);
-		--moment-chip-done-bd: hsl(170 42% 30% / 0.7);
 
 		display: block;
 		padding-block: var(--space-8, 32px);
@@ -151,189 +128,68 @@ const icons = {
 	.mt-sub {
 		font-size: clamp(0.9375rem, 1.4vw, 1.0625rem);
 		color: var(--site-muted);
-		max-width: 46ch;
+		max-width: 48ch;
 		margin: 0 auto;
 		line-height: 1.5;
 	}
 
 	.mt-stage {
-		max-width: 40rem;
+		max-width: 48rem;
 		margin-inline: auto;
 		padding-inline: var(--space-6, 24px);
 	}
 
-	/* Box reserved before hydration — zero CLS. SSG content means the box is
-	   never empty regardless, but the ratio still guarantees layout stability. */
+	/* Box reserved before the lazy image decodes — zero CLS. Ratio = the crop. */
 	.mt-shell {
 		position: relative;
 		background: var(--moment-shell-bg);
 		border: 1px solid var(--moment-shell-border);
 		border-radius: var(--radius-lg, 10px);
 		overflow: hidden;
-		font-size: 13px;
-		color: var(--moment-fg);
 		box-shadow: 0 32px 80px -28px hsl(0 0% 0% / 0.8);
-		aspect-ratio: 640 / 320;
-		display: flex;
-		flex-direction: column;
-		-webkit-font-smoothing: antialiased;
-		text-rendering: optimizeLegibility;
+		aspect-ratio: 1286 / 472;
 	}
-	.mt-shell,
-	.mt-shell * {
-		line-height: 1.5;
-		box-sizing: border-box;
-	}
-	.mt-shell s :global(svg) {
+	.mt-img {
+		display: block;
 		width: 100%;
 		height: 100%;
-		display: block;
+		object-fit: cover;
+		object-position: top left;
 	}
 
-	.mt-crumb {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		padding: 10px 14px;
-		border-bottom: 1px solid var(--moment-border-soft);
-		font: 500 10.5px var(--site-font-mono);
-		color: var(--moment-fg-faint);
-		flex: none;
-	}
-	.mt-mk {
-		width: 13px;
-		height: 13px;
-		color: var(--moment-accent);
-		display: inline-flex;
-	}
-	.mt-crumb b {
-		color: var(--moment-fg);
-		font-weight: 500;
-	}
-	.mt-crumb-sep {
-		color: var(--moment-crumb-sep);
-	}
-
-	.mt-pane {
-		background: var(--moment-mn-bg);
-		display: flex;
-		flex-direction: column;
-		flex: 1;
-		min-height: 0;
-	}
-	.mt-pane-head {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		padding: 8px 14px;
-		border-bottom: 1px solid var(--moment-border-soft);
-		font: 500 9px var(--site-font-mono);
-		letter-spacing: 0.18em;
-		text-transform: uppercase;
-		color: var(--moment-head);
-		flex: none;
-	}
-	.mt-pane-head .mt-n {
-		color: var(--moment-head-n);
-	}
-	.mt-sp {
-		flex: 1;
-	}
-
-	.mt-chip {
-		font: 500 8.5px var(--site-font-mono);
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
-		padding: 2px 8px;
-		border-radius: 4px;
-		border: 1px solid var(--moment-border);
-		color: var(--moment-fg-faint);
-		white-space: nowrap;
-		display: inline-block;
-	}
-	.mt-chip.done {
-		color: var(--moment-success);
-		border-color: var(--moment-chip-done-bd);
-		background: var(--moment-chip-done-bg);
-	}
-
-	.mt-pane-body {
-		flex: 1;
-		min-height: 0;
-		padding: 16px 16px;
-		display: flex;
-		flex-direction: column;
-		justify-content: center;
-		gap: 10px;
-	}
-
-	.mt-row {
-		display: flex;
-		align-items: center;
-		gap: 10px;
-		padding: 9px 11px;
-		border: 1px solid var(--moment-border-soft);
-		border-radius: 7px;
-		background: var(--moment-row-bg);
-		font: 400 12px var(--site-font-body);
-	}
-	.mt-box {
-		width: 15px;
-		height: 15px;
-		flex: none;
-		border-radius: 4px;
-		border: 1.4px solid var(--moment-dim-dot);
-		display: grid;
-		place-items: center;
-		color: var(--moment-success);
-		transition: border-color 0.2s var(--mt-ease), background 0.2s var(--mt-ease);
-	}
-	.mt-checkglyph {
-		width: 10px;
-		height: 10px;
-		display: inline-flex;
-		opacity: 0;
-	}
-	.mt-box.on {
-		border-color: var(--moment-success);
-		background: hsl(170 42% 54% / 0.14);
-	}
-	.mt-box.on .mt-checkglyph {
-		opacity: 1;
-	}
-	.mt-t {
-		color: var(--moment-fg-muted);
-		min-width: 0;
+	.mt-fx {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
 		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
 	}
-	.mt-rowchip {
-		display: none;
-	}
-	.mt-row.done .mt-t {
-		color: var(--moment-fg-faint);
-	}
-	.mt-row.done .mt-rowchip {
-		display: inline-block;
-	}
-
-	/* ── animation gating (default = SSG final frame; JS hides to reveal) ── */
-	.mt[data-anim='js'] .mt-m {
+	.mt-ring {
+		position: absolute;
+		border: 1px solid var(--moment-accent);
+		border-radius: 8px;
+		box-shadow: 0 0 0 1px hsl(42 78% 54% / 0.22), 0 0 20px hsl(42 78% 54% / 0.26);
 		opacity: 0;
-		transform: translateY(6px);
+	}
+	/* Track riding the real now-line; the spark travels its full width via
+	   `cqw` (container-relative), keeping the motion transform-only. */
+	.mt-nowline {
+		position: absolute;
+		height: 2px;
+		container-type: inline-size;
+	}
+	.mt-spark {
+		position: absolute;
+		top: 50%;
+		left: 0;
+		width: 22px;
+		height: 22px;
+		margin: -11px 0 0 -11px;
+		border-radius: 999px;
+		background: radial-gradient(circle, hsl(170 60% 72% / 0.85), transparent 68%);
+		opacity: 0;
 	}
 
-	/* ── responsive: the fixed aspect-ratio is a desktop-proportions device;
-	   below this width the reserved ratio would clip the pane body, so the
-	   box reflows to content height instead (same principle as the hero's
-	   860px breakpoint, scaled to this pane's narrower stage). ─────────────── */
-	@media (max-width: 640px) {
-		.mt-shell {
-			aspect-ratio: auto;
-		}
-	}
-
+	/* ── foot ─────────────────────────────────────────────────────────────── */
 	.mt-foot {
 		display: flex;
 		align-items: center;
@@ -343,6 +199,7 @@ const icons = {
 		font-size: 0.8125rem;
 		color: var(--site-faint);
 		flex-wrap: wrap;
+		text-align: center;
 	}
 	.mt-honest {
 		display: inline-flex;
@@ -378,16 +235,14 @@ const icons = {
 		border-color: var(--site-accent);
 	}
 
-	/* ── reduced motion: composed final frame, zero animation ────────────── */
+	/* ── reduced motion: the clean capture, zero animation ────────────────── */
 	@media (prefers-reduced-motion: reduce) {
-		.mt-m {
-			opacity: 1 !important;
+		.mt-ring,
+		.mt-spark {
+			opacity: 0 !important;
 			transform: none !important;
 		}
 		.mt-replay {
-			transition: none;
-		}
-		.mt-box {
 			transition: none;
 		}
 	}

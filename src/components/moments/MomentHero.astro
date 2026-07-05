@@ -1,31 +1,31 @@
 ---
 /**
- * MomentHero.astro — the proving moment island (WP-03 / G-MOMENT).
+ * MomentHero.astro — the proving moment island (WP-03 / G-MOMENT · WP-14 hybrid).
  *
- * Recreates the locked D-01 "Theatre" hero beat at production fidelity:
- * a one-line headline over a near-full-bleed recreation of the Ikenga shell
- * running `/groundwork status` — panes light up, an artifact assembles, chips
- * settle. All content is imported from `cast.json` at BUILD time (SSG, no
- * runtime fetch), so the DOM ships complete and the reduced-motion / no-JS
- * final frame is correct with zero script.
+ * DEC-8 hybrid retrofit: the shell PIXELS are now a real capture of the running
+ * Ikenga workspace (`/assets/shell/hero-shell-*.{avif,webp}`, cropped from the
+ * WP-11 staged-cast session — tasks pane ∥ launch-readiness dashboard artifact ∥
+ * terminal). The DOM theatre survives as the staged lighting around the frame
+ * (tone-aware copy, ember light pool, the framed "window") plus small overlays
+ * that demonstrably match the real surface: the three panes power on in
+ * sequence and a highlight ring settles on the assembled artifact. No DOM
+ * recreation of shell content — the founder's R5 complaint (recreated panes
+ * don't read as the real app) is answered by using the real app.
  *
- * Colour contract:
- *   · outer copy (headline, sub, ghost row, foot) reads brand intent from the
- *     tone-aware `--site-*` layer (flips under [data-tone="light"]);
- *   · the shell is a tone-INDEPENDENT dark app object — every near-black
- *     internal is a `--moment-*` local (the D-01 hardcodes, extracted here),
- *     fixed across poles so the "window" always reads as the same object.
- *
- * Tofu guard: every technical/box-drawing glyph in D-01 (⌗ ▤ ◫ ▦ ⚙ ⚡ ◉ ◐ ▣
- * ◆ ✓ ⟳) is replaced with a tiny inline SVG so no glyph font can tofu.
+ * Colour contract (unchanged): outer copy reads brand intent from the
+ * tone-aware `--site-*` layer (flips under [data-tone="light"]); the shell is a
+ * tone-INDEPENDENT dark object (now a photographic capture, always the same
+ * "window"). The overlay FX use `--moment-*` locals, fixed across poles.
  *
  * Motion + lifecycle live in ./moment-hero.ts (MomentTimeline). See CONTRACT.md.
+ * LCP stays the H1 text (DEC-7); the capture is lazy-loaded below it. The frame
+ * carries an explicit aspect-ratio so the box is reserved → zero CLS.
  */
 import castData from './cast.json';
 
 type Cast = typeof castData;
 export interface Props {
-	/** Tone pole for the OUTER copy only; the shell stays dark. */
+	/** Tone pole for the OUTER copy only; the shell capture stays dark. */
 	tone?: 'dark' | 'light';
 	/** Autoplay policy handed to the timeline engine. */
 	autoplay?: 'viewport' | 'immediate' | 'manual';
@@ -34,32 +34,13 @@ export interface Props {
 }
 const { tone = 'dark', autoplay = 'viewport', cast = castData } = Astro.props;
 
-// ── content derived from the cast ─────────────────────────────────────────
-const cmd = cast.terminal_transcript.lines[0].text;
-const responseLines = cast.terminal_transcript.lines.filter((l) => l.role === 'response');
 const engines = cast.engines_rotation;
 
 // ── inline SVG icon set (currentColor; sized by the consuming rule) ───────
 const svg = (body: string, opts = 'fill="none" stroke="currentColor" stroke-width="1.6"') =>
 	`<svg viewBox="0 0 24 24" ${opts} aria-hidden="true">${body}</svg>`;
 const icons: Record<string, string> = {
-	brand: svg('<path d="M9 3 7 21M17 3 15 21M3 9h18M3 15h18" stroke-linecap="round"/>'),
-	tasks: svg(
-		'<rect x="3.5" y="4.5" width="17" height="15" rx="1.6"/><path d="M7.5 9.5h9M7.5 12.5h9M7.5 15.5h5.5" stroke-linecap="round"/>',
-	),
-	panels: svg('<rect x="3.5" y="4.5" width="17" height="15" rx="1.6"/><path d="M12 4.5v15"/>'),
-	store: svg(
-		'<rect x="3.5" y="4.5" width="17" height="15" rx="1.6"/><path d="M3.5 12h17M12 4.5v15"/>',
-	),
-	gear: svg(
-		'<circle cx="12" cy="12" r="3.1"/><path d="M12 3v2.4M12 18.6V21M4.2 7.5l2.1 1.2M17.7 15.3l2.1 1.2M4.2 16.5l2.1-1.2M17.7 8.7l2.1-1.2" stroke-linecap="round"/>',
-	),
-	bolt: svg('<path d="M13 2.5 4.5 13.5H10l-1 8 8.5-11.5H12z"/>', 'fill="currentColor"'),
-	scopeAll: svg('<circle cx="12" cy="12" r="7.5"/><circle cx="12" cy="12" r="3.1" fill="currentColor" stroke="none"/>'),
-	scopeHalf: svg('<circle cx="12" cy="12" r="7.5"/><path d="M12 4.5a7.5 7.5 0 0 1 0 15z" fill="currentColor" stroke="none"/>'),
-	scopeSquare: svg('<rect x="4.5" y="4.5" width="15" height="15" rx="1.4"/><rect x="8.6" y="8.6" width="6.8" height="6.8" fill="currentColor" stroke="none"/>'),
 	diamond: svg('<path d="M12 3 21 12 12 21 3 12z"/>', 'fill="currentColor"'),
-	check: svg('<path d="M5 12.5 10 17.5 19 6.5" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>'),
 	replay: svg(
 		'<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3" stroke-linecap="round"/><path d="M19.5 3.5V9h-5.4z" fill="currentColor" stroke="none"/>',
 	),
@@ -78,37 +59,16 @@ const engineIcon: Record<string, string> = {
 };
 const engineMono: Record<string, boolean> = { Codex: true };
 
-// ── emphasis helpers (deterministic from the cast) ────────────────────────
-const esc = (s: string) => s.replace(/[&<>]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;' })[c] as string);
-const amberTokens = [cast.project.slug, cast.artifact.filename].filter(Boolean) as string[];
-function emphasize(text: string): string {
-	let html = esc(text);
-	for (const t of amberTokens) {
-		html = html.split(esc(t)).join(`<span class="mh-amber">${esc(t)}</span>`);
-	}
-	// timing badge reads as a success beat (matches D-01)
-	html = html.replace(/(done in [\d.]+s)/, '<span class="mh-ok-t">$1</span>');
-	return html;
-}
-function artItem(item: string): string {
-	const e = esc(item);
-	const m = e.match(/^(\S+)(.*)$/s);
-	let html = m ? `<b>${m[1]}</b>${m[2]}` : e;
-	html = html.replace(/\bozi\b/, '<i>ozi</i>'); // lore touch, italic
-	return html;
-}
-
-const boardMap: Record<string, { dot: string; chip: string; label: string }> = {
-	done: { dot: 'g', chip: 'done', label: 'done' },
-	review: { dot: 'a', chip: 'rev', label: 'review' },
-	queued: { dot: 'dim', chip: 'q', label: 'queued' },
-};
+// ── capture asset (WP-11 export; cropped app frame, 1680×1050) ────────────
+const HERO = '/assets/shell/hero-shell';
+const heroSrcset = (ext: string) =>
+	`${HERO}-840.${ext} 840w, ${HERO}-1260.${ext} 1260w, ${HERO}-1680.${ext} 1680w`;
+const HERO_SIZES = '(min-width: 1088px) 1056px, 92vw';
 ---
 
 <section
 	class="mh"
 	data-moment="hero"
-	data-cmd={cmd}
 	data-autoplay={autoplay}
 	data-tone={tone === 'light' ? 'light' : undefined}
 >
@@ -133,152 +93,51 @@ const boardMap: Record<string, { dot: string; chip: string; label: string }> = {
 	<div class="mh-stage">
 		<div
 			class="mh-shell"
-			aria-label="Ikenga workspace running a groundwork status check — panes light up as the skill reports and an artifact takes shape."
+			aria-label="The Ikenga workspace running a launch-week project: a Tasks pane, a v0.3 launch-readiness dashboard artifact, and a terminal session side by side."
 		>
-			<div class="mh-shell-in">
-				<!-- activity rail -->
-				<div class="mh-rail" aria-hidden="true">
-					<i set:html={icons.tasks} />
-					<i set:html={icons.panels} />
-					<i set:html={icons.store} />
-					<span class="mh-sp"></span>
-					<i class="on" set:html={icons.brand} />
-					<i set:html={icons.gear} />
-					<b class="mh-avatar">IK</b>
-				</div>
+			<picture>
+				<source type="image/avif" srcset={heroSrcset('avif')} sizes={HERO_SIZES} />
+				<source type="image/webp" srcset={heroSrcset('webp')} sizes={HERO_SIZES} />
+				<img
+					class="mh-img"
+					src={`${HERO}-1260.webp`}
+					width="1680"
+					height="1050"
+					loading="lazy"
+					decoding="async"
+					alt="Screenshot of the Ikenga desktop workspace — a Tasks pane with an overdue launch task selected, a v0.3 launch-readiness dashboard artifact, and a terminal session, arranged in split panes."
+				/>
+			</picture>
 
-				<!-- sidebar -->
-				<div class="mh-sb" aria-hidden="true">
-					<div class="mh-sb-brand"><span class="mh-mark" set:html={icons.brand} /> Ikenga <kbd>⌘1</kbd></div>
-					<div class="mh-sect">Run</div>
-					<div class="mh-item on"><s class="mh-kd skill" set:html={icons.bolt} /> groundwork <kbd>run</kbd></div>
-					<div class="mh-item"><s class="mh-kd skill" set:html={icons.bolt} /> artifact-builder</div>
-					<div class="mh-item"><s class="mh-kd skill" set:html={icons.bolt} /> release-status</div>
-					<div class="mh-sect">Views</div>
-					<div class="mh-item"><s class="mh-kd" set:html={icons.tasks} /> Tasks · Agenda</div>
-					<div class="mh-item"><s class="mh-kd" set:html={icons.store} /> Ọba (store)</div>
-					<div class="mh-sect">Scope</div>
-					<div class="mh-scope on"><s class="mh-d" set:html={icons.scopeAll} /> All scopes</div>
-					<div class="mh-scope"><s class="mh-d" set:html={icons.scopeHalf} /> Personal</div>
-					<div class="mh-scope"><s class="mh-d" set:html={icons.scopeSquare} /> {cast.workspace.scope_label}</div>
-				</div>
-
-				<!-- main column -->
-				<div class="mh-mn">
-					<div class="mh-crumb">
-						<b>{cast.workspace.scope_label}</b> <span class="mh-crumb-sep">›</span> {cast.project.slug}
-						<span class="mh-chip live">{cast.project.status_chip}</span>
-						<span class="mh-sp"></span>
-						<span class="mh-path">{cast.project.path}</span>
-					</div>
-
-					<div class="mh-panes">
-						<div class="mh-pane term">
-							<div class="mh-pane-head">
-								<span class="mh-n">Terminal</span> · {cast.terminal_transcript.session_label}
-								<span class="mh-sp"></span><span class="mh-chip live">session</span>
-							</div>
-							<div class="mh-pane-body">
-								<div class="mh-tline"><span class="mh-p">›</span> <span class="mh-cmd" data-typed>{cmd}</span><span class="mh-cursor" data-cursor></span></div>
-								{responseLines.map((l) => (
-									<div class="mh-tline mh-m" data-step={l.step}>
-										{l.tone === 'ok' && <span class="mh-ok" set:html={icons.check} />}
-										<span set:html={emphasize(l.text)} />
-									</div>
-								))}
-							</div>
-						</div>
-
-						<div class="mh-pane">
-							<div class="mh-pane-head">
-								<span class="mh-n">Groundwork</span> · board
-								<span class="mh-sp"></span><span class="mh-chip">{cast.board.title} · {cast.board.wps.length}</span>
-							</div>
-							<div class="mh-pane-body">
-								{cast.board.wps.map((wp) => {
-									const s = boardMap[wp.status] ?? boardMap.queued;
-									return (
-										<div class="mh-brow mh-m" data-step="3">
-											<span class:list={['mh-dot', s.dot]}></span>
-											<span class="mh-id">{wp.id}</span>
-											<span class="mh-t">{wp.title}</span>
-											<span class:list={['mh-chip', s.chip]}>{s.label}</span>
-										</div>
-									);
-								})}
-							</div>
-						</div>
-
-						<div class="mh-pane">
-							<div class="mh-pane-head">
-								<span class="mh-n">Artifact</span> · {cast.artifact.filename}
-								<span class="mh-sp"></span><span class="mh-chip done mh-m" data-step="5">{cast.artifact.saved_chip}</span>
-							</div>
-							<div class="mh-pane-body">
-								<div class="mh-art-title mh-m" data-step="4">{cast.artifact.title}</div>
-								{cast.artifact.items.map((item) => (
-									<div class="mh-ablock mh-m" data-step="4">
-										<span class="mh-abd" set:html={icons.diamond} />
-										<span class="mh-abt" set:html={artItem(item)} />
-									</div>
-								))}
-							</div>
-						</div>
-					</div>
-				</div>
+			<!-- Overlay theatre: pixels are the capture; these only light the real
+			     regions (transform/opacity, aria-hidden). Off by default → the
+			     no-JS / reduced-motion frame is the clean capture. -->
+			<div class="mh-fx" aria-hidden="true">
+				<span class="mh-scrim" data-fx="tasks" style="left:18.4%;top:8.8%;width:40.2%;height:91.2%"></span>
+				<span class="mh-scrim" data-fx="art" style="left:58.6%;top:8.8%;width:41.4%;height:44%"></span>
+				<span class="mh-scrim" data-fx="term" style="left:58.6%;top:52.8%;width:41.4%;height:47.2%"></span>
+				<span class="mh-sweep" data-sweep></span>
+				<span class="mh-ring" data-ring style="left:58.6%;top:8.8%;width:41.4%;height:44%"></span>
 			</div>
 		</div>
 
 		<div class="mh-foot">
-			<span class="mh-honest"><span class="mh-hd" set:html={icons.diamond} /> Staged demo — every feature shown ships today</span>
+			<span class="mh-honest"><span class="mh-hd" set:html={icons.diamond} /> Real capture of the shell — every feature shown ships today</span>
 			<button class="mh-replay" data-replay type="button"><span class="mh-ri" set:html={icons.replay} /> replay</button>
 		</div>
 	</div>
 </section>
 
 <style>
-	/* ── Moment island: proving moment (D-01 Theatre) ─────────────────────── */
+	/* ── Moment island: proving moment (D-01 Theatre · WP-14 hybrid) ────────── */
 	.mh {
-		/* Motion ramp — tuned crisper than the board's 0.2,0.6,0.2,1. */
 		--mh-ease: cubic-bezier(0.22, 0.61, 0.16, 1);
 
-		/* --moment-* locals: the D-01 near-black shell internals, extracted.
-		   Fixed across tone poles — the shell is a dark app OBJECT, not page
-		   chrome, so it must NOT flip with [data-tone]. */
+		/* --moment-* locals used by the overlay FX. Fixed across tone poles —
+		   the shell "window" is a dark object, not page chrome. */
 		--moment-shell-bg: hsl(28, 22%, 2.5%);
 		--moment-shell-border: hsl(30 18% 18% / 0.9);
-		--moment-rail-bg: hsl(28, 24%, 1.8%);
-		--moment-rail-idle: hsl(28, 10%, 30%);
-		--moment-rail-on-bg: hsl(28, 14%, 9%);
-		--moment-avatar-ink: hsl(28, 30%, 96%);
-		--moment-sb-bg: hsl(28, 16%, 4.5%);
-		--moment-sect: hsl(28, 10%, 34%);
-		--moment-item-on-bg: hsl(28, 12%, 9.5%);
-		--moment-scope-fg: hsl(28, 10%, 42%);
-		--moment-scope-on-bg: hsl(28, 12%, 8%);
-		--moment-mn-bg: hsl(28, 20%, 3%);
-		--moment-crumb-sep: hsl(28, 10%, 28%);
-		--moment-crumb-path: hsl(28, 10%, 38%);
-		--moment-pane-bg: hsl(28, 20%, 3%);
-		--moment-row-bg: hsl(28, 14%, 5%);
-		--moment-id: hsl(28, 10%, 38%);
-		--moment-head: hsl(28, 10%, 40%);
-		--moment-head-n: hsl(28, 10%, 52%);
-		--moment-dim-dot: hsl(28, 10%, 26%);
-		--moment-fg: hsl(36, 28%, 90%);
-		--moment-fg-muted: hsl(32, 11%, 56%);
-		--moment-fg-faint: hsl(28, 10%, 44%);
-		--moment-border: hsl(28, 14%, 15%);
-		--moment-border-soft: hsl(28, 14%, 11%);
-		/* Brand semantics INSIDE the shell — fixed dark values (never flip). */
 		--moment-accent: hsl(42, 78%, 54%);
-		--moment-success: hsl(170, 42%, 54%);
-		--moment-ember: hsl(14, 78%, 52%);
-		--moment-agent: hsl(262, 45%, 62%);
-		--moment-chip-live-bg: hsl(42 48% 12% / 0.5);
-		--moment-chip-live-bd: hsl(42, 48%, 24%);
-		--moment-chip-done-bg: hsl(170 30% 10% / 0.5);
-		--moment-chip-done-bd: hsl(170 42% 30% / 0.7);
 
 		display: block;
 		padding-block: clamp(1.5rem, 4vw, 2.8rem) var(--site-section-pad);
@@ -293,11 +152,8 @@ const boardMap: Record<string, { dot: string; chip: string; label: string }> = {
 		max-width: 72rem;
 		margin: 0 auto var(--space-8, 32px);
 		padding-inline: var(--space-6, 24px);
-		/* Reserve the copy block so the IM Fell font-swap reflow can't displace
-		   the (huge, CLS-amplifying) stage below it. Values = settled heights
-		   measured with fonts loaded (390px viewport → 183px; wider viewports
-		   settle shorter per line-count). Lighthouse mobile CLS was 0.275 with
-		   the swap shift, ~0 with the block reserved. */
+		/* Reserve the copy block so the display-font swap reflow can't displace
+		   the (huge, CLS-amplifying) stage below it. */
 		min-height: 120px;
 	}
 	@media (max-width: 640px) {
@@ -411,7 +267,7 @@ const boardMap: Record<string, { dot: string; chip: string; label: string }> = {
 		background: none;
 	}
 
-	/* ── Shell recreation (tone-independent --moment-* dark object) ───────── */
+	/* ── Shell frame (holds the real capture + overlay FX) ────────────────── */
 	.mh-shell {
 		position: relative;
 		max-width: 66rem;
@@ -420,403 +276,63 @@ const boardMap: Record<string, { dot: string; chip: string; label: string }> = {
 		border: 1px solid var(--moment-shell-border);
 		border-radius: var(--radius-lg, 10px);
 		overflow: hidden;
-		font-size: 13px;
-		color: var(--moment-fg);
 		box-shadow: 0 32px 80px -28px hsl(0 0% 0% / 0.8);
-		/* CLS: reserve the box before hydration. The content is SSG-rendered
-		   so the box is never empty, but the explicit ratio guarantees the
-		   layout is stable at first paint regardless. */
-		aspect-ratio: 1056 / 512;
-		-webkit-font-smoothing: antialiased;
-		text-rendering: optimizeLegibility;
+		/* CLS: reserve the box before the lazy image decodes. Ratio = the
+		   cropped app frame (1680×1050). */
+		aspect-ratio: 1680 / 1050;
 	}
-	.mh-shell,
-	.mh-shell * {
-		line-height: 1.5;
-		box-sizing: border-box;
-	}
-	.mh-shell-in {
-		display: grid;
-		grid-template-columns: 42px 172px 1fr;
-		min-height: 480px;
-		height: 100%;
-	}
-	.mh-shell i :global(svg),
-	.mh-shell s :global(svg) {
+	.mh-img {
+		display: block;
 		width: 100%;
 		height: 100%;
-		display: block;
+		object-fit: cover;
+		object-position: top left;
 	}
 
-	/* activity rail */
-	.mh-rail {
-		background: var(--moment-rail-bg);
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		padding: 10px 0 12px;
-		gap: 6px;
-	}
-	.mh-rail i {
-		width: 24px;
-		height: 24px;
-		padding: 5px;
-		border-radius: 5px;
-		display: grid;
-		place-items: center;
-		font-style: normal;
-		color: var(--moment-rail-idle);
-	}
-	.mh-rail .mh-sp {
-		flex: 1;
-	}
-	.mh-rail i.on {
-		background: var(--moment-rail-on-bg);
-		color: var(--moment-fg-muted);
-		outline: 1px solid var(--moment-border);
-	}
-	.mh-avatar {
-		width: 22px;
-		height: 22px;
-		border-radius: 5px;
-		background: var(--moment-ember);
-		color: var(--moment-avatar-ink);
-		display: grid;
-		place-items: center;
-		font: 600 8.5px var(--site-font-mono);
-		letter-spacing: 0.04em;
-	}
-
-	/* sidebar */
-	.mh-sb {
-		background: var(--moment-sb-bg);
-		border-right: 1px solid var(--moment-border-soft);
-		padding-bottom: var(--space-3, 12px);
-		font-size: 12px;
-	}
-	.mh-sb-brand {
-		display: flex;
-		align-items: center;
-		gap: 7px;
-		padding: 12px 13px 10px;
-		font-family: var(--site-font-display);
-		font-weight: 600;
-		font-size: 14.5px;
-		color: var(--moment-fg);
-	}
-	.mh-mark {
-		width: 14px;
-		height: 14px;
-		color: var(--moment-accent);
-		display: inline-flex;
-	}
-	.mh-sb-brand kbd {
-		margin-left: auto;
-		font: 500 8.5px var(--site-font-mono);
-		color: var(--moment-sect);
-		letter-spacing: 0.06em;
-	}
-	.mh-sect {
-		padding: 12px 13px 5px;
-		font: 500 8.5px var(--site-font-mono);
-		letter-spacing: 0.22em;
-		text-transform: uppercase;
-		color: var(--moment-sect);
-	}
-	.mh-item {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		margin: 0 6px;
-		padding: 4.5px 7px;
-		border-radius: 5px;
-		color: var(--moment-fg-muted);
-	}
-	.mh-kd {
-		width: 13px;
-		height: 13px;
-		font-style: normal;
-		display: inline-flex;
-		color: var(--moment-sect);
-	}
-	.mh-kd.skill {
-		color: var(--moment-accent);
-	}
-	.mh-item.on {
-		background: var(--moment-item-on-bg);
-		color: var(--moment-fg);
-	}
-	.mh-item.on .mh-kd {
-		color: var(--moment-accent);
-	}
-	.mh-item kbd {
-		margin-left: auto;
-		font: 500 8px var(--site-font-mono);
-		color: var(--moment-sect);
-		border: 1px solid var(--moment-border-soft);
-		border-radius: 3px;
-		padding: 1px 5px;
-		letter-spacing: 0.08em;
-		text-transform: uppercase;
-	}
-	.mh-scope {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		margin: 0 6px;
-		padding: 4px 7px;
-		border-radius: 5px;
-		font: 500 9.5px var(--site-font-mono);
-		letter-spacing: 0.1em;
-		text-transform: uppercase;
-		color: var(--moment-scope-fg);
-	}
-	.mh-d {
-		width: 11px;
-		height: 11px;
-		display: inline-flex;
-		flex: none;
-	}
-	.mh-scope.on {
-		color: var(--moment-fg-muted);
-		background: var(--moment-scope-on-bg);
-		outline: 1px solid var(--moment-border-soft);
-	}
-	.mh-scope.on .mh-d {
-		color: var(--moment-accent);
-	}
-
-	/* main column */
-	.mh-mn {
-		display: flex;
-		flex-direction: column;
-		min-width: 0;
-		background: var(--moment-mn-bg);
-	}
-	.mh-crumb {
-		display: flex;
-		align-items: center;
-		gap: 10px;
-		padding: 9px 14px;
-		border-bottom: 1px solid var(--moment-border-soft);
-		font: 500 10.5px var(--site-font-mono);
-		color: var(--moment-fg-faint);
-	}
-	.mh-crumb b {
-		color: var(--moment-fg);
-		font-weight: 500;
-	}
-	.mh-crumb-sep {
-		color: var(--moment-crumb-sep);
-	}
-	.mh-crumb .mh-sp {
-		flex: 1;
-	}
-	.mh-path {
-		font-size: 9px;
-		color: var(--moment-crumb-path);
-		border: 1px solid var(--moment-border-soft);
-		border-radius: 4px;
-		padding: 2px 8px;
-	}
-
-	/* boxed mono-uppercase chips */
-	.mh-chip {
-		font: 500 8.5px var(--site-font-mono);
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
-		padding: 2px 8px;
-		border-radius: 4px;
-		border: 1px solid var(--moment-border);
-		color: var(--moment-fg-faint);
-		white-space: nowrap;
-	}
-	.mh-chip.live {
-		color: var(--moment-accent);
-		border-color: var(--moment-chip-live-bd);
-		background: var(--moment-chip-live-bg);
-	}
-	.mh-chip.done {
-		color: var(--moment-success);
-		border-color: var(--moment-chip-done-bd);
-		background: var(--moment-chip-done-bg);
-	}
-	.mh-chip.rev {
-		color: var(--moment-accent);
-		border-color: var(--moment-chip-live-bd);
-		background: var(--moment-chip-live-bg);
-	}
-	.mh-chip.q {
-		color: var(--moment-scope-fg);
-	}
-
-	.mh-panes {
-		flex: 1;
-		display: grid;
-		grid-template-columns: 1.05fr 1fr;
-		grid-template-rows: 1fr 1fr;
-		gap: 1px;
-		background: var(--moment-border-soft);
-		min-height: 0;
-	}
-	.mh-pane {
-		background: var(--moment-pane-bg);
-		display: flex;
-		flex-direction: column;
-		min-width: 0;
-	}
-	.mh-pane.term {
-		grid-row: 1 / 3;
-	}
-	.mh-pane-head {
-		display: flex;
-		align-items: center;
-		gap: 8px;
-		padding: 8px 13px;
-		border-bottom: 1px solid var(--moment-border-soft);
-		font: 500 9px var(--site-font-mono);
-		letter-spacing: 0.18em;
-		text-transform: uppercase;
-		color: var(--moment-head);
-	}
-	.mh-pane-head .mh-n {
-		color: var(--moment-head-n);
-	}
-	.mh-pane-head .mh-sp {
-		flex: 1;
-	}
-	.mh-pane-body {
-		padding: 12px 14px;
-		font-family: var(--site-font-mono);
-		font-size: 11.5px;
-		line-height: 1.75;
-		flex: 1;
-		min-width: 0;
-	}
-
-	/* terminal */
-	.mh-tline {
-		color: var(--moment-fg-muted);
-		white-space: pre-wrap;
-		display: flex;
-		align-items: baseline;
-		gap: 6px;
-	}
-	.mh-tline .mh-p {
-		color: var(--moment-ember);
-	}
-	.mh-cmd {
-		color: var(--moment-fg);
-	}
-	.mh-ok {
-		width: 11px;
-		height: 11px;
-		flex: none;
-		align-self: center;
-		color: var(--moment-success);
-		display: inline-flex;
-	}
-	.mh-amber {
-		color: var(--moment-accent);
-	}
-	.mh-ok-t {
-		color: var(--moment-success);
-	}
-	.mh-cursor {
-		display: inline-block;
-		width: 7px;
-		height: 13px;
-		background: var(--moment-accent);
-		vertical-align: -2px;
-		align-self: center;
-		animation: mh-blink 1.1s steps(1) infinite;
-	}
-	@keyframes mh-blink {
-		50% {
-			opacity: 0;
-		}
-	}
-
-	/* board rows */
-	.mh-brow {
-		display: flex;
-		align-items: center;
-		gap: 9px;
-		padding: 7px 9px;
-		border: 1px solid var(--moment-border-soft);
-		border-radius: 6px;
-		margin-bottom: 6px;
-		background: var(--moment-row-bg);
-	}
-	.mh-dot {
-		width: 6px;
-		height: 6px;
-		border-radius: 999px;
-		flex: none;
-	}
-	.mh-dot.g {
-		background: var(--moment-success);
-	}
-	.mh-dot.a {
-		background: var(--moment-accent);
-	}
-	.mh-dot.dim {
-		background: var(--moment-dim-dot);
-	}
-	.mh-id {
-		font: 500 9px var(--site-font-mono);
-		color: var(--moment-id);
-		letter-spacing: 0.06em;
-	}
-	.mh-t {
-		flex: 1;
-		font: 500 11.5px var(--site-font-body);
-		color: var(--moment-fg);
-		min-width: 0;
+	/* overlay layer */
+	.mh-fx {
+		position: absolute;
+		inset: 0;
+		pointer-events: none;
 		overflow: hidden;
-		text-overflow: ellipsis;
-		white-space: nowrap;
 	}
-
-	/* artifact pane */
-	.mh-art-title {
-		font: 600 13px var(--site-font-body);
-		color: var(--moment-fg);
-		margin-bottom: 8px;
-	}
-	.mh-ablock {
-		display: flex;
-		gap: 9px;
-		align-items: baseline;
-		padding: 7px 10px;
-		border: 1px solid var(--moment-border-soft);
-		border-radius: 6px;
-		margin-bottom: 6px;
-		background: var(--moment-row-bg);
-		font: 400 11px var(--site-font-body);
-	}
-	.mh-abd {
-		width: 8px;
-		height: 8px;
-		flex: none;
-		color: var(--moment-accent);
-		display: inline-flex;
-		transform: translateY(1px);
-	}
-	.mh-abt {
-		color: var(--moment-fg-muted);
-	}
-	.mh-abt b {
-		color: var(--moment-fg);
-		font-weight: 600;
-	}
-
-	/* ── animation gating ─────────────────────────────────────────────────
-	   Default (no-JS / reduced-motion / static): .mh-m visible — the SSG
-	   final frame. JS sets data-anim="js" to hide them so they can reveal. */
-	.mh[data-anim='js'] .mh-m {
+	/* Pane scrims darken a real pane region; they lift (opacity→0) in sequence
+	   so the panes "power on". Off by default (clean capture); only armed when
+	   JS will drive the beat. */
+	.mh-scrim {
+		position: absolute;
+		background: var(--moment-shell-bg);
 		opacity: 0;
-		transform: translateY(6px);
+	}
+	.mh[data-anim='js'] .mh-scrim {
+		opacity: 0.86;
+	}
+	/* Diagonal light sweep — a single pass across the frame on play. */
+	.mh-sweep {
+		position: absolute;
+		top: -20%;
+		left: 0;
+		width: 40%;
+		height: 140%;
+		opacity: 0;
+		transform: translateX(-160%) skewX(-12deg);
+		background: linear-gradient(
+			100deg,
+			transparent,
+			hsl(42 80% 66% / 0.1) 45%,
+			hsl(42 90% 78% / 0.16) 50%,
+			hsl(42 80% 66% / 0.1) 55%,
+			transparent
+		);
+		mix-blend-mode: screen;
+	}
+	/* Highlight ring — settles on the assembled artifact region. */
+	.mh-ring {
+		position: absolute;
+		border: 1px solid var(--moment-accent);
+		border-radius: 8px;
+		box-shadow: 0 0 0 1px hsl(42 78% 54% / 0.25), 0 0 22px hsl(42 78% 54% / 0.28);
+		opacity: 0;
 	}
 
 	/* ── foot ─────────────────────────────────────────────────────────────── */
@@ -828,6 +344,8 @@ const boardMap: Record<string, { dot: string; chip: string; label: string }> = {
 		margin-top: var(--space-5, 20px);
 		font-size: 0.8125rem;
 		color: var(--site-faint);
+		flex-wrap: wrap;
+		text-align: center;
 	}
 	.mh-honest {
 		display: inline-flex;
@@ -863,39 +381,12 @@ const boardMap: Record<string, { dot: string; chip: string; label: string }> = {
 		border-color: var(--site-accent);
 	}
 
-	/* ── responsive ───────────────────────────────────────────────────────── */
-	@media (max-width: 860px) {
-		.mh-shell {
-			/* Reserve the stacked-layout box too — `auto` here caused the
-			   mobile CLS 0.281 Lighthouse flagged (WP-10 evidence): the shell
-			   grew as panes/fonts settled. 1/2 matches the settled stacked
-			   height at phone widths (327x656 measured at 390px viewport);
-			   content may stretch it further but first paint reserves it. */
-			aspect-ratio: 1 / 2;
-		}
-		.mh-shell-in {
-			grid-template-columns: 38px 1fr;
-		}
-		.mh-sb {
-			display: none;
-		}
-		.mh-panes {
-			grid-template-columns: 1fr;
-			grid-template-rows: auto auto auto;
-		}
-		.mh-pane.term {
-			grid-row: auto;
-		}
-	}
-
-	/* ── reduced motion: composed final frame, zero animation ─────────────── */
+	/* ── reduced motion: the clean capture, zero animation ────────────────── */
 	@media (prefers-reduced-motion: reduce) {
-		.mh-cursor {
-			animation: none;
-			display: none;
-		}
-		.mh-m {
-			opacity: 1 !important;
+		.mh-scrim,
+		.mh-sweep,
+		.mh-ring {
+			opacity: 0 !important;
 			transform: none !important;
 		}
 		.mh-h1 em {
