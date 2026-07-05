@@ -2,26 +2,31 @@
 import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
-import Button from '../components/Button.astro';
-import Downloads from '../components/Downloads.astro';
-import BrandIcon from '../components/BrandIcon.astro';
-import InstallBlock from '../components/InstallBlock.astro';
-import ProofList from '../components/ProofList.astro';
-import Beat from '../components/Beat.astro';
+import MomentHero from '../components/moments/MomentHero.astro';
+import MomentGraph from '../components/moments/MomentGraph.astro';
+import InstallSection from '../components/sections/InstallSection.astro';
+import ObiSection from '../components/sections/ObiSection.astro';
+import castData from '../components/moments/cast.json';
 
-// WP-12 — broad-audience hero (G-21: the blend — "a home for your Claude Code
-// setup, proven by skills doing real work"; two co-equal on-ramps). Refined
-// from the G-20 cockpit-first lead the founder rejected (R5/R6, 2026-06-01).
-// Visual language: site design system D-01 "Forge, tempered" — warm Dusk Wood,
-// IM Fell serif display, deliberate kola-amber glow, disciplined --space-*
-// rhythm. Consumes the .sk-* kit + --site-* tokens (plans/site-design-system).
-// Both CTAs are LIVE: app install one-liner (WP-13, install.sh is x86_64-only,
-// hence the caption) and the skills on-ramp (npx, verified public 2026-06-01).
-const INSTALL = 'curl -fsSL https://ikenga.dev/install.sh | sh';
-// Honest inventory (G-21): only groundwork + artifact-builder ship standalone
-// today — atelier/video-studio are "coming", never claimed live-standalone.
-const SKILL = 'npx skills add royalti-io/groundwork';
+// WP-05 — home shell & narrative scaffold (plans/site-redesign, Phase 2).
+// Rebuilds the page on the inverted narrative locked at D-01 (theatre hero,
+// hard tonal seam): moment → watch-it-work → everything-connects →
+// packages-teaser (light) → install (light) → Obi (dark) → subscribe (light).
+//
+// Section ownership past this WP:
+//   - WATCH-IT-WORK slots  → WP-06 (MomentTasks / MomentInstall)
+//   - EVERYTHING CONNECTS  → WP-07 productionizes the MomentGraph mounted here
+//   - PACKAGES TEASER      → WP-05 (this file) — typographic cards, no art yet
+//   - INSTALL              → WP-08 (src/components/sections/InstallSection.astro)
+//   - OBI                  → WP-09 (src/components/sections/ObiSection.astro)
+//   - SUBSCRIBE            → lifted verbatim from the prior production page
+//
+// Copy accounting vs the prior index.astro (full text in git history, this
+// branch's parent commit): every G-21 claim that doesn't survive verbatim
+// below is either re-flowed (new location noted inline) or moved to a later
+// WP's scope — see the WP-05 report for the complete accounting.
 const GITHUB = 'https://github.com/Royalti-io/ikenga';
+const storeRows = castData.store_rows;
 ---
 
 <!doctype html>
@@ -58,151 +63,88 @@ const GITHUB = 'https://github.com/Royalti-io/ikenga';
 		<Header github={GITHUB} />
 
 		<main id="main-content">
-			<!-- ───────────────── Hero ───────────────── -->
-			<section class="sk-hero">
+			<!-- ═══════════════ 1. HERO (dark) — D-01 theatre ═══════════════
+			     MomentHero renders its own <section>: eyebrow-less rotating-
+			     agent H1, sub line, ghost links (#install / #skills), the
+			     shell-recreation stage, and the honest "staged demo" caption —
+			     exactly as the island provides (G-MOMENT locked). Nothing added
+			     here; the outer copy consumes --site-* so it reads dark by
+			     default at the page level. -->
+			<MomentHero autoplay="viewport" />
+
+			<!-- ═══════════════ 2. WATCH IT WORK (dark) ═══════════════
+			     Two reserved moment slots — WP-06 lands MomentTasks (tasks_teaser)
+			     and an Ọba install beat (store_rows) on the shared timeline
+			     engine. Boxes reserve the shell aspect-ratio (1056/512, same
+			     contract as the hero stage) so there's no CLS when they land. -->
+			<section class="sk-section wiw">
 				<div class="sk-wrap">
-					<p class="sk-eyebrow">Ikenga</p>
-					<h1 class="sk-display">Give Claude&nbsp;Code <em>a home.</em></h1>
+					<h2 class="sk-h2">Watch it work.</h2>
 					<p class="sk-lede">
-						Skills like <strong>groundwork</strong> and <strong>artifact-builder</strong>
-						run anywhere in plain Claude Code — and get a visual home in Ikenga,
-						alongside the mini-apps and tools you install and manage like packages.
+						Two more beats from the same workspace — triaging the day's
+						tasks, and installing a package like an app.
 					</p>
-					<p class="sk-body">
-						See your whole Claude Code setup in one place and watch it do real
-						work — live CLIs running in panes, boards tracking the job, artifacts
-						taking shape — with no more hand-editing <code>~/.claude</code> dotfiles.
-						Open-source, local-first, yours to extend.
-					</p>
-
-					<!-- On-ramp 1 (the app): OS-detected download button + the full
-					     platform matrix. Picks the right build for the visitor and
-					     keeps every build one tap away. -->
-					<Downloads github={GITHUB} />
-
-					<!-- On-ramp 1, scripted alternative: the one-liner (kept). -->
-					<p class="sk-body sk-hero__onramp-lead">
-						<strong>Prefer the terminal?</strong> One line installs the app on
-						macOS, Linux, and Windows:
-					</p>
-
-					<InstallBlock cmd={INSTALL}>
-						<p class="sk-install__note">
-							Auto-detects your platform. On Linux it pulls the
-							<strong>~17&nbsp;MB</strong> <code>.deb</code> when <code>dpkg</code> is
-							present (or a <strong>~101&nbsp;MB</strong> AppImage, no sudo); on
-							Windows, <code>winget install Ikenga.Shell</code> also works.
-						</p>
-					</InstallBlock>
-
-					<!-- Skills on-ramp — inline .sk-install so the InstallBlock copy
-					     script binds it automatically; own id (#install is taken,
-					     and deep-linked from 10+ other pages). -->
-					<div class="sk-install" id="skills">
-						<div class="sk-install__cmd">
-							<code class="sk-install__code">{SKILL}</code>
-							<button type="button" class="sk-install__copy" aria-label="Copy skill install command"
-								>Copy</button
-							>
+					<div class="wiw-grid">
+						<!-- WP-06 -->
+						<div class="wiw-slot" aria-label="Tasks and agenda moment — reserved for WP-06">
+							<span class="wiw-slot__tag">tasks · agenda</span>
 						</div>
-						<p class="sk-install__note">
-							<strong>Or skip the app.</strong> Add a skill to plain Claude Code
-							anywhere — <code>groundwork</code> and
-							<code>ikenga-artifact-builder</code> work with or without Ikenga.
-							More skills are coming.
-						</p>
+						<!-- WP-06 -->
+						<div class="wiw-slot" aria-label="Package install moment — reserved for WP-06">
+							<span class="wiw-slot__tag">Ọba · install a package</span>
+						</div>
 					</div>
-
-					<div class="sk-hero__proof">
-						<ProofList
-							items={[
-								'Apache-2.0',
-								'Local-first',
-								'No account required',
-								'Claude-first · Gemini & Codex too',
-							]}
-						/>
-					</div>
-
-					<!-- TODO(WP-26): swap for the real-work composite — file tree + live
-					     Claude/Gemini CLIs in split panes + the groundwork board, cropped
-					     to content panes (no side-menu/header chrome). This ngwa-cockpit.png
-					     is the RETIRED design render (G-21) kept only so the page renders
-					     until the capture lands; update src/alt/caption together. -->
-					<figure class="sk-shot sk-hero__shot">
-						<img
-							src="/assets/shell/ngwa-cockpit.png"
-							alt="The Ikenga cockpit — a list of skills, agents and commands with a detail pane, managed across projects from one screen."
-							width="1680"
-							height="1050"
-							loading="eager"
-							decoding="async"
-						/>
-						<figcaption>Ikenga doing real work — your setup, running on your machine.</figcaption>
-					</figure>
 				</div>
 			</section>
 
-			<!-- ─────────── Beat 1 — everything is a package ─────────── -->
-			<Beat
-				heading="Everything is a package."
-				img="/assets/shell/oba-store.png"
-				alt="The package manager — install, enable and update packages like apps, with provenance and scope."
-				caption="Your package manager. Install, update, and inspect every piece."
-			>
-				<p class="sk-body">
-					The cockpit is just the start. Mini-apps, tool servers, engine
-					adapters — every capability docks into your workspace as an
-					independently installable package. Add what you need, retire what you don't.
-				</p>
-				<p class="sk-body">
-					Composed from independent packages, managed from one screen, running on your machine.
-				</p>
-			</Beat>
+			<!-- ═══════════════ 3. EVERYTHING CONNECTS (dark) ═══════════════
+			     MomentGraph renders its own heading ("Everything connects."),
+			     lede, and the capability-graph stage as a self-contained
+			     section — mounted as-is; WP-07 productionizes it further
+			     (tone/a11y/densification) without changing this mount point. -->
+			<MomentGraph tone="dark" />
 
-			<!-- ─────────── Beat 2 — the workspace becomes you ─────────── -->
-			<Beat
-				heading="The workspace becomes you."
-				img="/assets/shell/capability-graph.png"
-				alt="The capability graph — a radial map of how agents, skills, commands and MCP servers connect."
-				caption="See how everything connects — the capability graph across your setup."
-				reverse
-			>
-				<ul class="sk-list">
-					<li>Your config lives on your machine — readable as files, versioned in git.</li>
-					<li>Every agent, skill, and command you install is yours to inspect and change.</li>
-					<li>The cockpit keeps you in sync across projects — no dotfile archaeology.</li>
-					<li>
-						<BrandIcon name="claude" /> Claude-first — open to
-						<BrandIcon name="gemini" /> Gemini and <BrandIcon name="codex" /> Codex
-						when you want them.
-					</li>
-				</ul>
-			</Beat>
-
-			<!-- ─────────── Closing CTA — Welcome to your Obi ─────────── -->
-			<section class="sk-section">
-				<div class="sk-wrap sk-obi">
-					<h2 class="sk-display">Welcome to your Obi.</h2>
+			<!-- ═══════════════ 4. PACKAGES TEASER (light — hard tonal seam) ═══════════════
+			     Typographic cards straight off the cast's store_rows fixture
+			     (name / version / one-liner) — re-flows the old page's
+			     "Everything is a package" beat as a teaser strip; no art yet
+			     (storefront art is a Phase-3 track). -->
+			<section class="sk-section" data-tone="light">
+				<div class="sk-wrap">
+					<h2 class="sk-h2">Everything is a <em>package.</em></h2>
 					<p class="sk-lede">
-						Your home for Claude Code — where the skills you run anywhere and the
-						packages you install all live in one place: open-source, local-first,
-						and built to be made your own. We built it to run our own company. Now
-						it's yours.
+						Mini-apps, tool servers, engine adapters — every capability docks
+						into your workspace as an independently installable package.
+						Add what you need, retire what you don't.
 					</p>
-					<div class="sk-obi__cta">
-						<Button href="#downloads" variant="primary">Download Ikenga</Button>
-						<Button href={GITHUB} variant="ghost" rel="noopener">
-							<BrandIcon name="github" /> Star on GitHub
-						</Button>
+					<div class="sk-grid pkg-grid">
+						{storeRows.map((pkg) => (
+							<div class="pkg-card">
+								<p class="pkg-card__name">
+									{pkg.name}
+									<span class="pkg-card__version">v{pkg.version}</span>
+								</p>
+								<p class="pkg-card__desc">{pkg.description}</p>
+							</div>
+						))}
 					</div>
-					<p class="sk-obi__proof">Apache-2.0. No account required. Read every line.</p>
-					<p class="sk-obi__gloss"><em>Obi</em> — the meeting house; the home of your workspace.</p>
+					<p class="pkg-teaser__more">
+						<a href="/packages/">Browse all packages →</a>
+					</p>
 				</div>
 			</section>
 
-			<!-- ─────────── Subscribe (WP-29 — live newsletter) ─────────── -->
-			<section class="sk-section">
+			<!-- ═══════════════ 5. INSTALL (light) — WP-08 stub ═══════════════ -->
+			<InstallSection />
+
+			<!-- ═══════════════ 6. OBI (dark) — WP-09 stub ═══════════════ -->
+			<ObiSection />
+
+			<!-- ═══════════════ 7. SUBSCRIBE (light) — lifted verbatim ═══════════════
+			     Live production code (WP-29): the form markup, the honeypot,
+			     and the /api/subscribe wiring below are unchanged from the
+			     prior index.astro — do not rewrite the logic. -->
+			<section class="sk-section" data-tone="light">
 				<form class="sk-wrap subscribe" id="subscribe-form" novalidate>
 					<label class="subscribe-label" for="subscribe-email">
 						Get the <em>ozi</em> — dispatches when Ikenga ships: releases, new
@@ -292,16 +234,73 @@ const GITHUB = 'https://github.com/Royalti-io/ikenga';
 
 		<style>
 			/* Page-specific layout — the kit (.sk-*) carries the visual language;
-			   this only positions hero/beat/subscribe for the landing instance. */
+			   this only positions the new WP-05 seams + subscribe for the landing
+			   instance. */
 			html,
 			body {
 				margin: 0;
 			}
-			.sk-hero__proof {
-				margin-block: var(--space-6) var(--space-8);
+
+			/* watch-it-work reserved slots */
+			.wiw-grid {
+				display: grid;
+				grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+				gap: var(--space-5, 20px);
+				margin-top: var(--space-6, 24px);
 			}
-			.sk-hero__shot {
-				margin-top: var(--space-4);
+			.wiw-slot {
+				aspect-ratio: 1056 / 512;
+				border: 1px dashed var(--site-border-strong);
+				border-radius: var(--radius-lg, 10px);
+				display: grid;
+				place-items: center;
+				background: var(--site-surface);
+			}
+			.wiw-slot__tag {
+				font-family: var(--site-font-mono);
+				letter-spacing: 0.14em;
+				text-transform: uppercase;
+				font-size: 0.75rem;
+				color: var(--site-faint);
+			}
+
+			/* packages teaser cards — typographic, no art yet */
+			.pkg-grid {
+				margin-top: var(--space-6, 24px);
+			}
+			.pkg-card {
+				border: 1px solid var(--site-border);
+				border-radius: var(--radius-lg, 10px);
+				padding: var(--space-5, 20px);
+				background: var(--site-surface);
+			}
+			.pkg-card__name {
+				font-family: var(--site-font-mono);
+				font-weight: 600;
+				font-size: 0.9375rem;
+				color: var(--site-fg);
+				margin: 0 0 var(--space-2, 8px);
+			}
+			.pkg-card__version {
+				font-weight: 500;
+				color: var(--site-accent);
+				margin-left: var(--space-2, 8px);
+			}
+			.pkg-card__desc {
+				font-size: 0.9375rem;
+				color: var(--site-muted);
+				margin: 0;
+			}
+			.pkg-teaser__more {
+				margin-top: var(--space-6, 24px);
+			}
+			.pkg-teaser__more a {
+				color: var(--site-accent);
+				font-weight: 600;
+				text-decoration: none;
+			}
+			.pkg-teaser__more a:hover {
+				text-decoration: underline;
 			}
 
 			/* subscribe form */

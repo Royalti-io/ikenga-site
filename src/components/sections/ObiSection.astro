@@ -1,0 +1,51 @@
+---
+// ObiSection — WP-05 scaffold stub, WP-09 fills in.
+//
+// Reserved layout for the company-proof / lore closing beat: the "Welcome to
+// your Obi" story (18-months-running-our-company narrative, per-claim
+// sourcing per WP-09's DoD), the closing CTA pair, and the Obi/ozi gloss.
+// All of that content lives in the CURRENT src/pages/index.astro's closing
+// CTA section today and is copy-accounted in WP-05's report as "moved to
+// WP-09 scope" — nothing here is invented, this section only reserves the
+// seam WP-09 builds into.
+//
+// Tone: dark — the narrative returns to the theatre pole for the closing
+// beat before the light subscribe section underneath it (per D-01 seam plan).
+---
+
+<section class="sk-section" id="obi">
+	<div class="sk-wrap">
+		<!-- WP-09 -->
+		<div class="stub-box" aria-hidden="true">
+			<p class="stub-box__label">Obi / lore / company-proof — reserved for WP-09</p>
+			<p class="stub-box__note">
+				The "Welcome to your Obi" story, closing CTA, and proof/gloss lines
+				land here (moved from the current production index.astro's closing
+				CTA section; WP-09 re-sources every claim).
+			</p>
+		</div>
+	</div>
+</section>
+
+<style>
+	.stub-box {
+		border: 1px dashed var(--site-border-strong);
+		border-radius: var(--radius-lg, 10px);
+		padding: var(--space-8, 32px) var(--space-6, 24px);
+		text-align: center;
+		color: var(--site-faint);
+	}
+	.stub-box__label {
+		font-family: var(--site-font-mono);
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		font-size: 0.75rem;
+		margin: 0 0 var(--space-2, 8px);
+	}
+	.stub-box__note {
+		margin: 0;
+		max-width: 46ch;
+		margin-inline: auto;
+		font-size: 0.9375rem;
+	}
+</style>

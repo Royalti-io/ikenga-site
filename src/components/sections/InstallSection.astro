@@ -1,0 +1,58 @@
+---
+// InstallSection — WP-05 scaffold stub, WP-08 fills in.
+//
+// Reserved layout for the point-of-intent install beat: the app download
+// matrix (Downloads.astro), the scripted one-liner (InstallBlock.astro), and
+// the skills on-ramp (`npx skills add ...`). All of that content lives in
+// the CURRENT src/pages/index.astro today and is copy-accounted in WP-05's
+// report as "moved to WP-08 scope" — nothing here is invented, this section
+// only reserves the seam WP-08 builds into.
+//
+// Anchors kept live now (not stubbed) because the hero's ghost row
+// (MomentHero) already links to them:
+//   - #install → "Download ↓"
+//   - #skills  → "Or start with a skill"
+// so those two ids exist on this stub even before WP-08 lands the real
+// content, otherwise the hero links dangle.
+//
+// Tone: light (parchment pole) per the D-01 narrative — this section sits
+// between the light packages teaser and the dark Obi section (WP-05 keeps
+// the light tone for the seam WP-08 designs against).
+---
+
+<section class="sk-section" data-tone="light" id="install">
+	<div class="sk-wrap">
+		<!-- WP-08 -->
+		<div class="stub-box" aria-hidden="true">
+			<p class="stub-box__label">Install — reserved for WP-08</p>
+			<p class="stub-box__note">
+				Download matrix, install one-liner, and skills on-ramp land here
+				(lifted from the current production index.astro, claims verbatim).
+			</p>
+		</div>
+		<span id="skills" aria-hidden="true"></span>
+	</div>
+</section>
+
+<style>
+	.stub-box {
+		border: 1px dashed var(--site-border-strong);
+		border-radius: var(--radius-lg, 10px);
+		padding: var(--space-8, 32px) var(--space-6, 24px);
+		text-align: center;
+		color: var(--site-faint);
+	}
+	.stub-box__label {
+		font-family: var(--site-font-mono);
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		font-size: 0.75rem;
+		margin: 0 0 var(--space-2, 8px);
+	}
+	.stub-box__note {
+		margin: 0;
+		max-width: 46ch;
+		margin-inline: auto;
+		font-size: 0.9375rem;
+	}
+</style>
