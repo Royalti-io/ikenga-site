@@ -1,51 +1,56 @@
 ---
-// ObiSection — WP-05 scaffold stub, WP-09 fills in.
+// ObiSection — WP-09 fill: the closing dark "Welcome to your Obi" beat that
+// earns the download (company-proof story, closing CTA pair, Obi gloss).
 //
-// Reserved layout for the company-proof / lore closing beat: the "Welcome to
-// your Obi" story (18-months-running-our-company narrative, per-claim
-// sourcing per WP-09's DoD), the closing CTA pair, and the Obi/ozi gloss.
-// All of that content lives in the CURRENT src/pages/index.astro's closing
-// CTA section today and is copy-accounted in WP-05's report as "moved to
-// WP-09 scope" — nothing here is invented, this section only reserves the
-// seam WP-09 builds into.
+// Sourcing — every factual claim below is traceable to one of two files:
 //
-// Tone: dark — the narrative returns to the theatre pole for the closing
-// beat before the light subscribe section underneath it (per D-01 seam plan).
+// 1. The "we ran our own company on this for 18 months" claim is paraphrased
+//    from `site/src/content/docs/docs/index.mdx`:
+//      "The 18 months we spent running a real company on this system is the
+//       proof it works, not a feature you have to care about."
+//
+// 2. The G-21 spine line, the Obi gloss, the CTA pair, and the proof line
+//    are verbatim from the CURRENT production closing section
+//    (`git show main:src/pages/index.astro`):
+//      - "We built it to run our own company. Now it's yours."
+//      - "Obi — the meeting house; the home of your workspace."
+//      - "Apache-2.0. No account required. Read every line."
+//      - Button pair: Download Ikenga (primary) / Star on GitHub (ghost).
+//
+// Glow discipline (D-01): the kola-amber glow is spent on the hero <em> and
+// the primary CTA hover only (see `.sk-display em` in site-kit.css). This
+// section's <h2> carries no <em>, so it spends none.
+//
+// CTA target: #install (WP-08's InstallSection id), matching the hero's own
+// ghost-row "Download ↓" link — not the old page's #downloads anchor, which
+// this redesign doesn't use.
+import Button from '../Button.astro';
+import BrandIcon from '../BrandIcon.astro';
+
+export interface Props {
+	/** GitHub repo URL for the "Star on GitHub" CTA. */
+	github?: string;
+}
+const { github = 'https://github.com/Royalti-io/ikenga' } = Astro.props;
 ---
 
 <section class="sk-section" id="obi">
-	<div class="sk-wrap">
-		<!-- WP-09 -->
-		<div class="stub-box" aria-hidden="true">
-			<p class="stub-box__label">Obi / lore / company-proof — reserved for WP-09</p>
-			<p class="stub-box__note">
-				The "Welcome to your Obi" story, closing CTA, and proof/gloss lines
-				land here (moved from the current production index.astro's closing
-				CTA section; WP-09 re-sources every claim).
-			</p>
+	<div class="sk-wrap sk-obi">
+		<h2 class="sk-display">Welcome to your Obi.</h2>
+		<p class="sk-lede">
+			We didn't build Ikenga to sell it. We ran our own company on it for
+			eighteen months first — the same shell, skills, and agents you're about
+			to download, doing real day-to-day work. That's the proof it works, not
+			a feature you have to take on faith.
+		</p>
+		<p class="sk-lede">We built it to run our own company. Now it's yours.</p>
+		<div class="sk-obi__cta">
+			<Button href="#install" variant="primary">Download Ikenga</Button>
+			<Button href={github} variant="ghost" rel="noopener">
+				<BrandIcon name="github" /> Star on GitHub
+			</Button>
 		</div>
+		<p class="sk-obi__proof">Apache-2.0. No account required. Read every line.</p>
+		<p class="sk-obi__gloss"><em>Obi</em> — the meeting house; the home of your workspace.</p>
 	</div>
 </section>
-
-<style>
-	.stub-box {
-		border: 1px dashed var(--site-border-strong);
-		border-radius: var(--radius-lg, 10px);
-		padding: var(--space-8, 32px) var(--space-6, 24px);
-		text-align: center;
-		color: var(--site-faint);
-	}
-	.stub-box__label {
-		font-family: var(--site-font-mono);
-		letter-spacing: 0.14em;
-		text-transform: uppercase;
-		font-size: 0.75rem;
-		margin: 0 0 var(--space-2, 8px);
-	}
-	.stub-box__note {
-		margin: 0;
-		max-width: 46ch;
-		margin-inline: auto;
-		font-size: 0.9375rem;
-	}
-</style>
