@@ -3,28 +3,24 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import MomentHero from '../components/moments/MomentHero.astro';
+import MomentTasks from '../components/moments/MomentTasks.astro';
+import MomentInstall from '../components/moments/MomentInstall.astro';
 import MomentGraph from '../components/moments/MomentGraph.astro';
 import InstallSection from '../components/sections/InstallSection.astro';
 import ObiSection from '../components/sections/ObiSection.astro';
 import castData from '../components/moments/cast.json';
 
-// WP-05 — home shell & narrative scaffold (plans/site-redesign, Phase 2).
-// Rebuilds the page on the inverted narrative locked at D-01 (theatre hero,
-// hard tonal seam): moment → watch-it-work → everything-connects →
-// packages-teaser (light) → install (light) → Obi (dark) → subscribe (light).
-//
-// Section ownership past this WP:
-//   - WATCH-IT-WORK slots  → WP-06 (MomentTasks / MomentInstall)
-//   - EVERYTHING CONNECTS  → WP-07 productionizes the MomentGraph mounted here
-//   - PACKAGES TEASER      → WP-05 (this file) — typographic cards, no art yet
-//   - INSTALL              → WP-08 (src/components/sections/InstallSection.astro)
-//   - OBI                  → WP-09 (src/components/sections/ObiSection.astro)
-//   - SUBSCRIBE            → lifted verbatim from the prior production page
+// Home shell & narrative assembly (plans/site-redesign, Phase 2, WP-10 —
+// assembles the WP-05 scaffold with the WP-06/07/08/09 fan-out). Inverted
+// narrative locked at D-01 (theatre hero, hard tonal seam): moment →
+// watch-it-work → everything-connects → packages-teaser (light) → install
+// (light) → Obi (dark) → subscribe (light).
 //
 // Copy accounting vs the prior index.astro (full text in git history, this
 // branch's parent commit): every G-21 claim that doesn't survive verbatim
-// below is either re-flowed (new location noted inline) or moved to a later
-// WP's scope — see the WP-05 report for the complete accounting.
+// below is either re-flowed (new location noted inline) or moved into one
+// of the section components above — see each WP's report for its
+// accounting.
 const GITHUB = 'https://github.com/Royalti-io/ikenga';
 const storeRows = castData.store_rows;
 ---
@@ -73,35 +69,21 @@ const storeRows = castData.store_rows;
 			<MomentHero autoplay="viewport" />
 
 			<!-- ═══════════════ 2. WATCH IT WORK (dark) ═══════════════
-			     Two reserved moment slots — WP-06 lands MomentTasks (tasks_teaser)
-			     and an Ọba install beat (store_rows) on the shared timeline
-			     engine. Boxes reserve the shell aspect-ratio (1056/512, same
-			     contract as the hero stage) so there's no CLS when they land. -->
-			<section class="sk-section wiw">
-				<div class="sk-wrap">
-					<h2 class="sk-h2">Watch it work.</h2>
-					<p class="sk-lede">
-						Two more beats from the same workspace — triaging the day's
-						tasks, and installing a package like an app.
-					</p>
-					<div class="wiw-grid">
-						<!-- WP-06 -->
-						<div class="wiw-slot" aria-label="Tasks and agenda moment — reserved for WP-06">
-							<span class="wiw-slot__tag">tasks · agenda</span>
-						</div>
-						<!-- WP-06 -->
-						<div class="wiw-slot" aria-label="Package install moment — reserved for WP-06">
-							<span class="wiw-slot__tag">Ọba · install a package</span>
-						</div>
-					</div>
-				</div>
+			     MomentTasks + MomentInstall (WP-06) — the tasks/agenda beat
+			     and the Ọba install beat, both on the shared timeline engine
+			     (moments/timeline.ts). Each island renders its own <h2>, so
+			     the section-level intro stays an eyebrow (no second h2) to
+			     keep one heading per beat. -->
+			<section class="wiw">
+				<p class="sk-eyebrow wiw-eyebrow">Watch it work</p>
+				<MomentTasks tone="dark" autoplay="viewport" />
+				<MomentInstall tone="dark" autoplay="viewport" />
 			</section>
 
 			<!-- ═══════════════ 3. EVERYTHING CONNECTS (dark) ═══════════════
 			     MomentGraph renders its own heading ("Everything connects."),
 			     lede, and the capability-graph stage as a self-contained
-			     section — mounted as-is; WP-07 productionizes it further
-			     (tone/a11y/densification) without changing this mount point. -->
+			     section (WP-07 production pass over SPIKE-07). -->
 			<MomentGraph tone="dark" />
 
 			<!-- ═══════════════ 4. PACKAGES TEASER (light — hard tonal seam) ═══════════════
@@ -134,10 +116,10 @@ const storeRows = castData.store_rows;
 				</div>
 			</section>
 
-			<!-- ═══════════════ 5. INSTALL (light) — WP-08 stub ═══════════════ -->
+			<!-- ═══════════════ 5. INSTALL (light) ═══════════════ -->
 			<InstallSection />
 
-			<!-- ═══════════════ 6. OBI (dark) — WP-09 stub ═══════════════ -->
+			<!-- ═══════════════ 6. OBI (dark) ═══════════════ -->
 			<ObiSection />
 
 			<!-- ═══════════════ 7. SUBSCRIBE (light) — lifted verbatim ═══════════════
@@ -234,34 +216,24 @@ const storeRows = castData.store_rows;
 
 		<style>
 			/* Page-specific layout — the kit (.sk-*) carries the visual language;
-			   this only positions the new WP-05 seams + subscribe for the landing
-			   instance. */
+			   this only positions the watch-it-work seam, the packages teaser,
+			   and the subscribe form for this landing instance. */
 			html,
 			body {
 				margin: 0;
 			}
 
-			/* watch-it-work reserved slots */
-			.wiw-grid {
-				display: grid;
-				grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
-				gap: var(--space-5, 20px);
-				margin-top: var(--space-6, 24px);
+			/* watch-it-work — thin wrapper around the two moment islands, each
+			   of which owns its own padding/background (.mt / .mi); this only
+			   carries the section eyebrow above the pair. */
+			.wiw {
+				display: block;
+				background: var(--site-bg);
 			}
-			.wiw-slot {
-				aspect-ratio: 1056 / 512;
-				border: 1px dashed var(--site-border-strong);
-				border-radius: var(--radius-lg, 10px);
-				display: grid;
-				place-items: center;
-				background: var(--site-surface);
-			}
-			.wiw-slot__tag {
-				font-family: var(--site-font-mono);
-				letter-spacing: 0.14em;
-				text-transform: uppercase;
-				font-size: 0.75rem;
-				color: var(--site-faint);
+			.wiw-eyebrow {
+				max-width: 64rem;
+				margin: 0 auto;
+				padding: var(--space-8, 32px) var(--space-6, 24px) 0;
 			}
 
 			/* packages teaser cards — typographic, no art yet */
