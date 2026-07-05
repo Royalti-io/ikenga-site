@@ -33,6 +33,12 @@ export interface GraphNode {
 	label: string;
 	kind: GraphKind;
 	detail: string;
+	/** Registry version, when the fixture carries one (mcp/engine/pkg). */
+	version?: string;
+	/** Human one-liner for the info board (GraphDetailCard `description`).
+	 * Empty for the engine rows — cast.json carries only a version for those,
+	 * so the card renders no description rather than inventing one. */
+	description: string;
 }
 
 export interface GraphEdge {
@@ -69,24 +75,45 @@ export const KIND_LABEL: Record<GraphKind, string> = {
 /** Stable draw order for the kind bands (clockwise from 12 o'clock). */
 export const KIND_ORDER: GraphKind[] = ['skill', 'command', 'mcp', 'engine', 'pkg'];
 
+/** Kind → glyph. Mirrors the shell's `KIND_GLYPH` (store-matrix.tsx /
+ * flow-view.tsx `REF_GLYPH`) so the store map + flow rows read as the same
+ * object as the reference screenshots. `pkg` reuses the store-map's ▦. */
+export const KIND_GLYPH: Record<GraphKind, string> = {
+	skill: '◆',
+	command: '⌘',
+	mcp: '⬡',
+	engine: '★',
+	pkg: '▦',
+};
+
 function slug(name: string): string {
 	return name.replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase();
 }
 
 const nodes: GraphNode[] = [
-	...cast.capability_nodes.map((n) => ({
-		id: slug(n.name),
-		label: n.name,
-		kind: n.kind as GraphKind,
-		// the 3 engine entries carry no `detail`, only `version` — cast.json
-		// as authored, not a gap introduced here.
-		detail: n.detail ?? ('version' in n && n.version ? `v${n.version}` : ''),
-	})),
+	...cast.capability_nodes.map((n) => {
+		const version = 'version' in n && n.version ? n.version : undefined;
+		return {
+			id: slug(n.name),
+			label: n.name,
+			kind: n.kind as GraphKind,
+			// the 3 engine entries carry no `detail`, only `version` — cast.json
+			// as authored, not a gap introduced here.
+			detail: n.detail ?? (version ? `v${version}` : ''),
+			version,
+			// engines carry no human one-liner in the cast → empty description
+			// (the card omits it rather than fabricating one). skill/command/mcp
+			// use their factual cast `detail` note verbatim.
+			description: n.kind === 'engine' ? '' : (n.detail ?? ''),
+		};
+	}),
 	...cast.store_rows.map((p) => ({
 		id: slug(p.name),
 		label: p.name,
 		kind: 'pkg' as GraphKind,
 		detail: `v${p.version} — ${p.description}`,
+		version: p.version,
+		description: p.description,
 	})),
 ];
 

@@ -1,48 +1,54 @@
 ---
 /**
- * MomentGraph.astro — capability-graph moment island (WP-07 production pass
- * over SPIKE-07, PASSED @ 61be832 — see plans/site-redesign/04-discussion.md).
+ * MomentGraph.astro — "Everything connects" v2 (WP-13, supersedes WP-07's
+ * section scope over the shipped SPIKE-07 island).
  *
- * Ports ONLY the shell's Bundle-mode visual language (radial edge-bundling,
- * kind-band arcs, hover-to-trace) from
- * `shell/src/shell/claude-config/analyze/graph-view.tsx` — no React, no
- * zoom/drag/force/dag modes, no `deriveGraph`.
+ * A pinned scrollytelling sequence (DEC-10 / DEC-11), four beats over one
+ * sticky stage:
+ *   1. Radial capability graph (the shipped island — ports the shell Ngwa
+ *      analyzer's Bundle mode: radial edge-bundling + kind-band arcs).
+ *   2. Node-select → info board (ports GraphDetailCard from
+ *      `shell/.../analyze/graph-view.tsx`): kind chip, scope, description,
+ *      Connections count, per-edge rows with →/← direction, rel verbs and the
+ *      heuristic `*` marker.
+ *   3. Store map (ports StoreMatrix): kind rows × scope columns, presence dots.
+ *   4. Flow view (ports ngwa-flow): groundwork's procedural step-sequence.
  *
- * SSG-first: the radial layout (d3-hierarchy `cluster` + d3-shape
- * `lineRadial`/`curveBundle`) runs HERE, at `astro build` time, in Node.
- * The full SVG — every arc, path, and text label — ships as static markup.
- * There is ZERO client JS required to see the complete graph; `moment-graph.ts`
- * only adds hover/focus-to-trace and an optional ambient draw-in, both gated
- * so the static frame is also the correct reduced-motion frame (island
- * contract: ./CONTRACT.md).
+ * SSG-FIRST (island contract ./CONTRACT.md, hardened by DEC-4):
+ *   · The radial layout (d3-hierarchy `cluster` + d3-shape `lineRadial`/
+ *     `curveBundle`) and every info card / matrix cell / flow step render as
+ *     complete static markup at `astro build` time — ZERO client JS is needed
+ *     to read all four states.
+ *   · The DEFAULT (no-JS) frame is the STACKED layout: the four visualizers
+ *     stack vertically, each fully legible, in reading order. This same stacked
+ *     frame is what `prefers-reduced-motion` and mobile (<=720px) render.
+ *   · Only when JS runs AND motion is allowed does `moment-graph.ts` set
+ *     `data-anim="js"`, which upgrades wide viewports to the pinned sequence.
+ *     The 400vh track reserves its height up front → CLS 0. IntersectionObserver
+ *     step sentinels drive the active `[data-beat]`; the beat transitions are
+ *     compositor-safe `transform`/`opacity` only (WAAPI intro + CSS-transition
+ *     beat swaps — no CSS scroll-timeline).
  *
- * Honesty: every node/edge comes from ./graph-fixture.ts, which derives
- * strictly from the vendored ./cast.json (registry-verified — see that
- * file's header comment and the spike report for the node-count drift note).
+ * A11Y: every node is keyboard-focusable (tabindex/role/aria-label, unchanged
+ * from WP-07); focusing or hovering a node traces the radial AND drives the
+ * info board, whose selection is announced via a visually-hidden aria-live
+ * region. Each beat/slide carries its own caption + label; the matrix is a real
+ * <table> with a caption.
  *
- * Tone (per CONTRACT.md, locked at G-MOMENT): the shell/stage recreation is a
- * tone-INDEPENDENT dark app object and never flips — only the outer copy
- * (h2/sub/foot) is tone-aware via `--site-*`. What WP-07 changed: the stage's
- * internal near-black/neutral literals are now named `--moment-*` custom
- * properties (mirroring MomentHero's block) instead of scattered magic hsl()
- * literals, so the "graph tokens" are a single documented surface — same
- * spirit as re-deriving from tokens, without breaking the locked contract.
- * Contrast was verified both poles (see WP-07 report): the stage's own
- * palette is fixed, so its internal contrast (node-label-muted on stage-bg,
- * kind-hue text on stage-bg) doesn't change with page tone; the surrounding
- * `--site-*` copy was checked against both the dark and parchment poles.
+ * HONESTY (G-19 / G-21): every node, store row, scope column and flow step
+ * traces to the registry-verified cast (./graph-fixture.ts + ./graph-slides.ts
+ * → ./cast.json). Presence encodings are labelled "staged demo".
  *
- * Packaging: client script stays under the small-asset inlining threshold
- * Astro applies automatically (measured 753 B gz inline in the page HTML,
- * 8x under the 6KB budget) — kept inline by not doing anything to force a
- * separate chunk; a hashed chunk only pays off once this script grows enough
- * to amortize an extra request, which isn't the case here.
+ * TONE (CONTRACT.md, locked at G-MOMENT): the dark app object is
+ * tone-INDEPENDENT and never flips; only the outer copy (captions / foot) is
+ * tone-aware via `--site-*`. Section ships on the dark pole.
  */
 import { cluster, hierarchy, type HierarchyNode } from 'd3-hierarchy';
 import { arc as d3arc, curveBundle, lineRadial } from 'd3-shape';
 import {
 	graphFixture,
 	KIND_COLOR,
+	KIND_GLYPH,
 	KIND_LABEL,
 	KIND_ORDER,
 	REL_KIND,
@@ -50,10 +56,11 @@ import {
 	type GraphKind,
 	type GraphNode,
 } from './graph-fixture';
+import { FLOW_SOURCE, FLOW_STEPS, STORE_SCOPES, featuredNodeId, storeGroups, storeTotals } from './graph-slides';
 
 export interface Props {
-	/** Tone pole for the outer copy only (headline/sub/foot) — same contract
-	 * as MomentHero; the graph stage itself is a tone-independent dark object. */
+	/** Tone pole for the outer copy only (captions/foot) — same contract as
+	 * MomentHero; the stage itself is a tone-independent dark app object. */
 	tone?: 'dark' | 'light';
 }
 const { tone = 'dark' } = Astro.props;
@@ -98,24 +105,7 @@ const bandArc = d3arc<{ a0: number; a1: number }>()
 	.startAngle((d) => ((d.a0 - 3) * Math.PI) / 180)
 	.endAngle((d) => ((d.a1 + 3) * Math.PI) / 180);
 
-/**
- * Label declutter (WP-07, fixes the engine-band collision visible at 11
- * nodes): a naive `mid = (a0+a1)/2` label angle coincides EXACTLY with a
- * node's own angle whenever a band has an odd member count (the cluster
- * layout spaces children evenly, so the middle child sits at the true
- * midpoint) or exactly one member (a0 === a1 === that node's angle). At
- * that shared angle the band label's fixed-radius text lands right inside
- * the reach of the coincident node's own (much longer) tangential label —
- * see the ENGINES/`pkg-engine-codex` collision in the spike capture.
- *
- * Fix: bias the label angle off any node's exact angle — for odd counts,
- * nudge by half the local inter-node gap so it falls *between* the middle
- * node and its neighbor; for a single-member band, nudge by a small fixed
- * offset. Even counts already land between two nodes, untouched. This is
- * angle-count-general, so it holds as the cast densifies toward ~25 nodes.
- */
 const ARC_LABEL_SOLO_NUDGE_DEG = 6;
-
 const arcs = (root.children ?? []).map((g) => {
 	const xs = (g.children ?? []).map((c) => c.x ?? 0).sort((a, b) => a - b);
 	const a0 = xs[0] ?? 0;
@@ -123,11 +113,7 @@ const arcs = (root.children ?? []).map((g) => {
 	const count = xs.length;
 	const gap = count > 1 ? (a1 - a0) / (count - 1) : 0;
 	const mid =
-		count <= 1
-			? a0 + ARC_LABEL_SOLO_NUDGE_DEG
-			: count % 2 === 1
-				? (a0 + a1) / 2 + gap / 2
-				: (a0 + a1) / 2;
+		count <= 1 ? a0 + ARC_LABEL_SOLO_NUDGE_DEG : count % 2 === 1 ? (a0 + a1) / 2 + gap / 2 : (a0 + a1) / 2;
 	return { kind: g.data.kind as GraphKind, a0, a1, mid };
 });
 
@@ -135,28 +121,40 @@ function degree(id: string): number {
 	return graphFixture.edges.filter((e) => e.source === id || e.target === id).length;
 }
 
-/** Hub = a node dense enough in links that its label earns mobile real
- * estate; leaves fold their label away below ~720px (arcs + circles stay —
- * see the responsive rule in <style>). Threshold picked against today's
- * fixture (mcp-iyke:7, /release-status:4, pkg-tasks:3 vs. everything else
- * ≤2) and stays meaningful as the cast densifies — hubs are always the
- * minority by construction of a capability graph. */
 const HUB_DEGREE = 3;
-
-/** Display-only shortening (drops the `@ikenga/` scope) so long registry
- * names don't collide at this canvas size. The full name still ships in
- * `label`/`aria-label` — nothing is truncated for accessibility, only the
- * on-canvas <text>. */
 function shortLabel(label: string): string {
 	return label.replace(/^@ikenga\//, '');
 }
 
-// Stable, build-time ids for the <title>/<desc> pair — this island only ever
-// mounts once per page (moment-lab previews it beside the hero; production
-// mounts one instance), so a fixed literal is fine and keeps SSR output
-// deterministic (no per-render random suffix to fight caching/diffing).
+// ── Info board (Beat 2) — GraphDetailCard data, pre-rendered per node ─────────
+// The mcp hub (featuredNodeId) is the default/static frame; the rest render
+// hidden and are revealed by keyboard/pointer focus (moment-graph.ts). This
+// keeps the client script tiny (a `hidden` toggle, no template engine) and puts
+// every card in the SSG HTML — the honest, no-JS-legible way.
+const nodeById = new Map(graphFixture.nodes.map((n) => [n.id, n] as const));
+const HOME: Record<GraphKind, string> = {
+	skill: 'skill',
+	command: 'workspace command',
+	mcp: 'workspace',
+	engine: 'engine',
+	pkg: 'pkg',
+};
+type Conn = { label: string; rel: GraphEdge['rel']; heuristic: boolean };
+const cards = graphFixture.nodes.map((n) => {
+	const scopeLine = [n.version ? `v${n.version}` : null, HOME[n.kind]].filter(Boolean).join(' · ');
+	const out: Conn[] = graphFixture.edges
+		.filter((e) => e.source === n.id)
+		.map((e) => ({ label: nodeById.get(e.target)?.label ?? e.target, rel: e.rel, heuristic: e.derivation === 'heuristic' }));
+	const inc: Conn[] = graphFixture.edges
+		.filter((e) => e.target === n.id)
+		.map((e) => ({ label: nodeById.get(e.source)?.label ?? e.source, rel: e.rel, heuristic: e.derivation === 'heuristic' }));
+	return { node: n, scopeLine, out, inc, connections: out.length + inc.length };
+});
+
 const titleId = 'mg-title';
 const descId = 'mg-desc';
+// window-chrome breadcrumb — workspace scope · project (both real, from cast)
+const wsCrumb = `${STORE_SCOPES[0]?.label ?? 'workspace'} · ${STORE_SCOPES[1]?.label ?? 'project'} — analyze`;
 ---
 
 <section class="mg" data-moment="graph" data-tone={tone === 'light' ? 'light' : undefined}>
@@ -164,126 +162,378 @@ const descId = 'mg-desc';
 		<h2 class="mg-h2">Everything connects.</h2>
 		<p class="mg-sub">
 			Skills, commands, MCPs, engines, and installed pkgs — one capability graph,
-			radial-bundled the same way the shell renders it.
+			radial-bundled the same way the shell renders it. Scroll to walk the wiring.
 		</p>
 	</div>
 
-	<div class="mg-stage">
-		<svg
-			class="mg-svg"
-			role="img"
-			aria-labelledby={`${titleId} ${descId}`}
-			viewBox={`0 0 ${SIZE} ${SIZE}`}
-			preserveAspectRatio="xMidYMid meet"
-		>
-			<title id={titleId}>Ikenga capability graph</title>
-			<desc id={descId}>
-				{`Radial-bundle diagram of ${graphFixture.nodes.length} real, shipping capabilities -- skills, commands, MCPs, engines, and installed pkgs -- grouped into ${arcs.length} kind bands and joined by ${graphFixture.edges.length} links. Every node is keyboard-focusable via Tab; focusing or hovering one highlights its outgoing links in amber and incoming links in teal.`}
-			</desc>
-			<g transform={`translate(${SIZE / 2},${SIZE / 2})`}>
-				{arcs.map((a) => {
-					const rad = ((a.mid - 90) * Math.PI) / 180;
-					const lr = R + 30;
-					const band = bandArc(a) ?? undefined;
-					return (
-						<g class="mg-arc">
-							{band && <path d={band} fill={KIND_COLOR[a.kind]} opacity={0.55} />}
-							<text
-								x={Math.cos(rad) * lr}
-								y={Math.sin(rad) * lr}
-								text-anchor="middle"
-								dominant-baseline="middle"
-								class="mg-arc-label"
-								fill={KIND_COLOR[a.kind]}
-							>
-								{KIND_LABEL[a.kind].toUpperCase()}
-							</text>
-						</g>
-					);
-				})}
+	<!-- visually-hidden live region: announces the selected node (a11y) -->
+	<span class="mg-live sr-only" aria-live="polite" aria-atomic="true"></span>
 
-				<g fill="none">
-					{links.map(({ edge, d }) => (
-						<path
-							class="mg-edge"
-							d={d}
-							data-source={edge.source}
-							data-target={edge.target}
-							stroke={KIND_COLOR[REL_KIND[edge.rel]]}
-							stroke-width="1.1"
-							stroke-dasharray={edge.derivation === 'heuristic' ? '4,4' : undefined}
-						/>
-					))}
-				</g>
+	<div class="mg-scrolly">
+		<div class="mg-track">
+			<!-- pinned-only step sentinels (observed for the active beat) -->
+			<div class="mg-steps" aria-hidden="true">
+				<div class="mg-step" data-step="1"></div>
+				<div class="mg-step" data-step="2"></div>
+				<div class="mg-step" data-step="3"></div>
+				<div class="mg-step" data-step="4"></div>
+			</div>
 
-				{leaves.map((leaf) => {
-					const n = leaf.data.node;
-					if (!n) return null;
-					const angle = leaf.x ?? 0;
-					const flip = angle >= 180;
-					const deg = degree(n.id);
-					const r = 4 + Math.min(5, deg * 0.8);
-					return (
-						<g
-							class="mg-node"
-							data-node-id={n.id}
-							data-kind={n.kind}
-							data-hub={deg >= HUB_DEGREE ? '' : undefined}
-							tabindex="0"
-							role="button"
-							aria-label={`${n.label} — ${KIND_LABEL[n.kind]}, ${deg} connection${deg === 1 ? '' : 's'}. ${n.detail}`}
-							transform={`rotate(${angle - 90}) translate(${leaf.y ?? 0},0)`}
-						>
-							<circle
-								r={r}
-								style={`--mg-node-r: ${r}px`}
-								fill={`color-mix(in srgb, ${KIND_COLOR[n.kind]} 24%, var(--moment-shell-bg, hsl(28, 22%, 2.5%)))`}
-								stroke={KIND_COLOR[n.kind]}
-								stroke-width="1.5"
-							/>
-							<text
-								class="mg-node-label"
-								dy="0.31em"
-								x={flip ? -(r + 5) : r + 5}
-								text-anchor={flip ? 'end' : 'start'}
-								transform={flip ? 'rotate(180)' : undefined}
+			<div class="mg-sticky" data-beat="1">
+				<div class="mg-progress" aria-hidden="true">
+					<i class="on"></i><i></i><i></i><i></i>
+				</div>
+
+				<!-- LEFT: the theatre stage (dark app object) holding the 4 layers -->
+				<div class="mg-stagecol">
+					<div class="mg-frame-bar" aria-hidden="true">
+						<i></i><i></i><i></i>
+						<span class="bc">{wsCrumb}</span>
+					</div>
+					<div class="mg-frame-body">
+						<!-- BEAT 1+2 : radial graph (resident) -->
+						<div class="mg-layer mg-l-radial" aria-label="Beat 1 — capability graph">
+							<svg
+								class="mg-svg"
+								role="img"
+								aria-labelledby={`${titleId} ${descId}`}
+								viewBox={`0 0 ${SIZE} ${SIZE}`}
+								preserveAspectRatio="xMidYMid meet"
 							>
-								{shortLabel(n.label)}
-							</text>
-						</g>
-					);
-				})}
-			</g>
-		</svg>
+								<title id={titleId}>Ikenga capability graph</title>
+								<desc id={descId}>
+									{`Radial-bundle diagram of ${graphFixture.nodes.length} real, shipping capabilities -- skills, commands, MCPs, engines, and installed pkgs -- grouped into ${arcs.length} kind bands and joined by ${graphFixture.edges.length} links. Every node is keyboard-focusable via Tab; focusing one traces its links (amber outgoing, teal incoming) and opens its detail card.`}
+								</desc>
+								<g transform={`translate(${SIZE / 2},${SIZE / 2})`}>
+									{arcs.map((a) => {
+										const rad = ((a.mid - 90) * Math.PI) / 180;
+										const lr = R + 30;
+										const band = bandArc(a) ?? undefined;
+										return (
+											<g class="mg-arc">
+												{band && <path d={band} fill={KIND_COLOR[a.kind]} opacity={0.55} />}
+												<text
+													x={Math.cos(rad) * lr}
+													y={Math.sin(rad) * lr}
+													text-anchor="middle"
+													dominant-baseline="middle"
+													class="mg-arc-label"
+													fill={KIND_COLOR[a.kind]}
+												>
+													{KIND_LABEL[a.kind].toUpperCase()}
+												</text>
+											</g>
+										);
+									})}
+
+									<g fill="none">
+										{links.map(({ edge, d }) => (
+											<path
+												class="mg-edge"
+												d={d}
+												data-source={edge.source}
+												data-target={edge.target}
+												stroke={KIND_COLOR[REL_KIND[edge.rel]]}
+												stroke-width="1.1"
+												stroke-dasharray={edge.derivation === 'heuristic' ? '4,4' : undefined}
+											/>
+										))}
+									</g>
+
+									{leaves.map((leaf) => {
+										const n = leaf.data.node;
+										if (!n) return null;
+										const angle = leaf.x ?? 0;
+										const flip = angle >= 180;
+										const deg = degree(n.id);
+										const r = 4 + Math.min(5, deg * 0.8);
+										return (
+											<g
+												class="mg-node"
+												data-node-id={n.id}
+												data-kind={n.kind}
+												data-hub={deg >= HUB_DEGREE ? '' : undefined}
+												tabindex="0"
+												role="button"
+												aria-label={`${n.label} — ${KIND_LABEL[n.kind]}, ${deg} connection${deg === 1 ? '' : 's'}. ${n.detail}`}
+												transform={`rotate(${angle - 90}) translate(${leaf.y ?? 0},0)`}
+											>
+												<circle
+													r={r}
+													style={`--mg-node-r: ${r}px`}
+													fill={`color-mix(in srgb, ${KIND_COLOR[n.kind]} 24%, var(--moment-shell-bg, hsl(28, 22%, 2.5%)))`}
+													stroke={KIND_COLOR[n.kind]}
+													stroke-width="1.5"
+												/>
+												<text
+													class="mg-node-label"
+													dy="0.31em"
+													x={flip ? -(r + 5) : r + 5}
+													text-anchor={flip ? 'end' : 'start'}
+													transform={flip ? 'rotate(180)' : undefined}
+												>
+													{shortLabel(n.label)}
+												</text>
+											</g>
+										);
+									})}
+								</g>
+							</svg>
+						</div>
+
+						<!-- BEAT 2 : node-select → info board (GraphDetailCard anatomy) -->
+						<div class="mg-layer mg-l-info" data-featured={featuredNodeId} aria-label="Beat 2 — selected node detail">
+							{cards.map(({ node: n, scopeLine, out, inc, connections }) => (
+								<div class="mg-gd" data-node={n.id} hidden={n.id !== featuredNodeId}>
+									<span class="mg-gd-kind" style={`--accent: var(--nk-${n.kind})`}>
+										<span class="dd"></span>{n.kind}
+									</span>
+									<div class="mg-gd-name">{n.label}</div>
+									<div class="mg-gd-scope">{scopeLine}</div>
+									{n.description && <div class="mg-gd-desc">{n.description}</div>}
+									<div class="mg-gd-ch"><span>Connections</span><span>{connections}</span></div>
+									{out.map((c) => (
+										<div class="mg-gd-conn">
+											<span class="ar out">→</span>
+											<span class="tg">{c.label}</span>
+											<span class="rl">{c.rel}{c.heuristic ? '*' : ''}</span>
+										</div>
+									))}
+									{inc.map((c) => (
+										<div class="mg-gd-conn">
+											<span class="ar in">←</span>
+											<span class="tg">{c.label}</span>
+											<span class="rl">{c.rel}{c.heuristic ? '*' : ''}</span>
+										</div>
+									))}
+								</div>
+							))}
+						</div>
+
+						<!-- BEAT 3 : store map (StoreMatrix anatomy) -->
+						<div class="mg-layer mg-l-store" aria-label="Beat 3 — store map">
+							<div class="mg-sm">
+								<div class="mg-sm-toolbar">
+									<span class="mg-sm-title"><span class="g">▦</span> Store map</span>
+									<span class="mg-sm-meta">{storeTotals.rows} entries · {storeTotals.scopes} scopes</span>
+									<span class="mg-sm-spacer"></span>
+									<span class="mg-sm-search" aria-hidden="true">filter entries…</span>
+								</div>
+								<div class="mg-sm-stage">
+									<table class="mg-mx">
+										<caption class="sr-only">
+											{`Ọba presence matrix — ${storeTotals.rows} registry entries across ${storeTotals.scopes} scopes. Staged demo: presence (enabled / local / absent) illustrates the encoding.`}
+										</caption>
+										<thead>
+											<tr>
+												<th class="mg-mx-corner" scope="col">Ọba entry ↓ / scope →</th>
+												{STORE_SCOPES.map((s) => (
+													<th class="mg-mx-colh" scope="col"><span class="mg-mx-colnm">{s.label}</span></th>
+												))}
+											</tr>
+										</thead>
+										<tbody>
+											{storeGroups.map((g) => (
+												<>
+													<tr class="mg-mx-kindrow">
+														<td colspan={STORE_SCOPES.length + 1}>
+															<span class="mg-mx-kindlbl">
+																<span class="kd" style={`background: var(--nk-${g.kind})`}></span>{g.label}
+																<span class="ct">{g.rows.length}</span>
+															</span>
+														</td>
+													</tr>
+													{g.rows.map((r) => (
+														<tr>
+															<th class="mg-mx-rowh" scope="row">
+																<span class="mg-mx-rowcard">
+																	<span class="mg-mx-ic" style={`color: var(--nk-${g.kind})`}>{KIND_GLYPH[g.kind]}</span>
+																	<span class="mg-mx-nm">{r.label}</span>
+																	<span class={`mg-mx-st ${r.status}`}>{r.status}</span>
+																</span>
+															</th>
+															{r.cells.map((c, i) => (
+																<td class="mg-mx-cell">
+																	<span
+																		class={`mg-mx-dot ${c === 'enabled' ? 'on' : c}`}
+																		title={`${STORE_SCOPES[i].label}: ${c === 'none' ? 'absent' : c}`}
+																	>
+																		<span class="mark"></span>
+																	</span>
+																</td>
+															))}
+														</tr>
+													))}
+												</>
+											))}
+										</tbody>
+									</table>
+								</div>
+								<div class="mg-sm-foot">
+									<span><b>{storeTotals.rows}</b> entries × <b>{storeTotals.scopes}</b> scopes</span>
+									<span class="sep">|</span>
+									<span style="color:var(--st-enabled)"><b>staged demo</b></span>
+									<span class="sep">|</span>
+									<span>presence dots illustrate the matrix encoding</span>
+								</div>
+							</div>
+						</div>
+
+						<!-- BEAT 4 : flow view (ngwa-flow anatomy) -->
+						<div class="mg-layer mg-l-flow" aria-label="Beat 4 — orchestration flow">
+							<div class="mg-fl">
+								<div class="mg-fl-toolbar">
+									<span class="mg-fl-title"><span class="g">⛓</span> Orchestration flow</span>
+									<span class="mg-fl-meta">1 flowable</span>
+									<span class="mg-fl-badge">regex-derived</span>
+								</div>
+								<div class="mg-fl-body">
+									<p class="mg-fl-note">
+										<b>How this is built:</b> the capability graph reads <i>declarative</i> wiring from
+										frontmatter. This <i>procedural</i> sequence is parsed from the body — a lightweight
+										regex pass, not an LLM read. Best-effort trace.
+									</p>
+									<div class="mg-fl-source">
+										<span class="g" style={`color: var(--nk-${FLOW_SOURCE.kind})`}>{KIND_GLYPH[FLOW_SOURCE.kind]}</span>
+										<b>{FLOW_SOURCE.label}</b><span class="meta">{FLOW_SOURCE.meta}</span>
+									</div>
+									<div class="mg-fl-chain">
+										{FLOW_STEPS.map((st, i) => (
+											<div>
+												<div class="mg-fl-step">
+													<div class="mg-fl-num">{st.n}</div>
+													<div class="mg-fl-stepbody">
+														<div class="mg-fl-label">{st.label}</div>
+														{st.refs.length > 0 && (
+															<div class="mg-fl-refs">
+																{st.refs.map((rf) => (
+																	<span class="mg-fl-ref" style={`border-left-color: var(--nk-${rf.kind})`}>
+																		<span class="g" style={`color: var(--nk-${rf.kind})`}>{KIND_GLYPH[rf.kind]}</span>
+																		{rf.name}<span class="rk">{rf.kind}</span>
+																	</span>
+																))}
+															</div>
+														)}
+													</div>
+												</div>
+												{i < FLOW_STEPS.length - 1 && <div class="mg-fl-conn"></div>}
+											</div>
+										))}
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- RIGHT: scrolling narrative caption (content swaps per beat) -->
+				<div class="mg-caption">
+					<div class="mg-cap" data-for="1">
+						<div class="mg-cap-kick">Beat 1 · Radial graph</div>
+						<h3>One capability graph.</h3>
+						<p>Skills, commands, MCPs, engines, and installed pkgs — radial-bundled exactly the way the shell's Ngwa analyzer renders them.</p>
+						<p class="foot"><span class="hd">◆</span> Staged demo — every node is a real, shipping capability.</p>
+					</div>
+					<div class="mg-cap" data-for="2">
+						<div class="mg-cap-kick">Beat 2 · Select a node</div>
+						<h3>Click one, read the wiring.</h3>
+						<p>The info board is the shell's own detail card — kind chip, scope, description, then every connection with its relation verb. <code>*</code> marks a heuristic (inferred) edge.</p>
+						<p class="foot"><span class="hd">→</span> outgoing · <span class="hd hd-in">←</span> incoming · dashed = heuristic</p>
+					</div>
+					<div class="mg-cap" data-for="3">
+						<div class="mg-cap-kick">Beat 3 · Store map</div>
+						<h3>The breadth, at a glance.</h3>
+						<p>Every store-backed primitive × the scopes it lives in. One matrix shows how far the workspace reaches — enabled, local, or absent per scope.</p>
+						<p class="foot"><span class="hd">▦</span> Presence matrix — the shell's Ọba store map.</p>
+					</div>
+					<div class="mg-cap" data-for="4">
+						<div class="mg-cap-kick">Beat 4 · Flow view</div>
+						<h3>How the work moves.</h3>
+						<p>Declarative wiring is only half the story. The flow view traces the <i>procedural</i> step-sequence inside a skill — numbered steps and the capabilities each one calls.</p>
+						<p class="foot"><span class="hd">⛓</span> Orchestration flow — parsed, best-effort.</p>
+					</div>
+				</div>
+			</div>
+		</div>
 	</div>
 
 	<p class="mg-foot">
-		<span class="mg-hd" aria-hidden="true">◆</span> Staged demo — every node shown is a real, shipping
-		capability · hover or tab through a node to trace its links
+		<span class="mg-hd" aria-hidden="true">◆</span> Staged demo — every node, store row and flow step is a real, shipping
+		capability · hover or tab through a node to trace its links and open its card
 	</p>
 </section>
 
+<script is:inline>
+	/* Parse-time layout upgrade (WP-13 verify fix): set data-anim="js" BEFORE
+	   the section first paints, so the 400vh pinned track is reserved from the
+	   start and the DOMContentLoaded module never causes a layout jump. Runs
+	   per instance; no-JS and reduced-motion readers never get the pin. */
+	(() => {
+		const s = document.currentScript;
+		const el = s && s.previousElementSibling;
+		if (
+			el &&
+			el.matches('[data-moment="graph"]') &&
+			!matchMedia('(prefers-reduced-motion: reduce)').matches
+		) {
+			el.dataset.anim = 'js';
+		}
+		if (s) s.remove();
+	})();
+</script>
+
 <style>
-	/* ── capability-graph moment (WP-07 production pass over SPIKE-07) ────── */
+	/* ── "Everything connects" v2 (WP-13) ────────────────────────────────────
+	   The dark app OBJECT internals are tone-INDEPENDENT `--moment-*` tokens
+	   (CONTRACT.md); the outer copy is tone-aware via `--site-*`. `--nk-*`
+	   (kind hues) and `--st-*` (store presence) mirror the shell's own tokens —
+	   there is no site-tier equivalent, so they live here as component locals,
+	   same pattern as `--moment-*`. */
 	.mg {
 		--mg-ease: cubic-bezier(0.22, 0.61, 0.16, 1);
 
-		/* --moment-* locals: the D-01 near-black shell-object internals,
-		   named as tokens (mirrors MomentHero's block). Fixed across tone
-		   poles — per CONTRACT.md the stage recreation is a dark app OBJECT,
-		   not page chrome, so it must NOT flip with [data-tone]. */
 		--moment-shell-bg: hsl(28, 22%, 2.5%);
+		--moment-surface: hsl(28, 14%, 7%);
+		--moment-raised: hsl(28, 11%, 11%);
+		--moment-sunken: hsl(28, 24%, 1.8%);
 		--moment-shell-border: hsl(30 18% 18% / 0.9);
+		--moment-border-soft: hsl(28, 14%, 11%);
+		--moment-border-strong: hsl(28, 14%, 30%);
+		--moment-fg: hsl(36, 28%, 90%);
+		--moment-muted: hsl(32, 11%, 56%);
+		--moment-faint: hsl(28, 10%, 44%);
 		--moment-node-label: hsl(32, 11%, 62%);
 		--moment-node-label-hot: hsl(36, 28%, 92%);
 		--moment-accent: hsl(42, 78%, 54%);
 		--moment-success: hsl(170, 42%, 54%);
+
+		--nk-skill: hsl(42, 84%, 60%);
+		--nk-command: hsl(20, 64%, 54%);
+		--nk-mcp: hsl(170, 44%, 52%);
+		--nk-engine: hsl(284, 48%, 64%);
+		--nk-pkg: hsl(212, 48%, 60%);
+
+		--st-enabled: hsl(170, 42%, 54%);
+		--st-local: hsl(42, 78%, 54%);
+		--st-orphaned: hsl(8, 68%, 55%);
 
 		display: block;
 		padding-block: var(--space-8, 32px);
 		background: var(--site-bg);
 		color: var(--site-fg);
 		font-family: var(--site-font-body);
+	}
+
+	.sr-only {
+		position: absolute !important;
+		width: 1px;
+		height: 1px;
+		padding: 0;
+		margin: -1px;
+		overflow: hidden;
+		clip: rect(0, 0, 0, 0);
+		white-space: nowrap;
+		border: 0;
 	}
 
 	.mg-copy {
@@ -303,33 +553,128 @@ const descId = 'mg-desc';
 	.mg-sub {
 		font-size: clamp(0.9375rem, 1.4vw, 1.0625rem);
 		color: var(--site-muted);
-		max-width: 46ch;
+		max-width: 48ch;
 		margin: 0 auto;
 		line-height: 1.5;
 	}
 
-	/* Box reserved up front — zero CLS. Square canvas; a picture, not a
-	   layout that needs to reflow, so no mobile-breakpoint special case. */
-	.mg-stage {
-		max-width: 42rem;
+	/* ════════════ STACKED (default = no-JS / reduced-motion / mobile) ════════
+	   The four layers stack vertically as framed blocks, interleaved with their
+	   captions in reading order. This is the complete, legible, zero-JS frame. */
+	.mg-scrolly {
+		position: relative;
+	}
+	.mg-track {
+		position: relative;
+	}
+	.mg-steps {
+		display: none;
+	}
+	.mg-progress {
+		display: none;
+	}
+	.mg-sticky {
+		display: grid;
+		grid-template-columns: 1fr;
+		gap: var(--space-5, 20px);
+		max-width: 46rem;
 		margin-inline: auto;
 		padding-inline: var(--space-6, 24px);
 	}
-	.mg-svg {
-		display: block;
-		width: 100%;
-		aspect-ratio: 1 / 1;
+	/* stagecol + caption dissolve so their children interleave as grid items */
+	.mg-stagecol,
+	.mg-frame-body,
+	.mg-caption {
+		display: contents;
+	}
+	.mg-frame-bar {
+		display: none;
+	}
+
+	/* each layer = a self-contained framed app panel in the stacked frame */
+	.mg-layer {
+		position: relative;
 		background: var(--moment-shell-bg);
 		border: 1px solid var(--moment-shell-border);
 		border-radius: var(--radius-lg, 10px);
-		box-shadow: 0 32px 80px -28px hsl(0 0% 0% / 0.8);
+		box-shadow: 0 24px 60px -28px hsl(0 0% 0% / 0.7);
+		overflow: hidden;
+	}
+	.mg-l-radial {
+		display: grid;
+		place-items: center;
+		padding: var(--space-4, 16px);
+	}
+	.mg-l-info {
+		padding: var(--space-5, 20px);
 	}
 
+	/* interleave order: cap1, radial, cap2, info, cap3, store, cap4, flow */
+	.mg-cap[data-for='1'] { order: 1; }
+	.mg-l-radial { order: 2; }
+	.mg-cap[data-for='2'] { order: 3; }
+	.mg-l-info { order: 4; }
+	.mg-cap[data-for='3'] { order: 5; }
+	.mg-l-store { order: 6; }
+	.mg-cap[data-for='4'] { order: 7; }
+	.mg-l-flow { order: 8; }
+
+	.mg-cap {
+		max-width: 52ch;
+	}
+	.mg-cap-kick {
+		font-family: var(--site-font-mono);
+		font-size: 10px;
+		letter-spacing: 0.16em;
+		text-transform: uppercase;
+		color: var(--site-accent);
+		margin-bottom: var(--space-2, 8px);
+	}
+	.mg-cap h3 {
+		font-family: var(--site-font-display);
+		font-weight: 600;
+		font-size: clamp(1.3rem, 3vw, 1.9rem);
+		line-height: 1.14;
+		letter-spacing: -0.01em;
+		margin: 0 0 var(--space-2, 8px);
+	}
+	.mg-cap p {
+		color: var(--site-muted);
+		max-width: 42ch;
+		margin: 0;
+		font-size: 0.9375rem;
+		line-height: 1.5;
+	}
+	.mg-cap code {
+		font-family: var(--site-font-mono);
+		font-size: 0.82em;
+		color: var(--site-accent);
+	}
+	.mg-cap .foot {
+		margin-top: var(--space-3, 12px);
+		font-size: 0.78rem;
+		color: var(--site-faint);
+		font-family: var(--site-font-mono);
+		letter-spacing: 0.02em;
+	}
+	.mg-cap .foot .hd {
+		color: var(--site-accent);
+	}
+	.mg-cap .foot .hd-in {
+		color: var(--site-success);
+	}
+
+	/* ── radial SVG ─────────────────────────────────────────────────────────── */
+	.mg-svg {
+		display: block;
+		width: 100%;
+		max-width: 30rem;
+		aspect-ratio: 1 / 1;
+	}
 	.mg-arc-label {
 		font: 500 8.5px var(--site-font-mono);
 		letter-spacing: 0.16em;
 	}
-
 	.mg-edge {
 		stroke-opacity: 0.28;
 		transition: stroke-opacity 0.2s var(--mg-ease);
@@ -350,7 +695,6 @@ const descId = 'mg-desc';
 	.mg-edge.mg-edge-dim {
 		stroke-opacity: 0.04;
 	}
-
 	.mg-node {
 		cursor: pointer;
 	}
@@ -377,9 +721,434 @@ const descId = 'mg-desc';
 		outline-offset: 2px;
 	}
 
+	/* ── info board (GraphDetailCard) ───────────────────────────────────────── */
+	.mg-gd {
+		width: 100%;
+		max-width: 17rem;
+		margin-inline: auto;
+		background: color-mix(in srgb, var(--moment-surface) 88%, transparent);
+		border: 1px solid var(--moment-shell-border);
+		border-radius: var(--radius-lg, 10px);
+		box-shadow: 0 24px 60px -24px hsl(0 0% 0% / 0.7);
+		padding: 15px;
+	}
+	.mg-gd[hidden] {
+		display: none;
+	}
+	.mg-gd-kind {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		font-family: var(--site-font-mono);
+		font-size: 9.5px;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		padding: 3px 9px;
+		border-radius: var(--radius-pill, 999px);
+		margin-bottom: 9px;
+		color: var(--accent);
+		background: color-mix(in srgb, var(--accent) 16%, var(--moment-raised));
+	}
+	.mg-gd-kind .dd {
+		width: 6px;
+		height: 6px;
+		border-radius: 50%;
+		background: var(--accent);
+	}
+	.mg-gd-name {
+		font-size: 16px;
+		font-weight: 600;
+		letter-spacing: -0.02em;
+		line-height: 1.1;
+		color: var(--moment-fg);
+	}
+	.mg-gd-scope {
+		font-family: var(--site-font-mono);
+		font-size: 10px;
+		color: var(--moment-faint);
+		margin-top: 4px;
+	}
+	.mg-gd-desc {
+		font-size: 12px;
+		color: var(--moment-muted);
+		line-height: 1.5;
+		margin: 10px 0;
+		padding: 10px 0;
+		border-top: 1px solid var(--moment-border-soft);
+		border-bottom: 1px solid var(--moment-border-soft);
+	}
+	.mg-gd-ch {
+		display: flex;
+		justify-content: space-between;
+		font-family: var(--site-font-mono);
+		font-size: 9px;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--moment-faint);
+		margin: 8px 0 6px;
+	}
+	.mg-gd-conn {
+		display: flex;
+		align-items: center;
+		gap: 9px;
+		padding: 4px 0;
+		font-size: 12px;
+	}
+	.mg-gd-conn .ar {
+		font-family: var(--site-font-mono);
+		font-size: 11px;
+		width: 14px;
+		text-align: center;
+	}
+	.mg-gd-conn .ar.out {
+		color: var(--moment-accent);
+	}
+	.mg-gd-conn .ar.in {
+		color: var(--moment-success);
+	}
+	.mg-gd-conn .tg {
+		color: var(--moment-muted);
+	}
+	.mg-gd-conn .rl {
+		margin-left: auto;
+		font-family: var(--site-font-mono);
+		font-size: 9px;
+		color: var(--moment-faint);
+	}
+
+	/* ── store map (StoreMatrix) ────────────────────────────────────────────── */
+	.mg-sm {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+	}
+	.mg-sm-toolbar {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3, 12px);
+		padding: 8px var(--space-4, 16px);
+		border-bottom: 1px solid var(--moment-border-soft);
+		background: var(--moment-shell-bg);
+	}
+	.mg-sm-title {
+		display: inline-flex;
+		align-items: center;
+		gap: 7px;
+		font-size: 12px;
+		color: var(--moment-fg);
+	}
+	.mg-sm-title .g {
+		color: var(--moment-muted);
+	}
+	.mg-sm-meta {
+		font-family: var(--site-font-mono);
+		font-size: 10px;
+		color: var(--moment-faint);
+	}
+	.mg-sm-spacer {
+		flex: 1;
+	}
+	.mg-sm-search {
+		font-family: var(--site-font-mono);
+		font-size: 10px;
+		color: var(--moment-muted);
+		background: var(--moment-sunken);
+		border: 1px solid var(--moment-border-soft);
+		border-radius: var(--radius-sm, 4px);
+		padding: 4px 9px;
+	}
+	/* the matrix keeps its OWN horizontal scroller → body never scrolls sideways */
+	.mg-sm-stage {
+		overflow-x: auto;
+		background: var(--moment-shell-bg);
+		padding: var(--space-3, 12px);
+	}
+	.mg-mx {
+		border-collapse: separate;
+		border-spacing: 0;
+		width: 100%;
+	}
+	.mg-mx th,
+	.mg-mx td {
+		text-align: left;
+	}
+	.mg-mx-corner {
+		font-family: var(--site-font-mono);
+		font-size: 8.5px;
+		color: var(--moment-faint);
+		letter-spacing: 0.04em;
+		padding: 4px 8px;
+		white-space: nowrap;
+		font-weight: 400;
+	}
+	.mg-mx-colh {
+		padding: 4px 6px;
+	}
+	.mg-mx-colnm {
+		display: inline-block;
+		font-family: var(--site-font-mono);
+		font-size: 9.5px;
+		color: var(--moment-muted);
+		writing-mode: vertical-rl;
+		transform: rotate(180deg);
+		white-space: nowrap;
+		font-weight: 400;
+	}
+	.mg-mx-kindrow td {
+		padding: 8px 8px 3px;
+	}
+	.mg-mx-kindlbl {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		font-family: var(--site-font-mono);
+		font-size: 9px;
+		letter-spacing: 0.1em;
+		text-transform: uppercase;
+		color: var(--moment-faint);
+	}
+	.mg-mx-kindlbl .kd {
+		width: 7px;
+		height: 7px;
+		border-radius: 50%;
+	}
+	.mg-mx-kindlbl .ct {
+		color: var(--moment-faint);
+		opacity: 0.7;
+	}
+	.mg-mx-rowh {
+		padding: 3px 8px;
+		font-weight: 400;
+	}
+	.mg-mx-rowcard {
+		display: inline-flex;
+		align-items: center;
+		gap: 7px;
+	}
+	.mg-mx-ic {
+		font-size: 11px;
+	}
+	.mg-mx-nm {
+		font-size: 11px;
+		color: var(--moment-fg);
+	}
+	.mg-mx-st {
+		font-family: var(--site-font-mono);
+		font-size: 8px;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		padding: 1px 6px;
+		border-radius: var(--radius-pill, 999px);
+	}
+	.mg-mx-st.enabled {
+		background: color-mix(in srgb, var(--st-enabled) 18%, var(--moment-raised));
+		color: var(--st-enabled);
+	}
+	.mg-mx-st.local {
+		background: color-mix(in srgb, var(--st-local) 18%, var(--moment-raised));
+		color: var(--st-local);
+	}
+	.mg-mx-cell {
+		text-align: center;
+		padding: 3px 6px;
+	}
+	.mg-mx-dot {
+		display: inline-grid;
+		place-items: center;
+		width: 18px;
+		height: 18px;
+		border-radius: 50%;
+		border: 1px solid transparent;
+	}
+	.mg-mx-dot .mark {
+		width: 7px;
+		height: 7px;
+		border-radius: 50%;
+		background: transparent;
+	}
+	.mg-mx-dot.on {
+		background: color-mix(in srgb, var(--st-enabled) 16%, transparent);
+		border-color: color-mix(in srgb, var(--st-enabled) 32%, transparent);
+	}
+	.mg-mx-dot.on .mark {
+		background: var(--st-enabled);
+		box-shadow: 0 0 10px color-mix(in srgb, var(--st-enabled) 70%, transparent);
+	}
+	.mg-mx-dot.local {
+		background: color-mix(in srgb, var(--st-local) 16%, transparent);
+		border-color: color-mix(in srgb, var(--st-local) 32%, transparent);
+	}
+	.mg-mx-dot.local .mark {
+		background: var(--st-local);
+		box-shadow: 0 0 10px color-mix(in srgb, var(--st-local) 60%, transparent);
+	}
+	.mg-mx-dot.none .mark {
+		background: hsl(28 10% 22%);
+	}
+	.mg-sm-foot {
+		display: flex;
+		gap: var(--space-3, 12px);
+		align-items: center;
+		flex-wrap: wrap;
+		padding: 7px var(--space-4, 16px);
+		border-top: 1px solid var(--moment-border-soft);
+		font-family: var(--site-font-mono);
+		font-size: 9.5px;
+		color: var(--moment-muted);
+		background: var(--moment-shell-bg);
+	}
+	.mg-sm-foot .sep {
+		color: var(--moment-border-strong);
+	}
+	.mg-sm-foot b {
+		color: var(--moment-fg);
+	}
+
+	/* ── flow view (ngwa-flow) ──────────────────────────────────────────────── */
+	.mg-fl {
+		display: flex;
+		flex-direction: column;
+		width: 100%;
+	}
+	.mg-fl-toolbar {
+		display: flex;
+		align-items: center;
+		gap: var(--space-3, 12px);
+		padding: 8px var(--space-4, 16px);
+		border-bottom: 1px solid var(--moment-border-soft);
+		background: var(--moment-shell-bg);
+	}
+	.mg-fl-title {
+		display: inline-flex;
+		align-items: center;
+		gap: 7px;
+		font-size: 12px;
+		color: var(--moment-fg);
+	}
+	.mg-fl-title .g {
+		color: var(--moment-muted);
+	}
+	.mg-fl-meta {
+		font-family: var(--site-font-mono);
+		font-size: 10px;
+		color: var(--moment-faint);
+	}
+	.mg-fl-badge {
+		font-family: var(--site-font-mono);
+		font-size: 9px;
+		text-transform: uppercase;
+		letter-spacing: 0.06em;
+		color: var(--st-local);
+		background: color-mix(in srgb, var(--st-local) 12%, transparent);
+		border: 1px solid color-mix(in srgb, var(--st-local) 35%, transparent);
+		padding: 2px 7px;
+		border-radius: var(--radius-pill, 999px);
+	}
+	.mg-fl-body {
+		background: var(--moment-shell-bg);
+		padding: var(--space-4, 16px) var(--space-5, 20px);
+	}
+	.mg-fl-note {
+		font-family: var(--site-font-mono);
+		font-size: 10px;
+		color: var(--moment-muted);
+		line-height: 1.6;
+		margin: 0 0 var(--space-5, 20px);
+		padding: var(--space-3, 12px) var(--space-4, 16px);
+		background: var(--moment-surface);
+		border: 1px solid var(--moment-border-soft);
+		border-left: 2px solid var(--st-local);
+		border-radius: var(--radius-xs, 3px);
+	}
+	.mg-fl-note b {
+		color: var(--moment-fg);
+		font-family: var(--site-font-body);
+	}
+	.mg-fl-source {
+		display: flex;
+		align-items: baseline;
+		gap: var(--space-2, 8px);
+		margin-bottom: var(--space-4, 16px);
+		font-size: 14px;
+		color: var(--moment-fg);
+	}
+	.mg-fl-source b {
+		font-family: var(--site-font-body);
+	}
+	.mg-fl-source .meta {
+		font-family: var(--site-font-mono);
+		font-size: 10px;
+		color: var(--moment-faint);
+	}
+	.mg-fl-chain {
+		display: flex;
+		flex-direction: column;
+	}
+	.mg-fl-step {
+		display: flex;
+		gap: var(--space-3, 12px);
+		align-items: flex-start;
+	}
+	.mg-fl-num {
+		flex-shrink: 0;
+		width: 24px;
+		height: 24px;
+		border-radius: 50%;
+		background: var(--moment-raised);
+		border: 1px solid var(--moment-border-strong);
+		color: var(--moment-muted);
+		font-family: var(--site-font-mono);
+		font-size: 11px;
+		font-weight: 600;
+		display: grid;
+		place-items: center;
+		font-variant-numeric: tabular-nums;
+	}
+	.mg-fl-stepbody {
+		flex: 1;
+		min-width: 0;
+		padding-bottom: var(--space-2, 8px);
+	}
+	.mg-fl-label {
+		font-size: 13px;
+		color: var(--moment-fg);
+		line-height: 1.45;
+	}
+	.mg-fl-refs {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 5px;
+		margin-top: 6px;
+	}
+	.mg-fl-ref {
+		display: inline-flex;
+		align-items: center;
+		gap: 5px;
+		padding: 2px 7px 2px 6px;
+		background: var(--moment-surface);
+		border: 1px solid var(--moment-border-soft);
+		border-left: 2px solid var(--moment-border-strong);
+		border-radius: var(--radius-xs, 3px);
+		font-size: 11px;
+		color: var(--moment-fg);
+	}
+	.mg-fl-ref .rk {
+		font-family: var(--site-font-mono);
+		font-size: 8.5px;
+		text-transform: uppercase;
+		letter-spacing: 0.04em;
+		color: var(--moment-faint);
+	}
+	.mg-fl-conn {
+		width: 2px;
+		height: 14px;
+		margin-left: 11px;
+		background: var(--moment-border-soft);
+	}
+
 	.mg-foot {
 		text-align: center;
-		margin-top: var(--space-5, 20px);
+		margin-top: var(--space-6, 24px);
 		font-size: 0.8125rem;
 		color: var(--site-faint);
 		padding-inline: var(--space-6, 24px);
@@ -388,14 +1157,229 @@ const descId = 'mg-desc';
 		color: var(--site-accent);
 	}
 
-	/* ── Responsive simplify (WP-07): below ~720px the canvas itself still
-	   scales down via the 100%-width/1:1-aspect box above, so raw px values
-	   (node circle r, font-size) shrink right along with it. Compensate by
-	   bumping both relatively bigger, and declutter by dropping non-hub node
-	   labels (arcs, kind-band labels, and all edges/nodes stay — only the
-	   long tangential leaf labels that are most prone to crowding go). Hub
-	   nodes (data-hub, degree >= HUB_DEGREE) keep their label as the
-	   surviving orientation cues. ─────────────────────────────────────────── */
+	/* ════════════ PINNED (JS + motion-allowed + wide) ═══════════════════════
+	   The parse-time inline script above sets [data-anim="js"] only when motion
+	   is allowed — BEFORE first paint, so the 400vh track is reserved from the
+	   start (no layout jump; CLS 0). Reduced-motion and no-JS never reach this
+	   block (stay stacked, zero animation). */
+	@media (min-width: 721px) {
+		.mg[data-anim='js'] .mg-track {
+			height: 400vh;
+		}
+		.mg[data-anim='js'] .mg-steps {
+			display: block;
+			position: absolute;
+			inset: 0;
+			z-index: 0;
+		}
+		.mg[data-anim='js'] .mg-step {
+			height: 25%;
+		}
+		.mg[data-anim='js'] .mg-sticky {
+			position: sticky;
+			top: 0;
+			height: 100vh;
+			grid-template-columns: 1fr minmax(300px, 440px);
+			align-items: center;
+			gap: var(--space-8, 32px);
+			max-width: 74rem;
+			padding-inline: var(--space-6, 24px);
+			z-index: 2;
+			pointer-events: none;
+		}
+		/* the app object frame is the stagecol; children are absolute overlays */
+		.mg[data-anim='js'] .mg-stagecol {
+			display: block;
+			position: relative;
+			height: min(78vh, 560px);
+			background: var(--moment-shell-bg);
+			border: 1px solid var(--moment-shell-border);
+			border-radius: var(--radius-lg, 10px);
+			box-shadow:
+				0 32px 80px -28px hsl(0 0% 0% / 0.82),
+				inset 0 1px 0 hsl(40 40% 60% / 0.06);
+			overflow: hidden;
+		}
+		.mg[data-anim='js'] .mg-frame-bar {
+			display: flex;
+			align-items: center;
+			gap: 7px;
+			height: 30px;
+			padding: 0 12px;
+			border-bottom: 1px solid var(--moment-border-soft);
+			background: var(--moment-sunken);
+		}
+		.mg[data-anim='js'] .mg-frame-bar i {
+			width: 8px;
+			height: 8px;
+			border-radius: 50%;
+			background: hsl(28 12% 20%);
+		}
+		.mg[data-anim='js'] .mg-frame-bar .bc {
+			margin-left: 8px;
+			font-family: var(--site-font-mono);
+			font-size: 9.5px;
+			letter-spacing: 0.04em;
+			color: var(--moment-faint);
+		}
+		.mg[data-anim='js'] .mg-frame-body {
+			display: block;
+			position: relative;
+			height: calc(100% - 30px);
+		}
+
+		/* layers → transparent overlays, gated by [data-beat]. `visibility`
+		   (delayed off the transition) removes inactive layers from the tab
+		   order too, so keyboard focus can't land on a hidden radial. */
+		.mg[data-anim='js'] .mg-layer {
+			position: absolute;
+			inset: 0;
+			order: 0;
+			border: none;
+			background: transparent;
+			box-shadow: none;
+			border-radius: 0;
+			opacity: 0;
+			visibility: hidden;
+			transform: translateX(6%);
+			transition:
+				opacity 0.5s var(--mg-ease),
+				transform 0.5s var(--mg-ease),
+				visibility 0s 0.5s;
+			will-change: opacity, transform;
+			pointer-events: none;
+		}
+		.mg[data-anim='js'] .mg-l-radial {
+			padding: var(--space-4, 16px);
+			transform: scale(0.98);
+		}
+		.mg[data-anim='js'] .mg-svg {
+			max-width: min(78vh - 40px, 30rem);
+		}
+
+		/* Beat 1+2 : radial resident (nudges left in 2, exits in 3/4) */
+		.mg[data-anim='js'] .mg-sticky[data-beat='1'] .mg-l-radial,
+		.mg[data-anim='js'] .mg-sticky[data-beat='2'] .mg-l-radial {
+			opacity: 1;
+			visibility: visible;
+			transition-delay: 0s;
+		}
+		.mg[data-anim='js'] .mg-sticky[data-beat='1'] .mg-l-radial {
+			transform: scale(1);
+		}
+		.mg[data-anim='js'] .mg-sticky[data-beat='2'] .mg-l-radial {
+			transform: translateX(-13%) scale(0.9);
+		}
+		.mg[data-anim='js'] .mg-sticky[data-beat='3'] .mg-l-radial,
+		.mg[data-anim='js'] .mg-sticky[data-beat='4'] .mg-l-radial {
+			transform: translateX(-28%) scale(0.86);
+		}
+
+		/* Beat 2 : info board slides in from the right */
+		.mg[data-anim='js'] .mg-l-info {
+			display: flex;
+			align-items: center;
+			justify-content: flex-end;
+			padding: var(--space-5, 20px);
+			transform: translateX(18px);
+		}
+		.mg[data-anim='js'] .mg-sticky[data-beat='2'] .mg-l-info {
+			opacity: 1;
+			visibility: visible;
+			transform: translateX(0);
+			transition-delay: 0s;
+		}
+		.mg[data-anim='js'] .mg-l-info .mg-gd {
+			margin: 0;
+		}
+
+		/* Beat 3 : store map */
+		.mg[data-anim='js'] .mg-l-store .mg-sm {
+			position: absolute;
+			inset: 0;
+		}
+		.mg[data-anim='js'] .mg-l-store .mg-sm-stage {
+			flex: 1;
+			overflow: auto;
+		}
+		.mg[data-anim='js'] .mg-sticky[data-beat='3'] .mg-l-store {
+			opacity: 1;
+			visibility: visible;
+			transform: translateX(0);
+			transition-delay: 0s;
+		}
+
+		/* Beat 4 : flow view */
+		.mg[data-anim='js'] .mg-l-flow .mg-fl {
+			position: absolute;
+			inset: 0;
+		}
+		.mg[data-anim='js'] .mg-l-flow .mg-fl-body {
+			flex: 1;
+			overflow: auto;
+		}
+		.mg[data-anim='js'] .mg-sticky[data-beat='4'] .mg-l-flow {
+			opacity: 1;
+			visibility: visible;
+			transform: translateX(0);
+			transition-delay: 0s;
+		}
+
+		/* captions → right-column overlays gated by beat */
+		.mg[data-anim='js'] .mg-caption {
+			display: block;
+			position: relative;
+			pointer-events: none;
+		}
+		.mg[data-anim='js'] .mg-cap {
+			order: 0;
+			position: absolute;
+			inset: 0;
+			display: flex;
+			flex-direction: column;
+			justify-content: center;
+			max-width: none;
+			opacity: 0;
+			transform: translateY(14px);
+			transition:
+				opacity 0.4s var(--mg-ease),
+				transform 0.4s var(--mg-ease);
+		}
+		.mg[data-anim='js'] .mg-sticky[data-beat='1'] .mg-cap[data-for='1'],
+		.mg[data-anim='js'] .mg-sticky[data-beat='2'] .mg-cap[data-for='2'],
+		.mg[data-anim='js'] .mg-sticky[data-beat='3'] .mg-cap[data-for='3'],
+		.mg[data-anim='js'] .mg-sticky[data-beat='4'] .mg-cap[data-for='4'] {
+			opacity: 1;
+			transform: translateY(0);
+		}
+
+		/* beat progress rail */
+		.mg[data-anim='js'] .mg-progress {
+			display: flex;
+			position: absolute;
+			left: var(--space-4, 16px);
+			top: 50%;
+			transform: translateY(-50%);
+			flex-direction: column;
+			gap: 10px;
+			z-index: 3;
+		}
+		.mg[data-anim='js'] .mg-progress i {
+			width: 7px;
+			height: 7px;
+			border-radius: 50%;
+			background: var(--moment-border-strong);
+			transition:
+				background 0.3s var(--mg-ease),
+				transform 0.3s var(--mg-ease);
+		}
+		.mg[data-anim='js'] .mg-progress i.on {
+			background: var(--site-accent);
+			transform: scale(1.5);
+		}
+	}
+
+	/* ── Responsive simplify (stacked / mobile): drop non-hub leaf labels ────── */
 	@media (max-width: 720px) {
 		.mg-node circle {
 			r: calc(var(--mg-node-r, 4px) * 1.4);
@@ -411,11 +1395,15 @@ const descId = 'mg-desc';
 		}
 	}
 
+	/* ── reduced-motion: no transitions (data-anim is never set here anyway) ─── */
 	@media (prefers-reduced-motion: reduce) {
 		.mg-edge,
 		.mg-node circle,
-		.mg-node-label {
-			transition: none;
+		.mg-node-label,
+		.mg-layer,
+		.mg-cap,
+		.mg-progress i {
+			transition: none !important;
 		}
 	}
 </style>
