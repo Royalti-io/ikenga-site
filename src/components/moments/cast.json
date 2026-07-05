@@ -1,0 +1,89 @@
+{
+  "$schemaVersion": 1,
+  "provisional": true,
+  "source": {
+    "base_design": "plans/site-redesign/designs/home-hero-theatre.html",
+    "base_design_rev": 2,
+    "registry_snapshot": "ikenga-registry/index.json",
+    "registry_snapshot_updatedAt": "2026-06-25T23:36:40.002Z",
+    "verified_on": "2026-07-05"
+  },
+  "workspace": {
+    "name": "royalti",
+    "scope_label": "royalti",
+    "project": "launch-week"
+  },
+  "project": {
+    "slug": "launch-week",
+    "path": "~/royalti/launch-week",
+    "status_chip": "live"
+  },
+  "terminal_transcript": {
+    "session_label": "claude",
+    "lines": [
+      { "role": "prompt", "text": "/groundwork status" },
+      { "role": "response", "step": 2, "tone": "ok", "text": "plan: launch-week · groundwork spine · 12 parts" },
+      { "role": "response", "step": 2, "tone": "muted", "text": "research stamped · 3 gates green" },
+      { "role": "response", "step": 3, "tone": "ok", "text": "board → pane 2" },
+      { "role": "response", "step": 4, "tone": "ok", "text": "artifact → pane 3 launch-checklist.html" },
+      { "role": "response", "step": 5, "tone": "muted", "text": "done in 4.2s — 2 panes updated, 1 artifact written" }
+    ]
+  },
+  "board": {
+    "title": "launch-week",
+    "wps": [
+      { "id": "WP-01", "title": "Announcement draft", "status": "done" },
+      { "id": "WP-02", "title": "Press kit", "status": "review" },
+      { "id": "WP-03", "title": "Demo capture", "status": "queued" }
+    ]
+  },
+  "artifact": {
+    "filename": "launch-checklist.html",
+    "title": "Launch checklist — week 27",
+    "saved_chip": "saved",
+    "items": [
+      "Changelog v0.3 published to the site",
+      "Download links verified on 3 platforms",
+      "Newsletter scheduled — the ozi goes out Friday"
+    ]
+  },
+  "tasks_teaser": {
+    "titles": [
+      "Ship changelog v0.3",
+      "Verify download links on 3 platforms",
+      "Schedule the launch-week newsletter"
+    ]
+  },
+  "store_rows": [
+    {
+      "name": "@ikenga/pkg-tasks",
+      "version": "0.8.2",
+      "description": "Tasks — List, Agenda, Triage over the production tasks schema."
+    },
+    {
+      "name": "@ikenga/pkg-mail",
+      "version": "0.2.1",
+      "description": "Mail — Inbox, Triage, All, Drafts over the production mail schema."
+    },
+    {
+      "name": "@ikenga/pkg-research",
+      "version": "0.1.0",
+      "description": "Research — Reports, Sources, Personas over the research_notes + research_sources schema."
+    },
+    {
+      "name": "@ikenga/pkg-strategy",
+      "version": "0.1.0",
+      "description": "Strategy — OKR board (board + list), Cycles, Reviews over the production strategy schema."
+    }
+  ],
+  "capability_nodes": [
+    { "kind": "skill", "name": "groundwork", "detail": "npx skills add royalti-io/groundwork" },
+    { "kind": "skill", "name": "ikenga-artifact-builder", "detail": "npx skills add royalti-io/ikenga-artifact-builder" },
+    { "kind": "command", "name": "/release-status", "detail": "workspace skill — .claude/skills/release-status" },
+    { "kind": "mcp", "name": "@ikenga/mcp-iyke", "version": "0.2.1", "detail": "iyke control-bridge MCP server" },
+    { "kind": "engine", "name": "@ikenga/pkg-engine-claude-code", "version": "0.2.1" },
+    { "kind": "engine", "name": "@ikenga/pkg-engine-codex", "version": "0.2.1" },
+    { "kind": "engine", "name": "@ikenga/pkg-engine-gemini", "version": "0.2.1" }
+  ],
+  "engines_rotation": ["Claude Code", "Codex", "Gemini CLI"]
+}
