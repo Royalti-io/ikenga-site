@@ -1,0 +1,525 @@
+---
+/**
+ * MomentInstall.astro — the Ọba install beat (WP-06).
+ *
+ * Recreates a slice of the D-01 shell language at pane scale: a "Store" pane
+ * lists pkgs from `cast.store_rows`, one gets installed (row highlight →
+ * scaleX progress fill → "installed · vX.Y.Z" chip), and the "Installed"
+ * pane gains the entry with its count chip flipping. Anatomy mirrors
+ * `MomentHero.astro` (pane heads, boxed mono-uppercase chips, status dots) —
+ * this island renders two panes on their own, not the full sidebar+rail
+ * shell (that's the hero's job). All content is imported from `cast.json`
+ * at BUILD time (SSG, no runtime fetch); reduced-motion / no-JS render the
+ * composed final frame with zero script. Motion + lifecycle live in
+ * `./moment-install.ts` (on the shared `./timeline.ts` engine). See
+ * `./CONTRACT.md`.
+ *
+ * Honesty (G-19/G-21): every row here is a `store_rows` entry — a
+ * registry-published pkg per the cast's own provenance note (see
+ * `graph-fixture.ts`'s header). Which one installs (the first, `pkg-tasks`)
+ * is a display choice, not a claim about install order.
+ */
+import castData from './cast.json';
+
+type Cast = typeof castData;
+export interface Props {
+	/** Tone pole for the OUTER copy only; the shell panes stay dark. */
+	tone?: 'dark' | 'light';
+	/** Autoplay policy handed to the timeline engine. */
+	autoplay?: 'viewport' | 'immediate' | 'manual';
+	/** Fixtures slice — defaults to the vendored cast; a caller may pass another. */
+	cast?: Cast;
+}
+const { tone = 'dark', autoplay = 'viewport', cast = castData } = Astro.props;
+
+const rows = cast.store_rows.slice(0, 3);
+const installIdx = 0; // the row that installs during the beat — @ikenga/pkg-tasks
+const installed = rows[installIdx];
+
+const svg = (body: string, opts = 'fill="none" stroke="currentColor" stroke-width="1.6"') =>
+	`<svg viewBox="0 0 24 24" ${opts} aria-hidden="true">${body}</svg>`;
+const icons = {
+	store: svg('<rect x="3.5" y="4.5" width="17" height="15" rx="1.6"/><path d="M3.5 12h17M12 4.5v15"/>'),
+	replay: svg(
+		'<path d="M19.5 12a7.5 7.5 0 1 1-2.2-5.3" stroke-linecap="round"/><path d="M19.5 3.5V9h-5.4z" fill="currentColor" stroke="none"/>',
+	),
+	diamond: svg('<path d="M12 3 21 12 12 21 3 12z"/>', 'fill="currentColor"'),
+};
+---
+
+<section
+	class="mi"
+	data-moment="install"
+	data-autoplay={autoplay}
+	data-tone={tone === 'light' ? 'light' : undefined}
+>
+	<div class="mi-copy">
+		<h2 class="mi-h2">One click. Installed.</h2>
+		<p class="mi-sub">Ọba installs a pkg straight from the store — no restart, no config file to hand-edit.</p>
+	</div>
+
+	<div class="mi-stage">
+		<div
+			class="mi-shell"
+			aria-label={`Ikenga store — ${installed.name} installs from the store; the Installed pane gains the entry once it finishes.`}
+		>
+			<div class="mi-crumb">
+				<s class="mi-mk" set:html={icons.store} /> <b>Ọba</b>
+				<span class="mi-crumb-sep">›</span> Store
+			</div>
+			<div class="mi-cols">
+				<div class="mi-pane store">
+					<div class="mi-pane-head">
+						<span class="mi-n">Store</span> · pkgs
+						<span class="mi-sp"></span>
+						<span class="mi-chip">{rows.length} listed</span>
+					</div>
+					<div class="mi-pane-body">
+						{rows.map((r, i) => {
+							const acting = i === installIdx;
+							return (
+								<div
+									class="mi-row mi-m"
+									data-row={i}
+									data-install-row={acting ? '' : undefined}
+								>
+									{acting && <span class="mi-glow" data-glow aria-hidden="true"></span>}
+									<span class="mi-dot" data-dot={acting ? '' : undefined}></span>
+									<div class="mi-meta">
+										<span class="mi-name">{r.name}</span>
+										<span class="mi-desc">{r.description}</span>
+									</div>
+									<span class="mi-sp"></span>
+									{acting ? (
+										<span class="mi-action" data-action>
+											<span class="mi-btn" data-btn>Install</span>
+											<span class="mi-track" data-track>
+												<span class="mi-fill" data-fill></span>
+											</span>
+											<span class="mi-chip installed" data-instchip>installed · v{r.version}</span>
+										</span>
+									) : (
+										<span class="mi-chip">install</span>
+									)}
+								</div>
+							);
+						})}
+					</div>
+				</div>
+
+				<div class="mi-pane installed">
+					<div class="mi-pane-head">
+						<span class="mi-n">Installed</span>
+						<span class="mi-sp"></span>
+						<span class="mi-chip done" data-count>1</span>
+					</div>
+					<div class="mi-pane-body">
+						<div class="mi-empty" data-empty>Nothing installed yet</div>
+						<div class="mi-newrow mi-m" data-newrow>
+							<span class="mi-dot on"></span>
+							<span class="mi-name">{installed.name}</span>
+							<span class="mi-sp"></span>
+							<span class="mi-ver">v{installed.version}</span>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<div class="mi-foot">
+			<span class="mi-honest"><span class="mi-hd" set:html={icons.diamond} /> Staged demo — {installed.name} is a real, registry-published pkg</span>
+			<button class="mi-replay" data-replay type="button"><span class="mi-ri" set:html={icons.replay} /> replay</button>
+		</div>
+	</div>
+</section>
+
+<style>
+	/* ── Moment island: Ọba install beat ──────────────────────────────────── */
+	.mi {
+		--mi-ease: cubic-bezier(0.22, 0.61, 0.16, 1);
+		/* --moment-* locals: same tone-independent dark shell object as the
+		   hero (MomentHero.astro) — self-contained panes, not page chrome. */
+		--moment-shell-bg: hsl(28, 22%, 2.5%);
+		--moment-shell-border: hsl(30 18% 18% / 0.9);
+		--moment-mn-bg: hsl(28, 20%, 3%);
+		--moment-crumb-sep: hsl(28, 10%, 28%);
+		--moment-pane-bg: hsl(28, 20%, 3%);
+		--moment-row-bg: hsl(28, 14%, 5%);
+		--moment-head: hsl(28, 10%, 40%);
+		--moment-head-n: hsl(28, 10%, 52%);
+		--moment-fg: hsl(36, 28%, 90%);
+		--moment-fg-muted: hsl(32, 11%, 56%);
+		--moment-fg-faint: hsl(28, 10%, 44%);
+		--moment-border: hsl(28, 14%, 15%);
+		--moment-border-soft: hsl(28, 14%, 11%);
+		--moment-accent: hsl(42, 78%, 54%);
+		--moment-success: hsl(170, 42%, 54%);
+		--moment-dim-dot: hsl(28, 10%, 26%);
+		--moment-chip-done-bg: hsl(170 30% 10% / 0.5);
+		--moment-chip-done-bd: hsl(170 42% 30% / 0.7);
+
+		display: block;
+		padding-block: var(--space-8, 32px);
+		background: var(--site-bg);
+		color: var(--site-fg);
+		font-family: var(--site-font-body);
+	}
+
+	.mi-copy {
+		text-align: center;
+		max-width: 60rem;
+		margin: 0 auto var(--space-6, 24px);
+		padding-inline: var(--space-6, 24px);
+	}
+	.mi-h2 {
+		font-family: var(--site-font-display);
+		font-weight: 600;
+		font-size: clamp(1.6rem, 3.6vw, 2.4rem);
+		line-height: 1.12;
+		letter-spacing: -0.01em;
+		margin: 0 0 var(--space-3, 12px);
+	}
+	.mi-sub {
+		font-size: clamp(0.9375rem, 1.4vw, 1.0625rem);
+		color: var(--site-muted);
+		max-width: 48ch;
+		margin: 0 auto;
+		line-height: 1.5;
+	}
+
+	.mi-stage {
+		max-width: 56rem;
+		margin-inline: auto;
+		padding-inline: var(--space-6, 24px);
+	}
+
+	/* Box reserved before hydration — zero CLS. SSG content means the box is
+	   never empty regardless, but the ratio still guarantees layout stability. */
+	.mi-shell {
+		position: relative;
+		background: var(--moment-shell-bg);
+		border: 1px solid var(--moment-shell-border);
+		border-radius: var(--radius-lg, 10px);
+		overflow: hidden;
+		font-size: 13px;
+		color: var(--moment-fg);
+		box-shadow: 0 32px 80px -28px hsl(0 0% 0% / 0.8);
+		aspect-ratio: 960 / 400;
+		display: flex;
+		flex-direction: column;
+		-webkit-font-smoothing: antialiased;
+		text-rendering: optimizeLegibility;
+	}
+	.mi-shell,
+	.mi-shell * {
+		line-height: 1.5;
+		box-sizing: border-box;
+	}
+	.mi-shell s :global(svg) {
+		width: 100%;
+		height: 100%;
+		display: block;
+	}
+
+	.mi-crumb {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 10px 14px;
+		border-bottom: 1px solid var(--moment-border-soft);
+		font: 500 10.5px var(--site-font-mono);
+		color: var(--moment-fg-faint);
+		flex: none;
+	}
+	.mi-mk {
+		width: 13px;
+		height: 13px;
+		color: var(--moment-accent);
+		display: inline-flex;
+	}
+	.mi-crumb b {
+		color: var(--moment-fg);
+		font-weight: 500;
+	}
+	.mi-crumb-sep {
+		color: var(--moment-crumb-sep);
+	}
+
+	.mi-cols {
+		flex: 1;
+		min-height: 0;
+		display: grid;
+		grid-template-columns: 1.5fr 1fr;
+		gap: 1px;
+		background: var(--moment-border-soft);
+	}
+	.mi-pane {
+		background: var(--moment-mn-bg);
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+		min-height: 0;
+	}
+	.mi-pane-head {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 8px 14px;
+		border-bottom: 1px solid var(--moment-border-soft);
+		font: 500 9px var(--site-font-mono);
+		letter-spacing: 0.18em;
+		text-transform: uppercase;
+		color: var(--moment-head);
+		flex: none;
+	}
+	.mi-pane-head .mi-n {
+		color: var(--moment-head-n);
+	}
+	.mi-sp {
+		flex: 1;
+	}
+
+	.mi-chip {
+		font: 500 8.5px var(--site-font-mono);
+		letter-spacing: 0.14em;
+		text-transform: uppercase;
+		padding: 2px 8px;
+		border-radius: 4px;
+		border: 1px solid var(--moment-border);
+		color: var(--moment-fg-faint);
+		white-space: nowrap;
+		display: inline-block;
+		flex: none;
+	}
+	.mi-chip.installed {
+		color: var(--moment-success);
+		border-color: var(--moment-chip-done-bd);
+		background: var(--moment-chip-done-bg);
+	}
+	.mi-chip.done {
+		color: var(--moment-success);
+		border-color: var(--moment-chip-done-bd);
+		background: var(--moment-chip-done-bg);
+	}
+
+	.mi-pane-body {
+		flex: 1;
+		min-height: 0;
+		padding: 12px 13px;
+		display: flex;
+		flex-direction: column;
+		justify-content: center;
+		gap: 7px;
+	}
+
+	.mi-row {
+		position: relative;
+		display: flex;
+		align-items: center;
+		gap: 9px;
+		padding: 8px 10px;
+		border: 1px solid var(--moment-border-soft);
+		border-radius: 7px;
+		background: var(--moment-row-bg);
+		overflow: hidden;
+	}
+	.mi-glow {
+		position: absolute;
+		inset: 0;
+		background: hsl(42 78% 54% / 0.14);
+		opacity: 0;
+		pointer-events: none;
+	}
+	.mi-dot {
+		width: 7px;
+		height: 7px;
+		border-radius: 999px;
+		flex: none;
+		background: var(--moment-dim-dot);
+		transition: background 0.2s var(--mi-ease);
+	}
+	.mi-dot.on {
+		background: var(--moment-success);
+	}
+	.mi-meta {
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 1px;
+	}
+	.mi-name {
+		font: 500 11.5px var(--site-font-mono);
+		color: var(--moment-fg);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.mi-desc {
+		font: 400 10px var(--site-font-body);
+		color: var(--moment-fg-faint);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	.mi-action {
+		display: flex;
+		align-items: center;
+		flex: none;
+	}
+	.mi-btn {
+		display: none;
+		font: 500 9.5px var(--site-font-mono);
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--moment-accent);
+		border: 1px solid var(--moment-border);
+		border-radius: 5px;
+		padding: 3px 9px;
+	}
+	.mi-track {
+		display: none;
+		width: 64px;
+		height: 5px;
+		border-radius: 999px;
+		background: var(--moment-border-soft);
+		overflow: hidden;
+	}
+	.mi-fill {
+		display: block;
+		width: 100%;
+		height: 100%;
+		border-radius: inherit;
+		background: var(--moment-accent);
+		transform: scaleX(0);
+		transform-origin: left;
+	}
+	[data-instchip] {
+		display: inline-block;
+	}
+	.mi-action.pre .mi-btn {
+		display: inline-flex;
+	}
+	.mi-action.pre .mi-track,
+	.mi-action.pre [data-instchip] {
+		display: none;
+	}
+	.mi-action.installing .mi-track {
+		display: block;
+	}
+	.mi-action.installing .mi-btn,
+	.mi-action.installing [data-instchip] {
+		display: none;
+	}
+
+	/* Installed pane */
+	.mi-empty {
+		display: none;
+		font: 400 11px var(--site-font-body);
+		color: var(--moment-fg-faint);
+		padding: 4px 2px;
+	}
+	.mi-newrow {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		padding: 8px 10px;
+		border: 1px solid var(--moment-border-soft);
+		border-radius: 7px;
+		background: var(--moment-row-bg);
+	}
+	.mi-newrow .mi-name {
+		font: 500 11px var(--site-font-mono);
+		color: var(--moment-fg);
+	}
+	.mi-ver {
+		font: 500 9.5px var(--site-font-mono);
+		color: var(--moment-fg-faint);
+	}
+
+	/* ── animation gating (default = SSG final frame; JS hides to reveal) ── */
+	.mi[data-anim='js'] .mi-m {
+		opacity: 0;
+		transform: translateY(6px);
+	}
+
+	.mi-foot {
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		gap: var(--space-4, 16px);
+		margin-top: var(--space-5, 20px);
+		font-size: 0.8125rem;
+		color: var(--site-faint);
+		flex-wrap: wrap;
+		text-align: center;
+	}
+	.mi-honest {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+	}
+	.mi-hd {
+		width: 9px;
+		height: 9px;
+		color: var(--site-accent);
+		display: inline-flex;
+	}
+	.mi-replay {
+		display: inline-flex;
+		align-items: center;
+		gap: 6px;
+		font: 500 11px var(--site-font-mono);
+		color: var(--site-muted);
+		background: none;
+		border: 1px solid var(--site-border-strong);
+		border-radius: 999px;
+		padding: 4px 12px;
+		cursor: pointer;
+		transition: color 0.2s var(--mi-ease), border-color 0.2s var(--mi-ease);
+	}
+	.mi-ri {
+		width: 12px;
+		height: 12px;
+		display: inline-flex;
+	}
+	.mi-replay:hover {
+		color: var(--site-accent);
+		border-color: var(--site-accent);
+	}
+
+	/* ── responsive ───────────────────────────────────────────────────────── */
+	@media (max-width: 640px) {
+		.mi-shell {
+			aspect-ratio: auto;
+		}
+		.mi-cols {
+			grid-template-columns: 1fr;
+			grid-template-rows: auto auto;
+		}
+		.mi-desc {
+			display: none;
+		}
+	}
+
+	/* ── reduced motion: composed final frame, zero animation ────────────── */
+	@media (prefers-reduced-motion: reduce) {
+		.mi-m {
+			opacity: 1 !important;
+			transform: none !important;
+		}
+		.mi-replay {
+			transition: none;
+		}
+		.mi-dot {
+			transition: none;
+		}
+		.mi-fill {
+			transform: scaleX(1) !important;
+		}
+	}
+</style>
+
+<script>
+	import './moment-install';
+</script>
