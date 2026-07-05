@@ -293,6 +293,17 @@ const boardMap: Record<string, { dot: string; chip: string; label: string }> = {
 		max-width: 72rem;
 		margin: 0 auto var(--space-8, 32px);
 		padding-inline: var(--space-6, 24px);
+		/* Reserve the copy block so the IM Fell font-swap reflow can't displace
+		   the (huge, CLS-amplifying) stage below it. Values = settled heights
+		   measured with fonts loaded (390px viewport → 183px; wider viewports
+		   settle shorter per line-count). Lighthouse mobile CLS was 0.275 with
+		   the swap shift, ~0 with the block reserved. */
+		min-height: 120px;
+	}
+	@media (max-width: 640px) {
+		.mh-copy {
+			min-height: 184px;
+		}
 	}
 	.mh-h1 {
 		font-family: var(--site-font-display);
@@ -855,7 +866,12 @@ const boardMap: Record<string, { dot: string; chip: string; label: string }> = {
 	/* ── responsive ───────────────────────────────────────────────────────── */
 	@media (max-width: 860px) {
 		.mh-shell {
-			aspect-ratio: auto;
+			/* Reserve the stacked-layout box too — `auto` here caused the
+			   mobile CLS 0.281 Lighthouse flagged (WP-10 evidence): the shell
+			   grew as panes/fonts settled. 1/2 matches the settled stacked
+			   height at phone widths (327x656 measured at 390px viewport);
+			   content may stretch it further but first paint reserves it. */
+			aspect-ratio: 1 / 2;
 		}
 		.mh-shell-in {
 			grid-template-columns: 38px 1fr;

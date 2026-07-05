@@ -44,6 +44,14 @@ const { github = 'https://github.com/Royalti-io/ikenga' } = Astro.props;
 			a feature you have to take on faith.
 		</p>
 		<p class="sk-lede">We built it to run our own company. Now it's yours.</p>
+		<!-- The "workspace becomes you" claims, verbatim from the prior production
+		     page's Beat 2 (git show main:src/pages/index.astro) — re-homed here by
+		     the WP-10 follow-up so the copy accounting closes (WP-05 flag). -->
+		<ul class="sk-list obi-list">
+			<li>Your config lives on your machine — readable as files, versioned in git.</li>
+			<li>Every agent, skill, and command you install is yours to inspect and change.</li>
+			<li>The cockpit keeps you in sync across projects — no dotfile archaeology.</li>
+		</ul>
 		<div class="sk-obi__cta">
 			<Button href="#install" variant="primary">Download Ikenga</Button>
 			<Button href={github} variant="ghost" rel="noopener">
@@ -54,3 +62,13 @@ const { github = 'https://github.com/Royalti-io/ikenga' } = Astro.props;
 		<p class="sk-obi__gloss"><em>Obi</em> — the meeting house; the home of your workspace.</p>
 	</div>
 </section>
+
+<style>
+	/* .sk-obi centers everything; the claims list reads better left-aligned
+	   and centered as a block. */
+	.obi-list {
+		text-align: left;
+		margin: var(--space-6) auto 0;
+		width: fit-content;
+	}
+</style>
