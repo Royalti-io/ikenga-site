@@ -10,6 +10,7 @@
  */
 import '../styles/global.css';
 import MomentHero from '../components/moments/MomentHero.astro';
+import MomentGraph from '../components/moments/MomentGraph.astro';
 ---
 
 <!doctype html>
@@ -24,6 +25,8 @@ import MomentHero from '../components/moments/MomentHero.astro';
 	<body class="sk-page">
 		<main id="main-content">
 			<MomentHero tone="dark" autoplay="viewport" />
+			<!-- SPIKE-07 — capability-graph moment island feasibility spike -->
+			<MomentGraph tone="dark" />
 		</main>
 	</body>
 </html>

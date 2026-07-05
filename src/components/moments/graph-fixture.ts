@@ -1,0 +1,141 @@
+/**
+ * graph-fixture.ts — the {nodes, edges} source for MomentGraph (SPIKE-07).
+ *
+ * HONESTY GATE (G-19): every node here traces to the vendored `cast.json`
+ * (byte-identical copy of `plans/site-redesign/designs/_fixtures/cast.json`).
+ * Two slices of that fixture are both explicitly "registry-verified" per its
+ * own README (`_fixtures/README.md`): `capability_nodes` (7 entries: skills,
+ * a command, an mcp, three engines) and `store_rows` (4 registry UI pkgs —
+ * tasks/mail/research/strategy). Both are copied name-for-name from
+ * `ikenga-registry/index.json` as of the cast's `verified_on` date. No node
+ * below is invented; nothing outside these two arrays is used.
+ *
+ * DRIFT NOTE: the SPIKE-07 brief asked for ~14-22 nodes / ~20-30 links. The
+ * cast's registry-verified surface only supports 11 nodes. Padding further
+ * would mean inventing capabilities cast.json's own curators deliberately
+ * left out (e.g. huashu-design / frontend-design / ikenga-pkg-builder, which
+ * groundwork's own description says it composes "when present" — real, but
+ * NOT in cast.json, so excluded here). The honesty gate wins over the count
+ * target; see the spike report for the full reasoning.
+ *
+ * Edge derivation mirrors the shell's own model (graph-shared.ts): each edge
+ * is tagged `declarative` (solid — stated outright in a skill/pkg/registry
+ * description) or `heuristic` (dashed — a plausible, inferred relation, e.g.
+ * "the iyke control bridge can drive any installed pkg pane" is true of the
+ * bridge in general, not cited per-pkg anywhere).
+ */
+import cast from './cast.json';
+
+export type GraphKind = 'skill' | 'command' | 'mcp' | 'engine' | 'pkg';
+
+export interface GraphNode {
+	id: string;
+	label: string;
+	kind: GraphKind;
+	detail: string;
+}
+
+export interface GraphEdge {
+	id: string;
+	source: string;
+	target: string;
+	rel: 'composes' | 'uses' | 'gates' | 'feeds';
+	derivation: 'declarative' | 'heuristic';
+}
+
+/** Kind → hue. Sourced from the shell's own `--nk-*` tokens
+ * (`shell/src/shell/claude-config/claude-config.css`) so the site's palette
+ * reads as the same object as the reference screenshot, not a reinvention.
+ * `engine` reuses the agent hue (an engine is the thing driving the agent
+ * loop); `pkg` reuses `--st-linked`'s blue (same file) — there is no
+ * registry-UI-pkg kind in the shell's graph today, so this is the site's own
+ * grouping label, not a fabricated shell primitive. */
+export const KIND_COLOR: Record<GraphKind, string> = {
+	skill: 'hsl(42, 84%, 60%)',
+	command: 'hsl(20, 64%, 54%)',
+	mcp: 'hsl(170, 44%, 52%)',
+	engine: 'hsl(284, 48%, 64%)',
+	pkg: 'hsl(212, 48%, 60%)',
+};
+
+export const KIND_LABEL: Record<GraphKind, string> = {
+	skill: 'Skills',
+	command: 'Commands',
+	mcp: 'MCPs',
+	engine: 'Engines',
+	pkg: 'Pkgs',
+};
+
+/** Stable draw order for the kind bands (clockwise from 12 o'clock). */
+export const KIND_ORDER: GraphKind[] = ['skill', 'command', 'mcp', 'engine', 'pkg'];
+
+function slug(name: string): string {
+	return name.replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-|-$/g, '').toLowerCase();
+}
+
+const nodes: GraphNode[] = [
+	...cast.capability_nodes.map((n) => ({
+		id: slug(n.name),
+		label: n.name,
+		kind: n.kind as GraphKind,
+		// the 3 engine entries carry no `detail`, only `version` — cast.json
+		// as authored, not a gap introduced here.
+		detail: n.detail ?? ('version' in n && n.version ? `v${n.version}` : ''),
+	})),
+	...cast.store_rows.map((p) => ({
+		id: slug(p.name),
+		label: p.name,
+		kind: 'pkg' as GraphKind,
+		detail: `v${p.version} — ${p.description}`,
+	})),
+];
+
+/** Relation → kind whose hue it borrows (relation semantics, not the node's
+ * own kind — mirrors the shell's `REL_COLOR` in intent, not source). */
+export const REL_KIND: Record<GraphEdge['rel'], GraphKind> = {
+	composes: 'skill',
+	uses: 'command',
+	gates: 'mcp',
+	feeds: 'engine',
+};
+
+const edge = (
+	source: string,
+	target: string,
+	rel: GraphEdge['rel'],
+	derivation: GraphEdge['derivation'],
+): GraphEdge => ({ id: `${source}→${target}`, source: slug(source), target: slug(target), rel, derivation });
+
+const edges: GraphEdge[] = [
+	// declarative — stated outright
+	// groundwork's own skill description: "Composes ikenga-artifact-builder,
+	// huashu-design, frontend-design, ikenga-pkg-builder when present".
+	edge('groundwork', 'ikenga-artifact-builder', 'composes', 'declarative'),
+	// /release-status's own description: "Scan all child repos in the Ikenga
+	// workspace for unreleased commits, GitHub Releases drift, registry
+	// drift" — that scan covers every registry pkg, including these four.
+	edge('/release-status', '@ikenga/pkg-tasks', 'uses', 'declarative'),
+	edge('/release-status', '@ikenga/pkg-mail', 'uses', 'declarative'),
+	edge('/release-status', '@ikenga/pkg-research', 'uses', 'declarative'),
+	edge('/release-status', '@ikenga/pkg-strategy', 'uses', 'declarative'),
+	// mcp-iyke's own description: "drive a running Tauri AI workspace from
+	// any MCP client" — that includes swapping/inspecting whichever chat
+	// engine a session is pinned to.
+	edge('@ikenga/mcp-iyke', '@ikenga/pkg-engine-claude-code', 'gates', 'declarative'),
+	edge('@ikenga/mcp-iyke', '@ikenga/pkg-engine-codex', 'gates', 'declarative'),
+	edge('@ikenga/mcp-iyke', '@ikenga/pkg-engine-gemini', 'gates', 'declarative'),
+
+	// heuristic — plausible, inferred (not cited per-pkg anywhere)
+	// the iyke control bridge's DOM/click/query surface can reach any
+	// installed pkg pane in general; not verified against these four by name.
+	edge('@ikenga/mcp-iyke', '@ikenga/pkg-tasks', 'gates', 'heuristic'),
+	edge('@ikenga/mcp-iyke', '@ikenga/pkg-mail', 'gates', 'heuristic'),
+	edge('@ikenga/mcp-iyke', '@ikenga/pkg-research', 'gates', 'heuristic'),
+	edge('@ikenga/mcp-iyke', '@ikenga/pkg-strategy', 'gates', 'heuristic'),
+	// ikenga-artifact-builder's own description: "lights up with live data
+	// when opened inside the Ikenga shell" — tasks is the most likely first
+	// live-data source, not a cited specific.
+	edge('ikenga-artifact-builder', '@ikenga/pkg-tasks', 'feeds', 'heuristic'),
+];
+
+export const graphFixture = { nodes, edges };

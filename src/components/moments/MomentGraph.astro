@@ -1,0 +1,323 @@
+---
+/**
+ * MomentGraph.astro — SPIKE-07 capability-graph moment island.
+ *
+ * Feasibility + budget proof for Phase-2 WP-07: ports ONLY the shell's
+ * Bundle-mode visual language (radial edge-bundling, kind-band arcs,
+ * hover-to-trace) from `shell/src/shell/claude-config/analyze/graph-view.tsx`
+ * — no React, no zoom/drag/force/dag modes, no `deriveGraph`.
+ *
+ * SSG-first: the radial layout (d3-hierarchy `cluster` + d3-shape
+ * `lineRadial`/`curveBundle`) runs HERE, at `astro build` time, in Node.
+ * The full SVG — every arc, path, and text label — ships as static markup.
+ * There is ZERO client JS required to see the complete graph; the script at
+ * the bottom only adds hover-to-trace and an optional ambient draw-in, both
+ * gated so the static frame is also the correct reduced-motion frame
+ * (island contract: ./CONTRACT.md).
+ *
+ * Honesty: every node/edge comes from ./graph-fixture.ts, which derives
+ * strictly from the vendored ./cast.json (registry-verified — see that
+ * file's header comment and the spike report for the node-count drift note).
+ */
+import { cluster, hierarchy, type HierarchyNode } from 'd3-hierarchy';
+import { arc as d3arc, curveBundle, lineRadial } from 'd3-shape';
+import {
+	graphFixture,
+	KIND_COLOR,
+	KIND_LABEL,
+	KIND_ORDER,
+	REL_KIND,
+	type GraphEdge,
+	type GraphKind,
+	type GraphNode,
+} from './graph-fixture';
+
+export interface Props {
+	/** Tone pole for the outer copy only (headline/sub/foot) — same contract
+	 * as MomentHero; the graph stage itself is a tone-independent dark object. */
+	tone?: 'dark' | 'light';
+}
+const { tone = 'dark' } = Astro.props;
+
+// ── build-time radial-bundle layout (ports BundleRenderer's layout memo) ──
+const SIZE = 640;
+const R = SIZE / 2 - 92;
+
+type BundleDatum = { name: string; kind?: GraphKind; node?: GraphNode; children?: BundleDatum[] };
+
+const groups: BundleDatum[] = KIND_ORDER.map((k) => ({
+	name: k,
+	kind: k,
+	children: graphFixture.nodes.filter((n) => n.kind === k).map((n) => ({ name: n.id, kind: k, node: n })),
+})).filter((g) => (g.children?.length ?? 0) > 0);
+
+const root = hierarchy<BundleDatum>({ name: 'root', children: groups }).sort((a, b) =>
+	(a.data.node?.label ?? a.data.name).localeCompare(b.data.node?.label ?? b.data.name),
+);
+cluster<BundleDatum>().size([360, R])(root);
+const leaves = root.leaves();
+const leafById = new Map<string, HierarchyNode<BundleDatum>>();
+for (const l of leaves) if (l.data.node) leafById.set(l.data.node.id, l);
+
+const line = lineRadial<HierarchyNode<BundleDatum>>()
+	.curve(curveBundle.beta(0.78))
+	.radius((d) => d.y ?? 0)
+	.angle((d) => ((d.x ?? 0) * Math.PI) / 180);
+
+const links = graphFixture.edges
+	.map((e) => {
+		const s = leafById.get(e.source);
+		const t = leafById.get(e.target);
+		if (!s || !t) return null;
+		return { edge: e, d: line(s.path(t)) ?? '' };
+	})
+	.filter((x): x is { edge: GraphEdge; d: string } => x !== null);
+
+const bandArc = d3arc<{ a0: number; a1: number }>()
+	.innerRadius(R + 14)
+	.outerRadius(R + 18)
+	.startAngle((d) => ((d.a0 - 3) * Math.PI) / 180)
+	.endAngle((d) => ((d.a1 + 3) * Math.PI) / 180);
+
+const arcs = (root.children ?? []).map((g) => {
+	const xs = (g.children ?? []).map((c) => c.x ?? 0);
+	return { kind: g.data.kind as GraphKind, a0: Math.min(...xs), a1: Math.max(...xs) };
+});
+
+function degree(id: string): number {
+	return graphFixture.edges.filter((e) => e.source === id || e.target === id).length;
+}
+
+/** Display-only shortening (drops the `@ikenga/` scope) so long registry
+ * names don't collide at this canvas size. The full name still ships in
+ * `label`/`aria-label` — nothing is truncated for accessibility, only the
+ * on-canvas <text>. */
+function shortLabel(label: string): string {
+	return label.replace(/^@ikenga\//, '');
+}
+---
+
+<section class="mg" data-moment="graph" data-tone={tone === 'light' ? 'light' : undefined}>
+	<div class="mg-copy">
+		<h2 class="mg-h2">Everything connects.</h2>
+		<p class="mg-sub">
+			Skills, commands, MCPs, engines, and installed pkgs — one capability graph,
+			radial-bundled the same way the shell renders it.
+		</p>
+	</div>
+
+	<div class="mg-stage">
+		<svg
+			class="mg-svg"
+			role="img"
+			aria-label={`Capability graph — ${graphFixture.nodes.length} nodes, ${graphFixture.edges.length} links, radial bundle layout`}
+			viewBox={`0 0 ${SIZE} ${SIZE}`}
+			preserveAspectRatio="xMidYMid meet"
+		>
+			<g transform={`translate(${SIZE / 2},${SIZE / 2})`}>
+				{arcs.map((a) => {
+					const mid = (a.a0 + a.a1) / 2;
+					const rad = ((mid - 90) * Math.PI) / 180;
+					const lr = R + 30;
+					const band = bandArc(a) ?? undefined;
+					return (
+						<g class="mg-arc">
+							{band && <path d={band} fill={KIND_COLOR[a.kind]} opacity={0.55} />}
+							<text
+								x={Math.cos(rad) * lr}
+								y={Math.sin(rad) * lr}
+								text-anchor="middle"
+								dominant-baseline="middle"
+								class="mg-arc-label"
+								fill={KIND_COLOR[a.kind]}
+							>
+								{KIND_LABEL[a.kind].toUpperCase()}
+							</text>
+						</g>
+					);
+				})}
+
+				<g fill="none">
+					{links.map(({ edge, d }) => (
+						<path
+							class="mg-edge"
+							d={d}
+							data-source={edge.source}
+							data-target={edge.target}
+							stroke={KIND_COLOR[REL_KIND[edge.rel]]}
+							stroke-width="1.1"
+							stroke-dasharray={edge.derivation === 'heuristic' ? '4,4' : undefined}
+						/>
+					))}
+				</g>
+
+				{leaves.map((leaf) => {
+					const n = leaf.data.node;
+					if (!n) return null;
+					const angle = leaf.x ?? 0;
+					const flip = angle >= 180;
+					const deg = degree(n.id);
+					const r = 4 + Math.min(5, deg * 0.8);
+					return (
+						<g
+							class="mg-node"
+							data-node-id={n.id}
+							data-kind={n.kind}
+							tabindex="0"
+							role="button"
+							aria-label={`${n.label} — ${KIND_LABEL[n.kind]}, ${deg} connection${deg === 1 ? '' : 's'}. ${n.detail}`}
+							transform={`rotate(${angle - 90}) translate(${leaf.y ?? 0},0)`}
+						>
+							<circle
+								r={r}
+								fill={`color-mix(in srgb, ${KIND_COLOR[n.kind]} 24%, var(--moment-shell-bg, hsl(28, 22%, 2.5%)))`}
+								stroke={KIND_COLOR[n.kind]}
+								stroke-width="1.5"
+							/>
+							<text
+								class="mg-node-label"
+								dy="0.31em"
+								x={flip ? -(r + 5) : r + 5}
+								text-anchor={flip ? 'end' : 'start'}
+								transform={flip ? 'rotate(180)' : undefined}
+							>
+								{shortLabel(n.label)}
+							</text>
+						</g>
+					);
+				})}
+			</g>
+		</svg>
+	</div>
+
+	<p class="mg-foot">
+		<span class="mg-hd" aria-hidden="true">◆</span> Staged demo — every node shown is a real, shipping
+		capability (SPIKE-07) · hover or tab through a node to trace its links
+	</p>
+</section>
+
+<style>
+	/* ── SPIKE-07 capability-graph moment ─────────────────────────────────── */
+	.mg {
+		--mg-ease: cubic-bezier(0.22, 0.61, 0.16, 1);
+		display: block;
+		padding-block: var(--space-8, 32px);
+		background: var(--site-bg);
+		color: var(--site-fg);
+		font-family: var(--site-font-body);
+	}
+
+	.mg-copy {
+		text-align: center;
+		max-width: 60rem;
+		margin: 0 auto var(--space-6, 24px);
+		padding-inline: var(--space-6, 24px);
+	}
+	.mg-h2 {
+		font-family: var(--site-font-display);
+		font-weight: 600;
+		font-size: clamp(1.6rem, 3.6vw, 2.4rem);
+		line-height: 1.12;
+		letter-spacing: -0.01em;
+		margin: 0 0 var(--space-3, 12px);
+	}
+	.mg-sub {
+		font-size: clamp(0.9375rem, 1.4vw, 1.0625rem);
+		color: var(--site-muted);
+		max-width: 46ch;
+		margin: 0 auto;
+		line-height: 1.5;
+	}
+
+	/* Box reserved up front — zero CLS. Square canvas; a picture, not a
+	   layout that needs to reflow, so no mobile-breakpoint special case. */
+	.mg-stage {
+		max-width: 42rem;
+		margin-inline: auto;
+		padding-inline: var(--space-6, 24px);
+	}
+	.mg-svg {
+		display: block;
+		width: 100%;
+		aspect-ratio: 1 / 1;
+		background: hsl(28, 22%, 2.5%);
+		border: 1px solid hsl(30 18% 18% / 0.9);
+		border-radius: var(--radius-lg, 10px);
+		box-shadow: 0 32px 80px -28px hsl(0 0% 0% / 0.8);
+	}
+
+	.mg-arc-label {
+		font: 500 8.5px var(--site-font-mono);
+		letter-spacing: 0.16em;
+	}
+
+	.mg-edge {
+		stroke-opacity: 0.28;
+		transition: stroke-opacity 0.2s var(--mg-ease);
+	}
+	.mg-svg.mg-tracing .mg-edge {
+		stroke-opacity: 0.06;
+	}
+	.mg-edge.mg-edge-out {
+		stroke: hsl(42, 78%, 54%);
+		stroke-width: 2;
+		stroke-opacity: 0.9;
+	}
+	.mg-edge.mg-edge-in {
+		stroke: hsl(170, 42%, 54%);
+		stroke-width: 2;
+		stroke-opacity: 0.9;
+	}
+	.mg-edge.mg-edge-dim {
+		stroke-opacity: 0.04;
+	}
+
+	.mg-node {
+		cursor: pointer;
+	}
+	.mg-node circle {
+		transition: stroke-width 0.15s var(--mg-ease);
+	}
+	.mg-node-label {
+		font: 500 8px var(--site-font-mono);
+		fill: hsl(32, 11%, 62%);
+		transition: fill 0.15s var(--mg-ease);
+	}
+	.mg-node.mg-node-hot circle {
+		stroke-width: 2.5;
+	}
+	.mg-node.mg-node-hot .mg-node-label {
+		fill: hsl(36, 28%, 92%);
+		font-weight: 600;
+	}
+	.mg-node.mg-node-dim {
+		opacity: 0.18;
+	}
+	.mg-node:focus-visible circle {
+		outline: 2px solid hsl(42, 78%, 54%);
+		outline-offset: 2px;
+	}
+
+	.mg-foot {
+		text-align: center;
+		margin-top: var(--space-5, 20px);
+		font-size: 0.8125rem;
+		color: var(--site-faint);
+		padding-inline: var(--space-6, 24px);
+	}
+	.mg-hd {
+		color: var(--site-accent);
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.mg-edge,
+		.mg-node circle,
+		.mg-node-label {
+			transition: none;
+		}
+	}
+</style>
+
+<script>
+	import './moment-graph';
+</script>
