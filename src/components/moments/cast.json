@@ -1,12 +1,12 @@
 {
   "$schemaVersion": 1,
-  "provisional": true,
+  "provisional": false,
   "source": {
     "base_design": "plans/site-redesign/designs/home-hero-theatre.html",
     "base_design_rev": 2,
     "registry_snapshot": "ikenga-registry/index.json",
-    "registry_snapshot_updatedAt": "2026-06-25T23:36:40.002Z",
-    "verified_on": "2026-07-05"
+    "registry_snapshot_updatedAt": "2026-07-04T22:35:17.857Z",
+    "verified_on": "2026-07-06"
   },
   "workspace": {
     "name": "royalti",
@@ -57,30 +57,52 @@
   "store_rows": [
     {
       "name": "@ikenga/pkg-tasks",
-      "version": "0.8.2",
+      "version": "0.8.3",
       "description": "Tasks — List, Agenda, Triage over the production tasks schema."
     },
     {
       "name": "@ikenga/pkg-mail",
-      "version": "0.2.1",
+      "version": "0.3.0",
       "description": "Mail — Inbox, Triage, All, Drafts over the production mail schema."
     },
     {
       "name": "@ikenga/pkg-research",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "description": "Research — Reports, Sources, Personas over the research_notes + research_sources schema."
     },
     {
       "name": "@ikenga/pkg-strategy",
-      "version": "0.1.0",
+      "version": "0.2.0",
       "description": "Strategy — OKR board (board + list), Cycles, Reviews over the production strategy schema."
+    },
+    {
+      "name": "@ikenga/pkg-content",
+      "version": "0.3.0",
+      "description": "Content — Pipeline, Calendar, Published over the production content schema."
+    },
+    {
+      "name": "@ikenga/pkg-finance",
+      "version": "0.3.0",
+      "description": "Finance — Overview, Transactions, Receivables, Inter-Company, Reports over the production finance schema."
+    },
+    {
+      "name": "@ikenga/pkg-outbound",
+      "version": "0.3.0",
+      "description": "Outbound — Email, Newsletter, Sequences, Social channels over the production outbound schema."
+    },
+    {
+      "name": "@ikenga/pkg-sales",
+      "version": "0.3.0",
+      "description": "Sales — Pipeline, Forecast, Won over the production sales schema."
     }
   ],
   "capability_nodes": [
     { "kind": "skill", "name": "groundwork", "detail": "npx skills add royalti-io/groundwork" },
     { "kind": "skill", "name": "ikenga-artifact-builder", "detail": "npx skills add royalti-io/ikenga-artifact-builder" },
+    { "kind": "skill", "name": "@ikenga/skill-thunderbird", "version": "0.2.0", "detail": "Read/search the local Thunderbird mbox store; save reply drafts to IMAP." },
     { "kind": "command", "name": "/release-status", "detail": "workspace skill — .claude/skills/release-status" },
     { "kind": "mcp", "name": "@ikenga/mcp-iyke", "version": "0.2.1", "detail": "iyke control-bridge MCP server" },
+    { "kind": "mcp", "name": "@ikenga/mcp-browser", "version": "0.3.0", "detail": "Drives native child webviews — open a partner portal in a pane, snapshot, click, fill." },
     { "kind": "engine", "name": "@ikenga/pkg-engine-claude-code", "version": "0.2.1" },
     { "kind": "engine", "name": "@ikenga/pkg-engine-codex", "version": "0.2.1" },
     { "kind": "engine", "name": "@ikenga/pkg-engine-gemini", "version": "0.2.1" }

@@ -4,8 +4,8 @@
  * radial graph (./graph-fixture.ts → ./cast.json).
  *
  * HONESTY GATE (G-19 / G-21):
- *   · Store rows are the SAME 11 registry-published capabilities as the graph
- *     nodes — no new entries are invented here.
+ *   · Store rows are the SAME 17 registry-published capabilities as the graph
+ *     nodes (G-CAST lock sweep, WP-22) — no new entries are invented here.
  *   · Scope columns are real: the cast's workspace scope, its project, and the
  *     personal `user` scope (cast.workspace / cast.project).
  *   · The per-scope PRESENCE encoding is a *staged demo* — it illustrates how
@@ -42,8 +42,10 @@ export const STORE_SCOPES: StoreScope[] = [
 const STAGED: Record<string, { status: StoreStatus; cells: [Presence, Presence, Presence] }> = {
 	groundwork: { status: 'enabled', cells: ['enabled', 'local', 'enabled'] },
 	'ikenga-artifact-builder': { status: 'enabled', cells: ['enabled', 'none', 'enabled'] },
+	'@ikenga/skill-thunderbird': { status: 'local', cells: ['local', 'none', 'enabled'] },
 	'/release-status': { status: 'enabled', cells: ['enabled', 'none', 'local'] },
 	'@ikenga/mcp-iyke': { status: 'enabled', cells: ['enabled', 'enabled', 'none'] },
+	'@ikenga/mcp-browser': { status: 'enabled', cells: ['enabled', 'none', 'local'] },
 	'@ikenga/pkg-engine-claude-code': { status: 'enabled', cells: ['enabled', 'enabled', 'enabled'] },
 	'@ikenga/pkg-engine-codex': { status: 'local', cells: ['local', 'none', 'enabled'] },
 	'@ikenga/pkg-engine-gemini': { status: 'local', cells: ['none', 'none', 'enabled'] },
@@ -51,6 +53,10 @@ const STAGED: Record<string, { status: StoreStatus; cells: [Presence, Presence, 
 	'@ikenga/pkg-mail': { status: 'enabled', cells: ['enabled', 'local', 'none'] },
 	'@ikenga/pkg-research': { status: 'local', cells: ['local', 'enabled', 'none'] },
 	'@ikenga/pkg-strategy': { status: 'local', cells: ['none', 'local', 'none'] },
+	'@ikenga/pkg-content': { status: 'enabled', cells: ['enabled', 'enabled', 'none'] },
+	'@ikenga/pkg-finance': { status: 'local', cells: ['local', 'none', 'none'] },
+	'@ikenga/pkg-outbound': { status: 'enabled', cells: ['enabled', 'local', 'none'] },
+	'@ikenga/pkg-sales': { status: 'local', cells: ['none', 'local', 'none'] },
 };
 
 export interface StoreRow {

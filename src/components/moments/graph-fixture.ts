@@ -4,19 +4,22 @@
  * HONESTY GATE (G-19): every node here traces to the vendored `cast.json`
  * (byte-identical copy of `plans/site-redesign/designs/_fixtures/cast.json`).
  * Two slices of that fixture are both explicitly "registry-verified" per its
- * own README (`_fixtures/README.md`): `capability_nodes` (7 entries: skills,
- * a command, an mcp, three engines) and `store_rows` (4 registry UI pkgs —
- * tasks/mail/research/strategy). Both are copied name-for-name from
- * `ikenga-registry/index.json` as of the cast's `verified_on` date. No node
- * below is invented; nothing outside these two arrays is used.
+ * own README (`_fixtures/README.md`): `capability_nodes` (9 entries: three
+ * skills, a command, two mcps, three engines) and `store_rows` (8 registry
+ * UI pkgs — tasks/mail/research/strategy/content/finance/outbound/sales).
+ * Both are copied name-for-name from `ikenga-registry/index.json` as of the
+ * cast's `verified_on` date. No node below is invented; nothing outside these
+ * two arrays is used. Total = 17 nodes.
  *
- * DRIFT NOTE: the SPIKE-07 brief asked for ~14-22 nodes / ~20-30 links. The
- * cast's registry-verified surface only supports 11 nodes. Padding further
- * would mean inventing capabilities cast.json's own curators deliberately
- * left out (e.g. huashu-design / frontend-design / ikenga-pkg-builder, which
- * groundwork's own description says it composes "when present" — real, but
- * NOT in cast.json, so excluded here). The honesty gate wins over the count
- * target; see the spike report for the full reasoning.
+ * DENSITY NOTE (WP-22 / G-CAST): the SPIKE-07 brief asked for ~14-22 nodes /
+ * ~20-30 links. Against the provisional draft the registry-verified surface
+ * only supported 11 nodes; the G-CAST lock sweep re-curated against the live
+ * 18-pkg registry (updatedAt 2026-07-04) and the honest set now lands at 17
+ * nodes / 23 edges — inside the spike target without inventing anything. Still
+ * EXCLUDED (real, but not in cast.json — its curators left them out):
+ * huashu-design / frontend-design / ikenga-pkg-builder (groundwork composes
+ * them "when present"), and the hidden registry stubs (pkg-hello, engine-noop,
+ * engine-cursor-agent). The honesty gate still wins over the count target.
  *
  * Edge derivation mirrors the shell's own model (graph-shared.ts): each edge
  * is tagged `declarative` (solid — stated outright in a skill/pkg/registry
@@ -134,17 +137,24 @@ const edge = (
 ): GraphEdge => ({ id: `${source}→${target}`, source: slug(source), target: slug(target), rel, derivation });
 
 const edges: GraphEdge[] = [
-	// declarative — stated outright
+	// ── declarative — stated outright in a skill/pkg/registry description ──
 	// groundwork's own skill description: "Composes ikenga-artifact-builder,
 	// huashu-design, frontend-design, ikenga-pkg-builder when present".
 	edge('groundwork', 'ikenga-artifact-builder', 'composes', 'declarative'),
 	// /release-status's own description: "Scan all child repos in the Ikenga
-	// workspace for unreleased commits, GitHub Releases drift, registry
-	// drift" — that scan covers every registry pkg, including these four.
+	// workspace for unreleased commits, GitHub Releases drift, registry drift,
+	// and stale doc claims" — that scan covers EVERY registry pkg, so it reads
+	// (uses) each of the eight store UI pkgs. The four post-publish additions
+	// (content/finance/outbound/sales) inherit the exact same honest edge as
+	// the original four ("densification comes free at G-CAST", R3-b).
 	edge('/release-status', '@ikenga/pkg-tasks', 'uses', 'declarative'),
 	edge('/release-status', '@ikenga/pkg-mail', 'uses', 'declarative'),
 	edge('/release-status', '@ikenga/pkg-research', 'uses', 'declarative'),
 	edge('/release-status', '@ikenga/pkg-strategy', 'uses', 'declarative'),
+	edge('/release-status', '@ikenga/pkg-content', 'uses', 'declarative'),
+	edge('/release-status', '@ikenga/pkg-finance', 'uses', 'declarative'),
+	edge('/release-status', '@ikenga/pkg-outbound', 'uses', 'declarative'),
+	edge('/release-status', '@ikenga/pkg-sales', 'uses', 'declarative'),
 	// mcp-iyke's own description: "drive a running Tauri AI workspace from
 	// any MCP client" — that includes swapping/inspecting whichever chat
 	// engine a session is pinned to.
@@ -152,17 +162,30 @@ const edges: GraphEdge[] = [
 	edge('@ikenga/mcp-iyke', '@ikenga/pkg-engine-codex', 'gates', 'declarative'),
 	edge('@ikenga/mcp-iyke', '@ikenga/pkg-engine-gemini', 'gates', 'declarative'),
 
-	// heuristic — plausible, inferred (not cited per-pkg anywhere)
+	// ── heuristic — plausible, inferred (not cited per-pkg anywhere) ──
 	// the iyke control bridge's DOM/click/query surface can reach any
-	// installed pkg pane in general; not verified against these four by name.
+	// installed pkg pane in general; not verified against these pkgs by name.
+	// Uniform across all eight store panes (singling out a subset would be
+	// arbitrary now that all eight are published).
 	edge('@ikenga/mcp-iyke', '@ikenga/pkg-tasks', 'gates', 'heuristic'),
 	edge('@ikenga/mcp-iyke', '@ikenga/pkg-mail', 'gates', 'heuristic'),
 	edge('@ikenga/mcp-iyke', '@ikenga/pkg-research', 'gates', 'heuristic'),
 	edge('@ikenga/mcp-iyke', '@ikenga/pkg-strategy', 'gates', 'heuristic'),
+	edge('@ikenga/mcp-iyke', '@ikenga/pkg-content', 'gates', 'heuristic'),
+	edge('@ikenga/mcp-iyke', '@ikenga/pkg-finance', 'gates', 'heuristic'),
+	edge('@ikenga/mcp-iyke', '@ikenga/pkg-outbound', 'gates', 'heuristic'),
+	edge('@ikenga/mcp-iyke', '@ikenga/pkg-sales', 'gates', 'heuristic'),
 	// ikenga-artifact-builder's own description: "lights up with live data
 	// when opened inside the Ikenga shell" — tasks is the most likely first
 	// live-data source, not a cited specific.
 	edge('ikenga-artifact-builder', '@ikenga/pkg-tasks', 'feeds', 'heuristic'),
+	// skill-thunderbird's own description: "read/search the local Thunderbird
+	// mbox store and save reply drafts to the IMAP server" — pkg-mail is the
+	// shell surface that mail flows into; plausible feed, not cited by name.
+	edge('@ikenga/skill-thunderbird', '@ikenga/pkg-mail', 'feeds', 'heuristic'),
+	// mcp-browser drives native webview panes onto external portals; pkg-outbound
+	// is the surface that reaches external channels — plausible reach, not cited.
+	edge('@ikenga/mcp-browser', '@ikenga/pkg-outbound', 'gates', 'heuristic'),
 ];
 
 export const graphFixture = { nodes, edges };
