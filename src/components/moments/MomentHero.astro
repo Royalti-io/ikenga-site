@@ -183,6 +183,10 @@ const HERO_SIZES = '(min-width: 1088px) 1056px, 92vw';
 	.mh-rot {
 		display: inline-flex;
 		align-items: baseline;
+		/* WP-21 CLS fix: the JS pins this span to the widest engine name once
+		   (no width animation → no layout shift per swap); names center inside
+		   the fixed box so shorter ones read balanced, not left-hung. */
+		justify-content: center;
 		position: relative;
 		vertical-align: baseline;
 		white-space: nowrap;
@@ -193,11 +197,16 @@ const HERO_SIZES = '(min-width: 1088px) 1056px, 92vw';
 		gap: 0.22em;
 		opacity: 0;
 		position: absolute;
-		left: 0;
+		left: 50%;
+		/* `translate` (not transform) carries the centering so the rotator's
+		   WAAPI transform animations compose with it instead of clobbering it. */
+		translate: -50% 0;
 		transform: translateY(0.35em);
 	}
 	.mh-slot.cur {
 		position: relative;
+		left: auto;
+		translate: none;
 		opacity: 1;
 		transform: none;
 	}

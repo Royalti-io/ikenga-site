@@ -128,11 +128,14 @@ function mountAgentRotator(root: HTMLElement, reduce: boolean): void {
 	rot.style.display = 'inline-flex';
 	if (reduce) return;
 
-	const setWidth = (el: HTMLElement) => {
-		rot.style.width = `${el.getBoundingClientRect().width}px`;
-	};
-	rot.style.transition = `width 0.45s ${EASE}`;
-	requestAnimationFrame(() => setWidth(slots[0]));
+	// WP-21 CLS fix: the rotator used to ANIMATE its width per engine name —
+	// a layout shift on every swap ("Codex" is much narrower), and a
+	// non-compositor `width` transition besides. Pin the span to the widest
+	// slot ONCE before rotation starts; names crossfade inside a fixed box.
+	requestAnimationFrame(() => {
+		const max = Math.max(...slots.map((el) => el.getBoundingClientRect().width));
+		rot.style.width = `${Math.ceil(max)}px`;
+	});
 
 	let idx = 0;
 	let timer = 0;
@@ -156,7 +159,6 @@ function mountAgentRotator(root: HTMLElement, reduce: boolean): void {
 			],
 			{ duration: 320, delay: 120, easing: EASE, fill: 'forwards' },
 		);
-		setWidth(next);
 	};
 
 	const start = () => {

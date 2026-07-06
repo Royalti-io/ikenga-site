@@ -63,8 +63,8 @@
 	/* ── Type ────────────────────────────────────────────────────────────── */
 	/* Display swaps to Redaction in ONE place when acquired; IM Fell English
 	   is the interim stand-in (loaded by the page that uses it). */
-	--site-font-display: 'IM Fell English', Georgia, 'Times New Roman', serif;
-	--site-font-body: var(--font-sans); /* Plus Jakarta Sans */
+	--site-font-display: 'IM Fell English', 'IM Fell English Fallback', Georgia, 'Times New Roman', serif;
+	--site-font-body: 'Plus Jakarta Sans', 'Plus Jakarta Sans Fallback', system-ui, sans-serif; /* PJS + metric-matched fallback (WP-21 CLS) */
 	--site-font-mono: var(--font-mono);
 
 	/* Site rhythm — section padding derived from the --space-* ramp so every

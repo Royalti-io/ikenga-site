@@ -282,7 +282,10 @@
 	font-size: 0.6875rem;
 	letter-spacing: 0.08em;
 	text-transform: uppercase;
-	color: var(--site-accent);
+	/* WP-21 a11y gate: --site-accent on --site-accent-soft measures 3.88:1 at
+	   this 11px size (needs 4.5:1). Brighter tag ink, dark pole only — the
+	   light-pole override below restores the token pair (it passes there). */
+	color: hsl(42, 72%, 58%);
 	background: var(--site-accent-soft);
 	padding: 2px 8px;
 	border-radius: var(--radius-pill, 999px);
@@ -296,8 +299,16 @@
 }
 .sk-card__body {
 	font-size: 0.9375rem;
-	color: var(--site-muted);
+	/* WP-21 a11y gate: --site-muted on the card bg measures 3.58:1 at 15px
+	   (needs 4.5:1). One step lighter, card-local; light pole restored below. */
+	color: hsl(30, 10%, 54%);
 	margin: 0;
+}
+[data-tone='light'] .sk-card__tag {
+	color: var(--site-accent);
+}
+[data-tone='light'] .sk-card__body {
+	color: var(--site-muted);
 }
 
 /* ── Screenshot frame (Display) ──────────────────────────────────────────── */
