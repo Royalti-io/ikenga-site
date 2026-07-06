@@ -1,0 +1,137 @@
+{
+  "$schemaVersion": 1,
+  "updatedAt": "2026-07-04T22:35:17.857Z",
+  "fetchedAt": "2026-07-06T07:51:12.838Z",
+  "source": "https://royalti-io.github.io/ikenga-registry/index.json — committed fallback so CF Pages builds never break on registry downtime",
+  "pkgs": [
+    {
+      "name": "@ikenga/mcp-browser",
+      "latest": "0.3.0",
+      "detail": "pkgs/mcp-browser.json",
+      "description": "Model Context Protocol (MCP) server that lets agents drive native child webviews in the Ikenga desktop app — open a pane on a partner portal (Spotify-for-Artists, Bandcamp, Linkfire, etc.), snapshot it, click, fill, and wait. Bypasses iframe CSP `frame-ancestors` by using the system webview.",
+      "kind": "skill"
+    },
+    {
+      "name": "@ikenga/mcp-iyke",
+      "latest": "0.2.1",
+      "detail": "pkgs/mcp-iyke.json",
+      "description": "Model Context Protocol (MCP) server that exposes the Ikenga desktop app's iyke control bridge — drive a running Tauri AI workspace from any MCP client (Claude, Cursor, etc.).",
+      "kind": "skill"
+    },
+    {
+      "name": "@ikenga/pkg-browser",
+      "latest": "0.1.0",
+      "detail": "pkgs/browser.json",
+      "description": "Playwright verb engine behind Ikenga's /iyke/browser/* contract — replaces the Rust chromiumoxide Chrome engine (ADR-018). Managed (dedicated profile) + Attach (everyday Chrome via the official Playwright extension).",
+      "kind": "embedded"
+    },
+    {
+      "name": "@ikenga/pkg-content",
+      "latest": "0.3.0",
+      "detail": "pkgs/content.json",
+      "description": "Content — Pipeline (kanban + list), Calendar, Published over the production content schema. Multi-file iframe pkg; deterministic CSS vendoring build.",
+      "kind": "embedded"
+    },
+    {
+      "name": "@ikenga/pkg-engine-claude-code",
+      "latest": "0.2.1",
+      "detail": "pkgs/engine-claude-code.json",
+      "description": "Claude Code engine adapter for Ikenga — wraps the `claude` CLI as the default AI engine.",
+      "kind": "engine"
+    },
+    {
+      "name": "@ikenga/pkg-engine-codex",
+      "latest": "0.2.1",
+      "detail": "pkgs/engine-codex.json",
+      "description": "Codex CLI engine adapter for Ikenga — install-time portability for the OpenAI `codex` CLI (ADR-012 Track C).",
+      "kind": "engine"
+    },
+    {
+      "name": "@ikenga/pkg-engine-cursor-agent",
+      "latest": "0.1.0",
+      "detail": "pkgs/engine-cursor-agent.json",
+      "description": "Cursor agent CLI engine adapter for Ikenga (scaffold-only; runtime stubbed per ADR-013 Phase 4).",
+      "kind": "engine",
+      "visibility": "hidden"
+    },
+    {
+      "name": "@ikenga/pkg-engine-gemini",
+      "latest": "0.2.1",
+      "detail": "pkgs/engine-gemini.json",
+      "description": "Gemini CLI engine adapter for Ikenga.",
+      "kind": "engine"
+    },
+    {
+      "name": "@ikenga/pkg-engine-noop",
+      "latest": "0.1.2",
+      "detail": "pkgs/engine-noop.json",
+      "description": "No-op engine adapter for Ikenga — proves the engine pluggability pattern; used as a test fixture and for shell-without-AI mode.",
+      "kind": "engine",
+      "visibility": "hidden"
+    },
+    {
+      "name": "@ikenga/pkg-finance",
+      "latest": "0.3.0",
+      "detail": "pkgs/finance.json",
+      "description": "Finance — Overview / Transactions / Receivables / Inter-Company / Reports over the production finance schema. Multi-file iframe pkg; deterministic CSS vendoring build.",
+      "kind": "embedded"
+    },
+    {
+      "name": "@ikenga/pkg-hello",
+      "latest": "0.1.0",
+      "detail": "pkgs/hello.json",
+      "description": "Minimal Ikenga pkg — proves the registry install pipeline end-to-end without bringing any UI, sidecar, or MCP surface.",
+      "kind": "skill",
+      "visibility": "hidden"
+    },
+    {
+      "name": "@ikenga/pkg-mail",
+      "latest": "0.3.0",
+      "detail": "pkgs/mail.json",
+      "description": "Mail — Inbox, Triage, All, Drafts over the production mail schema. No-build iframe pkg; deterministic CSS vendoring build.",
+      "kind": "embedded"
+    },
+    {
+      "name": "@ikenga/pkg-outbound",
+      "latest": "0.3.0",
+      "detail": "pkgs/outbound.json",
+      "description": "Outbound — Email, Newsletter, Sequences, Social channels over the production outbound schema. No-build iframe pkg; deterministic CSS vendoring build.",
+      "kind": "embedded"
+    },
+    {
+      "name": "@ikenga/pkg-research",
+      "latest": "0.2.0",
+      "detail": "pkgs/research.json",
+      "description": "Research — Reports (list+detail), Sources (monitored register), Personas (ICP grid) over the research_notes + research_sources schema. Multi-file iframe pkg; deterministic CSS vendoring build.",
+      "kind": "embedded"
+    },
+    {
+      "name": "@ikenga/pkg-sales",
+      "latest": "0.3.0",
+      "detail": "pkgs/sales.json",
+      "description": "Sales — Pipeline, Forecast, Won over the production sales schema. Multi-file iframe pkg; deterministic CSS vendoring build.",
+      "kind": "embedded"
+    },
+    {
+      "name": "@ikenga/pkg-strategy",
+      "latest": "0.2.0",
+      "detail": "pkgs/strategy.json",
+      "description": "Strategy — OKR board (board + list), Cycles, Reviews over the production strategy schema. Multi-file iframe pkg; deterministic CSS vendoring build.",
+      "kind": "embedded"
+    },
+    {
+      "name": "@ikenga/pkg-tasks",
+      "latest": "0.8.3",
+      "detail": "pkgs/tasks.json",
+      "description": "Tasks — List, Agenda, Triage over the production tasks schema. Multi-file iframe pkg; deterministic CSS vendoring build.",
+      "kind": "embedded"
+    },
+    {
+      "name": "@ikenga/skill-thunderbird",
+      "latest": "0.2.0",
+      "detail": "pkgs/skill-thunderbird.json",
+      "description": "Thunderbird mail skill — read/search the local Thunderbird mbox store and save reply drafts to the IMAP server.",
+      "kind": "skill"
+    }
+  ]
+}

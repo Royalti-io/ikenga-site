@@ -8,6 +8,11 @@ import FeaturePage from '../../components/FeaturePage.astro';
 import Button from '../../components/Button.astro';
 import BrandIcon from '../../components/BrandIcon.astro';
 import InstallBlock from '../../components/InstallBlock.astro';
+import { loadRegistry, pkgVersion } from '../../lib/registry';
+
+const { index: registry } = await loadRegistry();
+// Header version tracks the default engine (claude-code) from the registry.
+const ver = pkgVersion(registry, '@ikenga/pkg-engine-claude-code', '0.2.1');
 ---
 
 <Layout
@@ -16,7 +21,7 @@ import InstallBlock from '../../components/InstallBlock.astro';
 	canonical="https://ikenga.dev/packages/engines"
 >
 	<FeaturePage
-		eyebrow="Engine pkgs · Apache-2.0"
+		eyebrow={`Engine pkgs · claude-code v${ver} · Apache-2.0`}
 		title={`Claude Code, wired in`}
 		lede="Claude Code is the default engine, fully wired. Gemini CLI and Codex CLI are pluggable adapters — install either alongside it, swap with a click."
 		problem="An engine is the AI backend that drives your workspace. Ikenga leads with Claude Code: it wraps the claude CLI you already have, parses its streaming output, and wires it into the shell's session layer — persistence, resume, and the cockpit's config surface all work out of the box. Gemini CLI and Codex CLI follow the same manifest-and-adapter pattern. One workspace, your choice of backend."
@@ -254,6 +259,11 @@ import InstallBlock from '../../components/InstallBlock.astro';
 	.eg-caps {
 		margin-top: var(--space-5);
 		overflow-x: auto;
+		/* WP-21 390px gate: the table's min-content (~513px) was blowing out an
+		   ancestor track (min-width:auto) past the viewport — constrain the
+		   scroller so the table scrolls INSIDE it instead. */
+		min-width: 0;
+		max-width: 100%;
 	}
 	.eg-caps__head {
 		font-family: var(--site-font-mono);
@@ -303,6 +313,10 @@ import InstallBlock from '../../components/InstallBlock.astro';
 	/* Two install blocks stacked with a gap */
 	.eg-installs {
 		display: grid;
+		/* WP-21 390px gate: the default grid track (min-width:auto) sizes to the
+		   nowrap install command's min-content (~392px), blowing past the wrap.
+		   minmax(0,1fr) lets the InstallBlock's own code scroller do its job. */
+		grid-template-columns: minmax(0, 1fr);
 		gap: var(--space-5);
 		max-width: 36rem;
 		margin-bottom: var(--space-5);

@@ -1,9 +1,14 @@
 ---
 // /packages/tasks — flagship page for @ikenga/pkg-tasks.
 // Draft source: plans/launch/drafts/pkg-page-tasks.md
-// All [SCREENSHOT: …] beats render as copy-only (no matching images in /assets/).
+// Registry-fed header (version verified from the registry at build time, WP-17).
+// List beat carries the real shell capture (public/assets/shell/tasks-shell-1286.webp).
 import Layout from '../../layouts/Layout.astro';
 import FeaturePage from '../../components/FeaturePage.astro';
+import { loadRegistry, pkgVersion } from '../../lib/registry';
+
+const { index: registry } = await loadRegistry();
+const ver = pkgVersion(registry, '@ikenga/pkg-tasks', '0.8.2');
 ---
 
 <Layout
@@ -12,7 +17,7 @@ import FeaturePage from '../../components/FeaturePage.astro';
 	canonical="https://ikenga.dev/packages/tasks/"
 >
 	<FeaturePage
-		eyebrow="@ikenga/pkg-tasks · com.ikenga.tasks · Apache-2.0"
+		eyebrow={`@ikenga/pkg-tasks · v${ver} · com.ikenga.tasks · Apache-2.0`}
 		title="A task manager that stays where work happens."
 		lede="Local-first. No account. No round-trip to a server. Your task data lives in the same local SQLite database the rest of Ikenga uses — on your machine, always one click away."
 		problem="Every project turns into a scattered heap of tasks — some in a GitHub board, some in a note, some in a chat thread you'll never scroll back to. Switching contexts to check them means leaving the place where work actually happens. Tasks is a mini-app that installs into the Ikenga shell and stays there. Status changes write immediately to the local database. No save button."
@@ -21,10 +26,21 @@ import FeaturePage from '../../components/FeaturePage.astro';
 		docsHref="/docs/"
 		catalogHref="/packages/"
 	>
-		<!-- Beat 1: List view — copy-only (no matching screenshot asset) -->
+		<!-- Beat 1: List view — real shell capture (WP-11 export) -->
 		<section class="sk-section">
 			<div class="sk-wrap">
 				<h2 class="sk-h2">The List view — see everything at once</h2>
+				<figure class="sk-shot">
+					<img
+						src="/assets/shell/tasks-shell-1286.webp"
+						width="1286"
+						height="472"
+						loading="lazy"
+						decoding="async"
+						alt="The Tasks pane running inside the Ikenga shell — grouped task list with a filter bar and a detail pane."
+					/>
+					<figcaption>Tasks running in the Ikenga shell — the List view, staged demo data.</figcaption>
+				</figure>
 				<p class="sk-body">
 					Tasks groups your work automatically: <strong>Overdue</strong>, <strong>Today</strong>,
 					<strong>This week</strong>, <strong>Later</strong>, and <strong>Auto-closed</strong>.
@@ -202,9 +218,13 @@ ikenga add ~/my-tasks</pre>
 	}
 	.sk-list a {
 		color: var(--site-accent);
-		text-decoration: none;
+		/* WP-21 a11y gate (link-in-text-block): accent vs surrounding text is
+		   1.55:1 — links need a non-color distinguisher, so underline at rest. */
+		text-decoration: underline;
+		text-underline-offset: 3px;
+		text-decoration-color: color-mix(in srgb, var(--site-accent) 55%, transparent);
 	}
 	.sk-list a:hover {
-		text-decoration: underline;
+		text-decoration-color: var(--site-accent);
 	}
 </style>

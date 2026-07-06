@@ -1,91 +1,57 @@
 ---
-// /packages — the catalog. Featured strip (editorial) + generated index
-// (live build-time fetch from the published registry) + roadmap.
-// Spec: plans/launch/drafts/pkg-catalog.md. DS pattern: catalog-grid.
+// /packages — the ecosystem storefront (WP-17, plan L3).
+//
+// Registry-driven: the "All packages" index is generated at build time from
+// the published registry (src/lib/registry.ts — live fetch + committed
+// snapshot fallback so the CF Pages build never breaks). Every depicted pkg
+// is registry-real; the six unpublished app pkgs appear only in a labelled
+// "Coming" strip with no install affordance (G-21 / DEC-1). Card system is
+// typographic-first per DEC-2 (no per-pkg art yet — the logo-forge track
+// upgrades these later).
 import Layout from '../../layouts/Layout.astro';
 import Button from '../../components/Button.astro';
 import Card from '../../components/Card.astro';
 import BrandIcon from '../../components/BrandIcon.astro';
+import {
+	loadRegistry,
+	groupByKind,
+	label,
+	oneLine,
+	installCmd,
+	comingPkgs,
+	type RegistryPkg,
+} from '../../lib/registry';
 
-const REGISTRY_URL = 'https://royalti-io.github.io/ikenga-registry/index.json';
+const { index: registry, source } = await loadRegistry();
+const grouped = groupByKind(registry);
+const coming = comingPkgs(registry);
 
-// Fallback mirrors the current public registry so the build never hard-fails
-// or ships an empty catalog if the fetch is unavailable at build time.
-const FALLBACK = {
-	updatedAt: '2026-06-01T03:31:10.278Z',
-	pkgs: [
-		{ name: '@ikenga/mcp-browser', latest: '0.2.0', kind: 'skill', description: 'An MCP server that lets agents drive native child webviews in the shell — open, snapshot, click, and fill pages that block iframes.' },
-		{ name: '@ikenga/mcp-iyke', latest: '0.2.0', kind: 'skill', description: 'An MCP server that exposes the running shell to any MCP client — drive panes, navigate, and inspect state from Claude or Cursor.' },
-		{ name: '@ikenga/pkg-engine-claude-code', latest: '0.2.0', kind: 'engine', description: 'The default engine adapter — wraps the claude CLI so your Claude Code setup runs natively inside Ikenga.' },
-		{ name: '@ikenga/pkg-engine-codex', latest: '0.2.0', kind: 'engine', description: 'A Codex CLI adapter — plugs the OpenAI codex CLI into the same engine slot.' },
-		{ name: '@ikenga/pkg-engine-gemini', latest: '0.2.0', kind: 'engine', description: "A Gemini CLI adapter — run the same installed setup through Google's Gemini CLI." },
-		{ name: '@ikenga/pkg-suite', latest: '0.3.0', kind: 'embedded', description: 'A business suite — Sales, Outbound, and Email views in one no-build iframe pkg, over Supabase.' },
-		{ name: '@ikenga/pkg-tasks', latest: '0.4.0', kind: 'embedded', description: 'A local-first task manager with list, agenda, and triage views over your local tasks data.' },
-	],
+// Flagship detail pages that exist under /packages/* (registry-real pkgs with
+// hand-authored prose). Rows link here when a flagship page exists.
+const DETAIL_LINKS: Record<string, string> = {
+	'@ikenga/pkg-tasks': '/packages/tasks',
+	'@ikenga/mcp-iyke': '/packages/mcp-iyke',
+	'@ikenga/pkg-engine-claude-code': '/packages/engines',
+	'@ikenga/pkg-engine-codex': '/packages/engines',
+	'@ikenga/pkg-engine-gemini': '/packages/engines',
 };
 
-let registry = FALLBACK;
-try {
-	const res = await fetch(REGISTRY_URL);
-	if (res.ok) registry = await res.json();
-} catch {
-	/* offline at build — use the bundled fallback above */
-}
+// Per-engine brand glyph for the generated rows.
+const engineIcon = (name: string): string | null =>
+	name.includes('claude') ? 'claude' : name.includes('gemini') ? 'gemini' : name.includes('codex') ? 'codex' : null;
 
-// Belt-and-suspenders: honor the registry's own `visibility` flag (the
-// source-of-truth mechanism), plus a guard for known stubs/fixtures in case a
-// pre-flag index is served.
-const HIDDEN = new Set([
-	'@ikenga/pkg-engine-cursor-agent',
-	'@ikenga/pkg-engine-noop',
-	'@ikenga/pkg-hello',
-]);
-const visible = (registry.pkgs || []).filter(
-	(p) => p.visibility !== 'hidden' && !HIDDEN.has(p.name)
-);
-
-// Per-pkg reference-doc deep links (where a doc exists).
-const DOC_LINKS = {
-	'@ikenga/pkg-tasks': '/docs/pkgs/tasks',
-	'@ikenga/pkg-suite': '/docs/pkgs/suite',
-	'@ikenga/mcp-browser': '/docs/pkgs/mcp-browser',
-	'@ikenga/mcp-iyke': '/docs/mcp-iyke',
-	'@ikenga/pkg-engine-claude-code': '/docs/engines',
-	'@ikenga/pkg-engine-codex': '/docs/engines',
-	'@ikenga/pkg-engine-gemini': '/docs/engines',
-};
-const label = (name) => name.replace(/^@ikenga\//, '');
-const oneLine = (d) => {
-	const s = (d || '').split(/(?<=\.)\s/)[0].trim();
-	return s.length > 140 ? s.slice(0, 137).trimEnd() + '…' : s;
-};
-
-const CATEGORIES = [
-	{ key: 'Apps', blurb: 'iframe mini-apps that run inside the shell', match: (p) => p.kind === 'embedded' },
-	{ key: 'MCP servers', blurb: 'tool servers any MCP client can drive', match: (p) => p.kind === 'skill' && p.name.includes('mcp-') },
-	{ key: 'Engines', blurb: 'pluggable reasoning adapters', match: (p) => p.kind === 'engine' },
-	{ key: 'Skills', blurb: 'Claude Code skill packages', match: (p) => p.kind === 'skill' && !p.name.includes('mcp-') },
-];
-const grouped = CATEGORIES.map((c) => ({
-	...c,
-	rows: visible.filter(c.match).sort((a, b) => a.name.localeCompare(b.name)),
-})).filter((c) => c.rows.length);
-
-// Two co-equal on-ramps (G-21). Skills run anywhere in plain Claude Code AND
-// get a visual home here; packages install + update inside the shell.
+// Two co-equal on-ramps (G-21 / R5-5). Skills are portable primitives: they
+// run anywhere in plain Claude Code AND move across engines — install once via
+// npx, use with or without the shell. Packages install + update inside the shell.
 const SKILLS_ONRAMP = [
 	{ name: 'Groundwork', icons: ['claude', 'npm'], line: 'A research → plan → act workflow scaffold. Runs in plain Claude Code via npx — and gets a live board view in the shell.', href: '/packages/groundwork', install: 'npx skills add royalti-io/groundwork' },
 	{ name: 'Artifacts', icons: ['claude', 'npm'], line: 'Author self-contained interactive HTML artifacts that render anywhere — then review, compare, and promote them in the shell.', href: '/packages/artifacts', install: 'npx skills add royalti-io/ikenga-artifact-builder' },
 ];
 const PKG_ONRAMP = [
-	{ name: 'Tasks', icons: [], line: 'A local-first task manager that lives inside your workspace — lists, triage, and agenda in one pane.', href: '/packages/tasks' },
+	{ name: 'Tasks', icons: [] as string[], line: 'A local-first task manager that lives inside your workspace — lists, triage, and agenda in one pane.', href: '/packages/tasks' },
 	{ name: 'mcp-iyke', icons: ['claude'], line: 'Give any MCP client — Claude, Cursor, or your own tool — live control over the running shell.', href: '/packages/mcp-iyke' },
 	{ name: 'Engines', icons: ['claude', 'gemini', 'codex'], line: 'Claude Code is the default. Gemini and Codex are pluggable adapters — same setup, different engine.', href: '/packages/engines' },
 ];
-
-// Per-engine brand glyph for the generated catalog rows.
-const engineIcon = (name) =>
-	name.includes('claude') ? 'claude' : name.includes('gemini') ? 'gemini' : name.includes('codex') ? 'codex' : null;
 
 const updated = new Date(registry.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
 const title = 'Packages for Ikenga — install and update like apps';
@@ -100,25 +66,27 @@ const desc = "Browse what's published for your Claude Code setup — mini-apps, 
 			<p class="sk-lede">
 				Everything that extends your Claude Code setup — mini-apps, MCP tool
 				servers, engine adapters — is a package. Some, like our skills, also run
-				anywhere in plain Claude Code with no shell at all.
+				anywhere in plain Claude Code with no shell at all, and move with you
+				across engines.
 			</p>
 			<p class="sk-body">
 				Two ways in: install and update packages inside the shell, or add a
 				skill via <code>npx</code> and use it with or without Ikenga. The catalog
-				below is generated live from the registry — only what's actually
-				published appears here.
+				below is generated from the registry — only what's actually published
+				appears here.
 			</p>
 		</div>
 	</section>
 
 	<!-- Featured strip (editorial) — the two co-equal on-ramps (G-21):
-	     skills that work anywhere, and packages you install in the shell. -->
+	     skills that work anywhere and move across engines, and packages you
+	     install in the shell. -->
 	<section class="sk-section">
 		<div class="sk-wrap">
 			<h2 class="sk-h2">Two ways in</h2>
 
 			<h3 class="pk-cat__head">
-				Skills <span class="pk-cat__blurb">— work anywhere via <code>npx</code>, with or without the shell</span>
+				Skills <span class="pk-cat__blurb">— portable primitives: run anywhere via <code>npx</code>, move across engines</span>
 			</h3>
 			<div class="sk-grid">
 				{SKILLS_ONRAMP.map((f) => (
@@ -153,24 +121,24 @@ const desc = "Browse what's published for your Claude Code setup — mini-apps, 
 		<div class="sk-wrap">
 			<h2 class="sk-h2">All packages</h2>
 			<p class="sk-body pk-meta">
-				Generated from the registry · Last updated {updated} · install commands
+				Generated from the registry · Last published {updated}{source === 'snapshot' ? ' · from committed snapshot' : ''} · install commands
 				require the <a href="/#install">Ikenga shell</a>.
 			</p>
 			{grouped.map((cat) => (
 				<div class="pk-cat">
 					<h3 class="pk-cat__head">{cat.key} <span class="pk-cat__blurb">— {cat.blurb}</span></h3>
 					<ul class="pk-rows">
-						{cat.rows.map((p) => (
+						{cat.rows.map((p: RegistryPkg) => (
 							<li class="pk-row">
 								<div class="pk-row__top">
-									{engineIcon(p.name) && <BrandIcon name={engineIcon(p.name)} />}
+									{engineIcon(p.name) && <BrandIcon name={engineIcon(p.name) as string} />}
 									<code class="pk-row__id">{label(p.name)}</code>
 									<span class="pk-row__ver">v{p.latest}</span>
 								</div>
 								<p class="pk-row__desc">{oneLine(p.description)}</p>
 								<div class="pk-row__foot">
-									<code class="pk-cmd">ikenga add {p.name}</code>
-									{DOC_LINKS[p.name] && <a class="pk-row__doc" href={DOC_LINKS[p.name]}>Docs →</a>}
+									<code class="pk-cmd">{installCmd(p)}</code>
+									{DETAIL_LINKS[p.name] && <a class="pk-row__doc" href={DETAIL_LINKS[p.name]}>Details →</a>}
 								</div>
 							</li>
 						))}
@@ -180,19 +148,30 @@ const desc = "Browse what's published for your Claude Code setup — mini-apps, 
 		</div>
 	</section>
 
-	<!-- Roadmap -->
-	<section class="sk-section">
-		<div class="sk-wrap">
-			<h2 class="sk-h2">Coming soon</h2>
-			<div class="sk-grid">
-				<div class="sk-card pk-soon">
-					<span class="sk-card__tag">Coming soon</span>
-					<h3 class="sk-card__title">Studio</h3>
-					<p class="sk-card__body">An in-shell Remotion-powered video/media workspace for reviewing and exporting creative work.</p>
+	<!-- Coming strip — built in ikenga-pkgs, not yet published to the registry.
+	     Labelled, no install affordance, no version claim (G-21 / DEC-1). The
+	     list self-corrects: anything the registry now publishes drops off here
+	     and shows in the catalog above instead. -->
+	{coming.length > 0 && (
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">Coming to the registry</h2>
+				<p class="sk-body pk-meta">
+					Built and in the shell — not yet published, so no install command
+					here yet. They'll appear in the catalog above the moment they ship.
+				</p>
+				<div class="sk-grid">
+					{coming.map((p) => (
+						<div class="sk-card pk-soon">
+							<span class="sk-card__tag">Coming</span>
+							<h3 class="sk-card__title">{p.name}</h3>
+							<p class="sk-card__body">{p.line}</p>
+						</div>
+					))}
 				</div>
 			</div>
-		</div>
-	</section>
+		</section>
+	)}
 
 	<section class="sk-section">
 		<div class="sk-wrap">
@@ -285,7 +264,13 @@ const desc = "Browse what's published for your Claude Code setup — mini-apps, 
 		text-decoration: underline;
 	}
 	.pk-soon {
-		opacity: 0.72;
+		/* WP-21 a11y gate: opacity-dimming the whole card dropped the tag/body
+		   text below 4.5:1 (LH measures the composited color). De-emphasize with
+		   a dashed border + muted title instead — text keeps full contrast. */
+		border-style: dashed;
+	}
+	.pk-soon .sk-card__title {
+		color: var(--site-muted);
 	}
 	.pk-onramp-icons {
 		display: inline-flex;

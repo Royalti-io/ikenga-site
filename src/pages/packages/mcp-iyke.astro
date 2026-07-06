@@ -4,8 +4,11 @@
 // All five [SCREENSHOT: …] beats have no matching asset — rendered as copy-only sections.
 import Layout from '../../layouts/Layout.astro';
 import FeaturePage from '../../components/FeaturePage.astro';
-import Button from '../../components/Button.astro';
 import InstallBlock from '../../components/InstallBlock.astro';
+import { loadRegistry, pkgVersion } from '../../lib/registry';
+
+const { index: registry } = await loadRegistry();
+const ver = pkgVersion(registry, '@ikenga/mcp-iyke', '0.2.1');
 ---
 
 <Layout
@@ -14,7 +17,7 @@ import InstallBlock from '../../components/InstallBlock.astro';
   canonical="https://ikenga.dev/packages/mcp-iyke"
 >
   <FeaturePage
-    eyebrow="@ikenga/mcp-iyke · Apache-2.0"
+    eyebrow={`@ikenga/mcp-iyke · v${ver} · Apache-2.0`}
     title="Let the agent you already use drive your workspace."
     lede="Any MCP client — Claude Code, Cursor, or your own tool — can navigate panes, read workspace state, inspect logs, and interact with the UI. The agent and the workspace share a wire."
     problem="You ask Claude Code to set something up, it completes the task, and you switch to the desktop app to check the result. Then you switch back. Then back again. Two windows, two contexts, a constant seam. @ikenga/mcp-iyke closes that seam."
@@ -280,6 +283,10 @@ import InstallBlock from '../../components/InstallBlock.astro';
   .mp-table td:first-child,
   .mp-table th:first-child {
     white-space: nowrap;
+  }
+  /* WP-21 390px gate: one long inline code token overflowed by 4px. */
+  .sk-body code {
+    overflow-wrap: anywhere;
   }
   .mp-table code {
     font-family: var(--site-font-mono);
