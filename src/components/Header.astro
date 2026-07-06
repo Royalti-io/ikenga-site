@@ -181,6 +181,13 @@ const ENGINES = ['claude', 'codex', 'gemini'] as const;
 	.hnav__disclosure[open] .hnav__disclosure-btn {
 		border-color: var(--site-accent);
 	}
+	/* Closed <details> content keeps its layout boxes in Chromium
+	   (content-visibility:hidden), so the engines pill was widening
+	   body scrollWidth to 437px at 390px viewports (WP-15 verify find).
+	   Hide the panel explicitly while closed. */
+	.hnav__disclosure:not([open]) .hnav__disclosure-panel {
+		display: none;
+	}
 	.hnav__disclosure-panel {
 		position: absolute;
 		left: 0;

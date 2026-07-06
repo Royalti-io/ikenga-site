@@ -131,6 +131,11 @@ const HERO_SIZES = '(min-width: 1088px) 1056px, 92vw';
 <style>
 	/* ── Moment island: proving moment (D-01 Theatre · WP-14 hybrid) ────────── */
 	.mh {
+		/* The light-pool pseudo (.mh-stage::before, inset -8% -12%) deliberately
+		   bleeds past the stage; without a horizontal clip it widens body
+		   scrollWidth to 437px at 390px viewports (WP-15 verify find). Clip at
+		   the section — visuals inside are unchanged. */
+		overflow-x: clip;
 		--mh-ease: cubic-bezier(0.22, 0.61, 0.16, 1);
 
 		/* --moment-* locals used by the overlay FX. Fixed across tone poles —
