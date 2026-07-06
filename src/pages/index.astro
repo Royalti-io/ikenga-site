@@ -317,7 +317,9 @@ const storeRows = castData.store_rows;
 				border-radius: var(--radius-md, 6px);
 				border: 1px solid transparent;
 				background: var(--site-accent);
-				color: hsl(28, 30%, 8%);
+				/* light-on-amber (was dark hsl(28,30%,8%)): 2.83:1 on the parchment-pole
+				   accent — flipped to pass 4.5:1 (WP-15 a11y gate). */
+				color: hsl(36, 40%, 96%);
 				font: inherit;
 				font-weight: 600;
 				font-size: 0.9375rem;

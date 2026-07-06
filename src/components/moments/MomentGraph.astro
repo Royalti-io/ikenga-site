@@ -501,7 +501,9 @@ const wsCrumb = `${STORE_SCOPES[0]?.label ?? 'workspace'} · ${STORE_SCOPES[1]?.
 		--moment-border-strong: hsl(28, 14%, 30%);
 		--moment-fg: hsl(36, 28%, 90%);
 		--moment-muted: hsl(32, 11%, 56%);
-		--moment-faint: hsl(28, 10%, 44%);
+		/* 53% (was 44%): 4.5:1+ on the darkest app-object panels — WP-15 a11y gate
+		   (LH flagged 19 micro-labels at 3.83–4.14 with the 44% value). */
+		--moment-faint: hsl(28, 10%, 53%);
 		--moment-node-label: hsl(32, 11%, 62%);
 		--moment-node-label-hot: hsl(36, 28%, 92%);
 		--moment-accent: hsl(42, 78%, 54%);
