@@ -31,7 +31,12 @@ const MAP: Record<string, { icon: string; mono?: boolean }> = {
 	bun: { icon: 'logos:bun' },
 };
 const entry = MAP[name] ?? { icon: name };
-const a11y = title ? { title, role: 'img' } : { 'aria-hidden': 'true' };
+// `as const` on both branches keeps their literal types — astro-icon's
+// <Icon> Props extends HTMLAttributes<'svg'>, whose `role` is `AriaRole`
+// (not `string`) and whose `aria-hidden` is `boolean | 'true' | 'false'`
+// (not `string`); without the assertions the ternary widens both and
+// `astro check` flags a false mismatch. No behavior change.
+const a11y = title ? { title, role: 'img' as const } : { 'aria-hidden': 'true' as const };
 ---
 
 <Icon

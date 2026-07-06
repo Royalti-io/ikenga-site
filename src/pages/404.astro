@@ -1,0 +1,63 @@
+---
+// 404 — not-found. Own minimal head (not the shared Layout.astro) because a
+// not-found page needs `noindex` in <head>, which Layout has no prop for
+// (out of WP-18's scope fence). Otherwise identical chrome to every other
+// page: same global.css import, same Header/Footer, pinned to the dark pole
+// (Dusk Wood) per Layout's convention. D-01 register: Fraunces display line,
+// quiet — no CTA clutter, just the three honest ways back in.
+import '../styles/global.css';
+import Header from '../components/Header.astro';
+import Footer from '../components/Footer.astro';
+import Button from '../components/Button.astro';
+
+const title = 'Page not found — Ikenga';
+const description = 'This page doesn’t exist. Head back home, browse the packages, or read the docs.';
+---
+
+<!doctype html>
+<html lang="en" data-theme="A" data-mode="dark">
+	<head>
+		<meta charset="UTF-8" />
+		<meta name="viewport" content="width=device-width, initial-scale=1" />
+		<link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+		<meta name="generator" content={Astro.generator} />
+		<title>{title}</title>
+		<meta name="description" content={description} />
+		<meta name="robots" content="noindex" />
+		<script
+			defer
+			src="https://static.cloudflareinsights.com/beacon.min.js"
+			data-cf-beacon='{"token": "3fdcdf8ab9ba4ca68bd46410d1527108"}'></script>
+	</head>
+	<body class="sk-page">
+		<Header />
+		<main id="main-content">
+			<section class="sk-hero sk-section--flush nf-hero">
+				<div class="sk-wrap sk-obi">
+					<p class="sk-eyebrow">404</p>
+					<h1 class="sk-display">This page went <em>quiet</em>.</h1>
+					<p class="sk-lede">
+						There's nothing at this address. It may have moved, or never existed here.
+					</p>
+					<div class="sk-obi__cta">
+						<Button href="/" variant="primary">Back home</Button>
+						<Button href="/packages/" variant="ghost">Browse the packages</Button>
+						<Button href="/docs/" variant="ghost">Read the docs</Button>
+					</div>
+				</div>
+			</section>
+		</main>
+		<Footer />
+	</body>
+</html>
+
+<style>
+	.nf-hero {
+		min-height: min(60vh, 34rem);
+		display: flex;
+		align-items: center;
+	}
+	.nf-hero .sk-wrap {
+		width: 100%;
+	}
+</style>
