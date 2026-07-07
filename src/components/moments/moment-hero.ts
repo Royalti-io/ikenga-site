@@ -128,16 +128,25 @@ function mountAgentRotator(root: HTMLElement, reduce: boolean): void {
 	rot.style.display = 'inline-flex';
 	if (reduce) return;
 
-	// WP-21 CLS fix: the rotator used to ANIMATE its width per engine name —
-	// a layout shift on every swap ("Codex" is much narrower), and a
-	// non-compositor `width` transition besides. Pin the span to the widest
-	// slot ONCE before rotation starts; names crossfade inside a fixed box.
-	requestAnimationFrame(() => {
-		const max = Math.max(...slots.map((el) => el.getBoundingClientRect().width));
-		rot.style.width = `${Math.ceil(max)}px`;
-	});
-
+	// Reflow discipline (founder call — supersedes the WP-21 fixed-width pin).
+	// The pin reserved the WIDEST slot ("Claude Code") and centred names inside
+	// it, so short engines ("Codex") sat in dead space and "a home." never
+	// tucked against the word. The mockups instead breathe: the rotator sizes to
+	// the CURRENT name and the whole centred H1 re-centres as it changes. We
+	// animate the width (CSS `transition: width`) so that reflow is smooth, not a
+	// jump — the small periodic shift keeps CLS well inside the "good" band.
+	//
+	// Widths are read from the REAL display face: a bare rAF can fire before the
+	// webfont `--site-font-display` loads and would fit to the narrower fallback
+	// metrics, snapping wider when the real face swaps in. Fit immediately (warm
+	// cache) and again once `document.fonts.ready` resolves (no-op if loaded).
+	const fit = (el: HTMLElement): void => {
+		rot.style.width = `${Math.ceil(el.getBoundingClientRect().width)}px`;
+	};
 	let idx = 0;
+	requestAnimationFrame(() => fit(slots[idx]));
+	if (document.fonts?.ready) document.fonts.ready.then(() => requestAnimationFrame(() => fit(slots[idx])));
+
 	let timer = 0;
 	const tick = () => {
 		const prev = slots[idx];
@@ -152,6 +161,7 @@ function mountAgentRotator(root: HTMLElement, reduce: boolean): void {
 		);
 		prev.classList.remove('cur');
 		next.classList.add('cur');
+		fit(next); // reflow the box to the incoming name (CSS eases the width)
 		next.animate(
 			[
 				{ opacity: 0, transform: 'translateY(0.3em)' },

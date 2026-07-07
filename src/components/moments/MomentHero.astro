@@ -183,13 +183,22 @@ const HERO_SIZES = '(min-width: 1088px) 1056px, 92vw';
 	.mh-rot {
 		display: inline-flex;
 		align-items: baseline;
-		/* WP-21 CLS fix: the JS pins this span to the widest engine name once
-		   (no width animation → no layout shift per swap); names center inside
-		   the fixed box so shorter ones read balanced, not left-hung. */
+		/* Reflow (founder call): the JS fits this span to the CURRENT engine name
+		   and eases the width, so the line breathes like the mockups — short
+		   names don't leave dead gaps and "a home." tucks against the word. The
+		   eased width keeps the per-swap shift small (CLS stays in the good band).
+		   Reduced-motion pins the first slot, so no transition fires there. */
 		justify-content: center;
+		transition: width 340ms var(--mh-ease);
 		position: relative;
 		vertical-align: baseline;
 		white-space: nowrap;
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.mh-rot {
+			transition: none;
+			width: auto !important; /* natural width of the single shown slot */
+		}
 	}
 	.mh-slot {
 		display: inline-flex;
