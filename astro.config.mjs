@@ -49,6 +49,10 @@ export default defineConfig({
 					autogenerate: { directory: 'docs/groundwork' },
 				},
 				{
+					label: 'Studio',
+					autogenerate: { directory: 'docs/studio' },
+				},
+				{
 					label: 'Pkgs',
 					autogenerate: { directory: 'docs/pkgs' },
 				},
