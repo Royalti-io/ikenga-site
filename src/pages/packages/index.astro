@@ -55,9 +55,10 @@ const SKILLS_ONRAMP = [
 	{ name: 'Artifacts', icons: ['claude', 'npm'], line: 'Author self-contained interactive HTML artifacts that render anywhere — then review, compare, and promote them in the shell.', href: '/packages/artifacts', install: 'npx skills add royalti-io/ikenga-artifact-builder' },
 ];
 const PKG_ONRAMP = [
-	{ name: 'Tasks', icons: [] as string[], line: 'A local-first task manager that lives inside your workspace — lists, triage, and agenda in one pane.', href: '/packages/tasks' },
-	{ name: 'mcp-iyke', icons: ['claude'], line: 'Give any MCP client — Claude, Cursor, or your own tool — live control over the running shell.', href: '/packages/mcp-iyke' },
-	{ name: 'Engines', icons: ['claude', 'gemini', 'codex'], line: 'Claude Code is the default. Gemini and Codex are pluggable adapters — same setup, different engine.', href: '/packages/engines' },
+	{ name: 'Studio', icons: [] as string[], line: 'The orchestration spine for AI film — script, cast, storyboard, generation, and cut on one board. Conducts fal, Higgsfield, and Flow.', href: '/packages/studio', tag: 'coming' },
+	{ name: 'Tasks', icons: [] as string[], line: 'A local-first task manager that lives inside your workspace — lists, triage, and agenda in one pane.', href: '/packages/tasks', tag: 'in shell' },
+	{ name: 'mcp-iyke', icons: ['claude'], line: 'Give any MCP client — Claude, Cursor, or your own tool — live control over the running shell.', href: '/packages/mcp-iyke', tag: 'in shell' },
+	{ name: 'Engines', icons: ['claude', 'gemini', 'codex'], line: 'Claude Code is the default. Gemini and Codex are pluggable adapters — same setup, different engine.', href: '/packages/engines', tag: 'in shell' },
 ];
 
 const updated = new Date(registry.updatedAt).toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
@@ -112,7 +113,7 @@ const desc = "Browse what's published for your Claude Code setup — mini-apps, 
 			</h3>
 			<div class="sk-grid">
 				{PKG_ONRAMP.map((f) => (
-					<Card title={f.name} href={f.href} tag="in shell">
+					<Card title={f.name} href={f.href} tag={f.tag}>
 						{f.icons.length > 0 && (
 							<span class="pk-onramp-icons">{f.icons.map((n) => <BrandIcon name={n} />)}</span>
 						)}
