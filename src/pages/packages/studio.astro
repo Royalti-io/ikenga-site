@@ -1,0 +1,275 @@
+---
+// /packages/studio — flagship page for @ikenga/pkg-studio (com.ikenga.studio).
+// Studio is built and runs in the shell, but is NOT yet published to the
+// registry — this page is framed "coming to the registry" per DEC-1/G-21:
+// no install command, no version claim. The in-app screens shown are the
+// locked AI-filmmaker UI *concepts* (labelled as concepts), on the "The Forge"
+// demo fixture. Copy source: plans/studio/pitch/ai-filmmakers.html +
+// plans/studio/16-ai-filmmaker-workflow.md.
+import Layout from '../../layouts/Layout.astro';
+import FeaturePage from '../../components/FeaturePage.astro';
+import Button from '../../components/Button.astro';
+
+const title = 'Studio — the orchestration spine for AI film';
+const description =
+	'Ikenga Studio turns a script into a finished cut on one board — breakdown, cast & world, storyboard, generation, and stitch — and orchestrates the generators you already use (fal.ai, Higgsfield, Google Flow). Built in the shell; coming to the registry.';
+---
+
+<Layout
+	title={title}
+	description={description}
+	canonical="https://ikenga.dev/packages/studio/"
+>
+	<FeaturePage
+		eyebrow="com.ikenga.studio · in the shell · Apache-2.0 · coming to the registry"
+		title="the film lives <em>here.</em>"
+		lede="Studio is the orchestration spine for AI film — script to breakdown to cast, storyboard, generation, and final cut, on one board. It doesn't replace the generators you use. It conducts them."
+		problem="Studio runs in the Ikenga shell today and a real master MP4 has shipped end-to-end from it. It isn't published to the registry yet, so there's no install command here — it'll appear in the catalog the moment it ships. The in-app screens below are the locked interface concepts, shown on the 'The Forge' demo film."
+		docsHref="/docs/studio/"
+		catalogHref="/packages/"
+	>
+
+		<!-- Beat 1: the problem -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">The tools make shots. Nobody makes the film.</h2>
+				<p class="sk-body">
+					Every AI generator is an island. Between them, the actual film — the through-line,
+					the consistency, the record of what made each frame — falls on the floor.
+				</p>
+				<ul class="sk-list">
+					<li><strong>Your cast &amp; world drift.</strong> No shared identity between the still you generated and the shot you animated. The face changes.</li>
+					<li><strong>Prompts rot in spreadsheets.</strong> Past a few dozen shots, every prompt lives in a sheet nobody can keep in sync.</li>
+					<li><strong>No record of the take.</strong> Which model, which seed, which settings made this clip? Re-editing means guessing.</li>
+					<li><strong>Re-stitching by hand.</strong> Change the script or a character and the whole downstream chain is a manual re-run.</li>
+				</ul>
+			</div>
+		</section>
+
+		<!-- Beat 2: the spine -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">Ikenga is the spine — not another generator</h2>
+				<p class="sk-body">
+					Studio is one place for the script, the cast, the locations, the prompts, the clips,
+					and the cut. It holds identity and provenance so nothing drifts and nothing is lost.
+					It doesn't replace Higgsfield, Flow, or fal — it conducts them.
+				</p>
+				<p class="sk-body sd-tagline">
+					Higgsfield, Flow, and fal make shots. <strong>Ikenga makes the film.</strong>
+				</p>
+			</div>
+		</section>
+
+		<!-- Beat 3: the pipeline -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">Script to cut, one continuous board</h2>
+				<p class="sk-body">
+					One board carries the work from the first line of the script to the delivery master:
+				</p>
+				<pre class="sd-pipe sk-body"><code>Script → Breakdown → Refs &amp; Cast → Storyboard → Generate → Stitch &amp; Edit</code></pre>
+				<p class="sk-body">
+					Studio owns the authoritative render and approval state for every shot; a groundwork
+					<a href="/docs/groundwork/profiles/">film</a> plan mirrors it for production management.
+				</p>
+			</div>
+		</section>
+
+		<!-- Beat 4: the surfaces (concept screens) -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">Six surfaces, one project</h2>
+				<p class="sk-body">
+					These are the locked interface concepts, shown on the wordless demo short
+					<em>“The Forge”</em> — Adaora forging an iron mask through the night.
+				</p>
+
+				<figure class="sd-shot">
+					<img src="/assets/studio/breakdown-b.png" alt="Studio breakdown — a script split into beats and shots with extracted characters, locations, and props" loading="lazy" width="1440" height="900" />
+					<figcaption class="sk-body sd-shot__cap"><strong>Breakdown.</strong> Paste a script; it splits into beats and shots and pulls every character, location, and prop into a reference checklist — with the fal-vs-handoff plan decided per shot. <span class="sd-concept">concept</span></figcaption>
+				</figure>
+
+				<figure class="sd-shot">
+					<img src="/assets/studio/canvas-gen-b.png" alt="Studio storyboard canvas — shots as cells generating live on two tracks, with running spend in a dock" loading="lazy" width="1440" height="900" />
+					<figcaption class="sk-body sd-shot__cap"><strong>Storyboard canvas.</strong> Shots land as cells and generate in place — fal on Track A (seed-locked, cost shown), a Higgsfield handoff on Track B — with running spend in the dock. <span class="sd-concept">concept</span></figcaption>
+				</figure>
+
+				<figure class="sd-shot">
+					<img src="/assets/studio/cast-world-c.png" alt="Studio Cast & World — seed-locked anchors with a continuity thread showing every shot each appears in" loading="lazy" width="1440" height="900" />
+					<figcaption class="sk-body sd-shot__cap"><strong>Cast &amp; World.</strong> Each principal becomes a seed-locked <em>anchor</em>; a continuity thread shows every shot it appears in. The anti-drift heart — the face doesn't change from shot one to shot forty. <span class="sd-concept">concept</span></figcaption>
+				</figure>
+
+				<figure class="sd-shot">
+					<img src="/assets/studio/cell-gen-a.png" alt="Studio cell — a generation console with prompt, anchor chips, engine picker, locked seed, living preview and an A/B variants tray" loading="lazy" width="1440" height="900" />
+					<figcaption class="sk-body sd-shot__cap"><strong>Cell.</strong> Open a shot into a generation console — editable prompt, anchor-ref chips, engine picker, locked seed, a living preview, and an A/B variants tray. Pick the keeper; it lands on the board with full provenance. <span class="sd-concept">concept</span></figcaption>
+				</figure>
+
+				<figure class="sd-shot">
+					<img src="/assets/studio/ledger-a.png" alt="Studio shot ledger — per-shot engine, model, seed, cost and variant with a running budget meter" loading="lazy" width="1440" height="900" />
+					<figcaption class="sk-body sd-shot__cap"><strong>Shot ledger.</strong> Per shot: the engine, model, seed, cost, and variant, with a running budget meter. fal rows are cost-tracked; Higgsfield handoff rows are marked manual. The spreadsheet, native to the board. <span class="sd-concept">concept</span></figcaption>
+				</figure>
+
+				<figure class="sd-shot">
+					<img src="/assets/studio/handoff-a.png" alt="Studio Track B handoff — a shaped per-shot prompt package for an API-less tool, with a clip ingest-back dropzone" loading="lazy" width="1440" height="900" />
+					<figcaption class="sk-body sd-shot__cap"><strong>Handoff (Track B).</strong> For web-only tools with no API, Studio shapes a per-shot prompt package — ref image, aspect, duration, camera move — you generate in Higgsfield or Flow, and drop the returned clip back onto the shot. <span class="sd-concept">concept</span></figcaption>
+				</figure>
+			</div>
+		</section>
+
+		<!-- Beat 5: two tracks -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">Two tracks, one board</h2>
+				<p class="sk-body">
+					Automate what should be automatic; keep your hands on what's directorial. Both land on
+					the same shot with the same provenance.
+				</p>
+				<div class="sd-tracks">
+					<div class="sd-track">
+						<p class="sd-track__tag sk-eyebrow">Track A — Studio generates</p>
+						<p class="sk-body sd-track__line">
+							Studio calls the generator directly through <strong>fal.ai</strong> — seed-locked,
+							cost-tracked, the result lands on the shot. Best for stills, character &amp;
+							location plates, and fast previews. FLUX · Kling · Veo · Wan · Hailuo · LTX.
+						</p>
+					</div>
+					<div class="sd-track">
+						<p class="sd-track__tag sk-eyebrow">Track B — you direct</p>
+						<p class="sk-body sd-track__line">
+							Web-app tools with no public API. Studio hands you a shaped per-shot prompt
+							package; you generate and drop the clip back onto the shot. Best for directorial
+							craft. Higgsfield · Google Flow · Sora · Midjourney.
+						</p>
+					</div>
+				</div>
+			</div>
+		</section>
+
+		<!-- Beat 6: status -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">Where it stands</h2>
+				<p class="sk-body"><strong>Shipping today.</strong> Script → board → render → export runs end to end — a real master MP4 has shipped from it. Storyboard canvas, shot &amp; camera metadata, 16:9 / 9:16 / 1:1 framing, FFmpeg stitch with music beds, seven video archetypes, and a ~40-tool MCP surface (the board is fully agent-drivable).</p>
+				<p class="sk-body"><strong>Building — staged.</strong> The fal adapter and prompt handoff (the generation spine); breakdown, character / location lock, and the shot ledger; AI-film archetypes and the groundwork <a href="/docs/groundwork/profiles/">film</a> profile for production planning.</p>
+			</div>
+		</section>
+
+		<!-- Beat 7: plan it here -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">Plan it in Groundwork. Shoot it in Studio.</h2>
+				<p class="sk-body">
+					The groundwork <a href="/docs/groundwork/profiles/">film</a> profile owns pre-production —
+					logline, treatment, cast bible, lookbook, shotlist, budget — then hands off to Studio,
+					which owns execution. The <a href="/docs/groundwork/film-workflow/">idea-to-cut guide</a>
+					walks the whole loop.
+				</p>
+				<figure class="sd-shot">
+					<img src="/assets/studio/lookbook-ember-noir.png" alt="The Forge — Ember-noir lookbook: palette and grade, scene-mood frames, the anti-drift anchor set, lens and grain notes, and a title treatment" loading="lazy" width="1440" height="4210" />
+					<figcaption class="sk-body sd-shot__cap">
+						The Ember-noir lookbook a <code>film</code> plan produces — palette, scene-mood frames,
+						the anchor set, and title treatment — locked before a single shot generates.
+					</figcaption>
+				</figure>
+			</div>
+		</section>
+
+		<!-- See also -->
+		<section class="sk-section">
+			<div class="sk-wrap">
+				<h2 class="sk-h2">See also</h2>
+				<div class="sd-links">
+					<Button href="/docs/studio/" variant="ghost">Studio docs</Button>
+					<Button href="/docs/groundwork/film-workflow/" variant="ghost">The idea-to-cut guide</Button>
+					<Button href="/packages/groundwork" variant="ghost">Groundwork</Button>
+				</div>
+			</div>
+		</section>
+
+	</FeaturePage>
+</Layout>
+
+<style>
+	.sd-tagline {
+		font-family: var(--site-font-display);
+		font-size: 1.25rem;
+		color: var(--site-fg);
+		margin-top: var(--space-4);
+	}
+	.sd-pipe {
+		background: var(--site-surface);
+		border: 1px solid var(--site-border);
+		border-radius: var(--radius-md, 6px);
+		padding: var(--space-5) var(--space-6);
+		overflow-x: auto;
+		font-family: var(--site-font-mono);
+		font-size: 0.875rem;
+		line-height: 1.6;
+		color: var(--site-fg);
+		margin: 0 0 var(--space-5);
+	}
+	.sd-pipe code {
+		font-family: inherit;
+		font-size: inherit;
+		color: inherit;
+		background: none;
+		padding: 0;
+	}
+
+	.sd-shot {
+		margin: 0 0 var(--space-6);
+	}
+	.sd-shot img {
+		display: block;
+		width: 100%;
+		height: auto;
+		border: 1px solid var(--site-border);
+		border-radius: var(--radius-md, 6px);
+		background: var(--site-surface);
+	}
+	.sd-shot__cap {
+		margin: var(--space-3) 0 0;
+		font-size: 0.875rem;
+		color: var(--site-faint, var(--site-fg));
+	}
+	.sd-concept {
+		display: inline-block;
+		margin-left: var(--space-2);
+		font-family: var(--site-font-mono);
+		font-size: 0.6875rem;
+		letter-spacing: 0.08em;
+		text-transform: uppercase;
+		color: var(--site-muted);
+		border: 1px solid var(--site-border-strong);
+		border-radius: var(--radius-sm, 4px);
+		padding: 0.1em 0.5em;
+		vertical-align: 0.1em;
+	}
+
+	.sd-tracks {
+		display: grid;
+		grid-template-columns: repeat(auto-fit, minmax(18rem, 1fr));
+		gap: var(--space-4);
+		margin: var(--space-4) 0 0;
+	}
+	.sd-track {
+		background: var(--site-surface);
+		border: 1px solid var(--site-border);
+		border-radius: var(--radius-md, 6px);
+		padding: var(--space-5);
+	}
+	.sd-track__tag {
+		margin-bottom: var(--space-2);
+	}
+	.sd-track__line {
+		margin: 0;
+		font-size: 0.9375rem;
+	}
+
+	.sd-links {
+		display: flex;
+		gap: var(--space-3);
+		flex-wrap: wrap;
+	}
+</style>

@@ -174,7 +174,7 @@ export interface ComingPkg {
 }
 
 export const COMING_PKGS: ComingPkg[] = [
-	{ name: 'studio', line: 'An in-shell Remotion-powered media workspace for reviewing and exporting creative work.' },
+	{ name: 'studio', line: 'The orchestration spine for AI film — script to breakdown, cast, storyboard, generation, and final cut on one board.' },
 	{ name: 'agent-ops', line: 'Operate and monitor your scheduled agents from inside the shell.' },
 	{ name: 'finance', line: 'A money-in / money-out workspace for your books, in one pane.' },
 	{ name: 'outbound', line: 'Draft, queue, and track outbound messages.' },

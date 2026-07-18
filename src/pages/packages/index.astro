@@ -36,6 +36,13 @@ const DETAIL_LINKS: Record<string, string> = {
 	'@ikenga/pkg-engine-gemini': '/packages/engines',
 };
 
+// "Coming" pkgs that already have a hand-authored preview page under /packages/*.
+// Keyed by the short `ComingPkg.name` (not the scoped registry id). A preview
+// link is honest here — the page itself is framed "coming to the registry".
+const COMING_DETAIL_LINKS: Record<string, string> = {
+	studio: '/packages/studio',
+};
+
 // Per-engine brand glyph for the generated rows.
 const engineIcon = (name: string): string | null =>
 	name.includes('claude') ? 'claude' : name.includes('gemini') ? 'gemini' : name.includes('codex') ? 'codex' : null;
@@ -166,6 +173,7 @@ const desc = "Browse what's published for your Claude Code setup — mini-apps, 
 							<span class="sk-card__tag">Coming</span>
 							<h3 class="sk-card__title">{p.name}</h3>
 							<p class="sk-card__body">{p.line}</p>
+							{COMING_DETAIL_LINKS[p.name] && <a class="pk-row__doc pk-soon__doc" href={COMING_DETAIL_LINKS[p.name]}>Preview →</a>}
 						</div>
 					))}
 				</div>
@@ -271,6 +279,10 @@ const desc = "Browse what's published for your Claude Code setup — mini-apps, 
 	}
 	.pk-soon .sk-card__title {
 		color: var(--site-muted);
+	}
+	.pk-soon__doc {
+		display: inline-block;
+		margin-top: var(--space-3);
 	}
 	.pk-onramp-icons {
 		display: inline-flex;
